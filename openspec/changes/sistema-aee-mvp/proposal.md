@@ -1,64 +1,92 @@
-# Proposal: sistema-aee-mvp
+# Proposta: sistema-aee-mvp
 
-## Summary
+## Resumo
 
-Build the MVP of the **Sistema AEE** — a Progressive Web App for managing Special Educational Needs (AEE) attendance in Brazilian public schools.
+Construir o MVP do **Sistema AEE** — uma Progressive Web App para gestão do Atendimento Educacional Especializado em escolas públicas brasileiras.
 
-The system serves **Professora AEE Valdirene**, who coordinates special education across 3 schools, managing students with NEE, support teachers (Professoras de Apoio), pedagogical reports, and photo documentation — all in an environment with **unreliable Wi-Fi connectivity**.
-
----
-
-## Problem
-
-Currently, Valdirene's workflow is fragmented across paper, WhatsApp, and personal cloud drives:
-
-- No centralized place for student records, PDIs, and reports
-- Photos have no pedagogical context or indexing
-- No visibility into whether support teachers have submitted their reports
-- Cannot work reliably without internet — schools have intermittent connectivity
-- Sensitive data (medical diagnoses, special needs assessments) handled with no access control or audit trail
+O sistema atende **quatro perfis de usuário**: Coordenação (acesso livre), Professora AEE (gestora pedagógica), Professora de Apoio e Professora PI, cada um com responsabilidades e permissões distintas sobre alunos, relatórios e fotos pedagógicas — tudo funcionando em ambiente com **conectividade intermitente ou inexistente**.
 
 ---
 
-## Proposed Change
+## Problema
 
-Deliver a fully functional offline-first PWA covering:
+O fluxo atual é fragmentado entre papel, WhatsApp e drives pessoais:
 
-1. **Three-tier access control** — Coordenador Geral (read-only), Professora AEE (full admin of her ecosystem), Professora de Apoio (restricted to assigned students)
-2. **Student lifecycle management** — cadastro, school transfers with access revocation, soft-delete archiving
-3. **Flexible document templates** — PDI, attendance reports, support teacher reports (weekly/monthly/annual), each with independent configurable sections
-4. **Quick photo capture** ("📸 Registrar Momento") — max 3 taps to link a pedagogical photo to a student with a tag
-5. **Offline-first sync** — entity-level merge strategy: texts and photos treated as independent units to prevent critical conflicts
-6. **LGPD compliance from day zero** — RLS in PostgreSQL, audit log on sensitive fields, consent recorded at student registration, soft-delete only
-
----
-
-## Why Now
-
-- Valdirene is the immediate beneficiary and first real user — the system solves an active daily pain
-- Architecture decisions are finalized and approved (PRD v1.0 — 10/03/2026)
-- The MVP scope is well-bounded and achievable in 8–12 weeks
-- Deferring implementation risks further data fragmentation and potential LGPD exposure with sensitive minor data
+- Sem centralização de fichas de alunos e relatórios
+- Fotos pedagógicas sem contexto ou indexação
+- Sem visibilidade sobre pendências de relatórios por aluno
+- Impossibilidade de trabalhar offline com confiança
+- Dados sensíveis de crianças com NEE sem controle de acesso ou trilha de auditoria
 
 ---
 
-## Out of Scope (This Change)
+## Mudança Proposta
 
-- Magic link / passwordless login
-- Photo uploads by Professoras de Apoio
-- Parent/guardian portal or access
-- Physical deletion of any data
-- Automated LGPD data expiry (cron)
-- Multi-tenant expansion (multiple SEMEDs)
-- Visual conflict diff UI for offline sync
+Entregar uma PWA offline-first cobrindo:
+
+1. **Quatro perfis de acesso com RBAC**
+   - **Coordenação** — acesso livre: cadastro de todos os usuários e entidades
+   - **Prof. AEE** — cadastra Prof. Apoio, alunos e todos os tipos de relatório
+   - **Prof. Apoio** — cadastra Relatório Anual e fotos dos seus alunos
+   - **Prof. PI** — cadastra Relatório Trimestral e fotos dos seus alunos
+
+2. **Entidades do domínio**
+   - Coordenação, Prof. AEE, Prof. Apoio, Prof. PI, Aluno
+   - Relatório AEE, Relatório Anual, Relatório Trimestral
+
+3. **Gestão do ciclo de vida do aluno** — cadastro, transferência de escola com revogação de acesso, arquivamento soft-delete
+
+4. **Templates de documentos flexíveis** — Relatório AEE (Prof. AEE), Relatório Anual (Prof. AEE ou Prof. Apoio), Relatório Trimestral (Prof. AEE ou Prof. PI), cada um com seções configuráveis
+
+5. **Captura rápida de foto** ("📸 Registrar Momento") — máximo 3 toques para vincular foto pedagógica a aluno com tag
+
+6. **Sync offline-first** — estratégia de merge por entidade: textos e fotos como unidades independentes
+
+7. **Conformidade LGPD desde zero** — RLS no PostgreSQL, audit log em campos sensíveis, consentimento no cadastro, apenas soft-delete
 
 ---
 
-## Success Criteria
+## Stack Técnica
 
-- [ ] All three user roles can log in and access only their authorized data
-- [ ] Valdirene can create a PDI, attach photos, and export to PDF — entirely offline
-- [ ] A Professora de Apoio can submit a periodic report from a mobile device
-- [ ] Student school transfer correctly revokes prior support teacher access
-- [ ] Sensitive fields are not exposed in general exports; all access is logged
-- [ ] Sync resolves without data loss when reconnecting after offline edits
+| Camada | Tecnologia |
+|---|---|
+| Backend | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 (async) |
+| Banco | PostgreSQL 16 (produção), SQLite (testes) |
+| Frontend | TypeScript, Next.js 14, TailwindCSS, shadcn/ui |
+| Auth | NextAuth.js + JWT |
+| DevOps | Docker, Docker Compose, GitHub Actions (CI/CD) |
+| Testes | pytest (TDD), Playwright (E2E) |
+| Offline | next-pwa, Dexie.js (IndexedDB) |
+
+---
+
+## Por que agora
+
+- Decisões arquiteturais finalizadas e aprovadas (PRD v1.1 — 13/03/2026)
+- Stack técnica definida: FastAPI + Next.js + PostgreSQL + Docker
+- Prazo de 60 horas de desenvolvimento mapeado em 5 fases
+- Adiar aumenta a fragmentação de dados e expõe dados sensíveis de crianças sem controle
+
+---
+
+## Fora do Escopo (Esta Change)
+
+- Magic link / login sem senha
+- Portal de responsáveis / pais
+- Exclusão física de dados
+- Expiração automatizada de dados LGPD (cron)
+- Expansão multi-tenant (múltiplas SEMEDs)
+- Interface de diff visual para conflitos de sync
+
+---
+
+## Critérios de Sucesso
+
+- [ ] Coordenação consegue cadastrar qualquer entidade e acessar todos os dados
+- [ ] Prof. AEE consegue cadastrar alunos, Prof. Apoio e redigir todos os relatórios
+- [ ] Prof. Apoio consegue redigir Relatório Anual e fazer upload de fotos dos seus alunos
+- [ ] Prof. PI consegue redigir Relatório Trimestral e fazer upload de fotos dos seus alunos
+- [ ] Transferência de escola revoga corretamente o acesso da professora anterior
+- [ ] Campos sensíveis não aparecem em exportações gerais; todo acesso é auditado
+- [ ] Sync funciona sem perda de dados ao reconectar após edições offline
+- [ ] Toda a stack (backend + frontend + banco) sobe com `docker compose up`

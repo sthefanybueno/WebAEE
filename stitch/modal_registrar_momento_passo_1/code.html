@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sistema AEE - Registrar Momento</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#dadada",
+                        "primary": "#005531",
+                        "secondary-fixed-dim": "#c6c4d9",
+                        "secondary": "#5d5d6f",
+                        "on-primary-fixed": "#002110",
+                        "on-background": "#1a1c1c",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#87d7a4",
+                        "on-tertiary-container": "#c5e4d4",
+                        "inverse-surface": "#2f3131",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary-fixed": "#1a1a29",
+                        "on-primary-container": "#9defba",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#042017",
+                        "outline": "#6f7a71",
+                        "surface-tint": "#156c42",
+                        "surface-bright": "#f9f9f9",
+                        "on-secondary-fixed-variant": "#454556",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#afcdbe",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#bfc9bf",
+                        "secondary-container": "#e2e0f6",
+                        "primary-container": "#1a6f45",
+                        "tertiary-fixed": "#cbeada",
+                        "on-primary-fixed-variant": "#00522f",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface-variant": "#3f4941",
+                        "on-secondary-container": "#636375",
+                        "surface": "#f9f9f9",
+                        "tertiary-container": "#4b675b",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#344f43",
+                        "inverse-primary": "#87d7a4",
+                        "on-surface": "#1a1c1c",
+                        "on-tertiary-fixed-variant": "#314c41",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#a2f4bf",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#e2e0f6",
+                        "background": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "headline": ["Lexend", "sans-serif"],
+                        "body": ["Atkinson Hyperlegible", "sans-serif"],
+                        "label": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body { font-family: 'Atkinson Hyperlegible', sans-serif; }
+        .font-headline { font-family: 'Lexend', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-hidden">
+<!-- BACKGROUND: SCREEN_2 (Home Dashboard Mockup) -->
+<div class="fixed inset-0 z-0 flex flex-col pointer-events-none">
+<!-- Top App Bar Mock -->
+<header class="h-16 flex items-center px-4 bg-surface border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant">menu</span>
+<h1 class="ml-4 font-headline font-bold text-lg text-primary">Sistema AEE</h1>
+<div class="ml-auto">
+<span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+</div>
+</header>
+<!-- Home Content Mock -->
+<main class="p-6 space-y-8">
+<div class="space-y-2">
+<h2 class="text-4xl font-headline font-bold tracking-tight text-on-surface">Olá, Educador</h2>
+<p class="text-on-surface-variant text-lg">Aqui está o resumo dos atendimentos de hoje.</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+<p class="text-label-md text-on-surface-variant mb-1">Alunos Atendidos</p>
+<p class="text-3xl font-headline font-bold text-primary">12</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10">
+<p class="text-label-md text-on-surface-variant mb-1">Relatórios Pendentes</p>
+<p class="text-3xl font-headline font-bold text-error">3</p>
+</div>
+</div>
+<div class="bg-primary-container/10 p-6 rounded-xl border border-primary/20">
+<h3 class="font-headline font-bold text-primary-container mb-4">Próxima Agenda</h3>
+<div class="flex items-center space-x-4">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold">AM</div>
+<div>
+<p class="font-bold text-on-surface">Artur Mendes</p>
+<p class="text-sm text-on-surface-variant">Sala de Recursos • 14:30</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar Mock -->
+<nav class="mt-auto h-20 bg-white/70 backdrop-blur-xl border-t border-outline-variant/20 flex items-center justify-around px-2">
+<div class="flex flex-col items-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-xs font-bold mt-1">Início</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant/60">
+<span class="material-symbols-outlined">school</span>
+<span class="text-xs mt-1">Alunos</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant/60">
+<span class="material-symbols-outlined">description</span>
+<span class="text-xs mt-1">Relatórios</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant/60">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-xs mt-1">Agenda</span>
+</div>
+</nav>
+</div>
+<!-- MODAL BACKDROP -->
+<div class="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"></div>
+<!-- BOTTOM SHEET: Registrar Momento -->
+<div class="fixed bottom-0 left-0 right-0 h-[90vh] bg-surface rounded-t-3xl z-50 flex flex-col shadow-[0_-8px_30px_rgb(0,0,0,0.12)] border-t border-white/20">
+<!-- BottomSheetHandle -->
+<div class="w-full flex justify-center py-3">
+<div class="w-10 h-1.5 bg-surface-container-highest rounded-full"></div>
+</div>
+<!-- HEADER -->
+<header class="px-6 py-4 flex items-center justify-between">
+<div class="flex items-center space-x-4">
+<button class="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-headline font-bold text-xl text-on-surface">Registrar Momento <span class="text-primary/60">[1/3]</span></h2>
+</div>
+<div class="w-10"></div> <!-- Spacer -->
+</header>
+<!-- MODAL CONTENT: STEP 1 (Camera/Media Selection) -->
+<div class="flex-1 overflow-y-auto px-6 py-2">
+<div class="space-y-8">
+<!-- Camera Placeholder -->
+<div class="aspect-video w-full bg-surface-container-highest rounded-2xl flex flex-col items-center justify-center overflow-hidden border-2 border-dashed border-outline-variant/50 group hover:border-primary/30 transition-colors">
+<img alt="Camera lens blur effect" class="w-full h-full object-cover opacity-20 grayscale" data-alt="Abstract blurry background representing a camera viewfinder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAa1PSEJg08biP-oNuGPfN21ZBRVfs-Yam6Olf6WOqnrNuaQWKEH_L8bQJp2fQCjJ425ZwwDMBAQloBMIZBOmf71fow69DuPhQ6KEq_k6yQRXoUBk52SRa-8hi02-MRIJJ0bJvdOTeong00N--cP5JzpLWScto51jKQua6z6KUy4vldAHK43i75PyBjb9nUoXDhu3r2lzrrq7CrB7qEyKSu-slEPVkcLnqLNF0133f56mHdozKO1fuRQPVEX_THAdw-MUs43VaNOFU"/>
+<div class="absolute flex flex-col items-center">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">videocam_off</span>
+<p class="text-on-surface-variant/60 font-medium">Toque para iniciar a câmera</p>
+</div>
+</div>
+<!-- Media Action Buttons -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center space-x-3 bg-primary text-on-primary h-[56px] rounded-xl font-bold shadow-sm hover:bg-primary-container transition-all">
+<span class="material-symbols-outlined">photo_camera</span>
+<span>Câmera</span>
+</button>
+<button class="flex items-center justify-center space-x-3 bg-white border-2 border-primary/20 text-primary h-[56px] rounded-xl font-bold hover:bg-primary-light/30 transition-all">
+<span class="material-symbols-outlined">photo_library</span>
+<span>Galeria</span>
+</button>
+</div>
+<!-- Concept Help Text -->
+<div class="bg-surface-container-low p-4 rounded-xl">
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<span class="font-bold text-primary">Dica:</span> Registre momentos significativos de autonomia e interação para compor o portfólio pedagógico do aluno.
+                    </p>
+</div>
+</div>
+</div>
+<!-- FOOTER -->
+<footer class="p-6 border-t border-outline-variant/10 bg-white flex items-center justify-between">
+<!-- Step Indicator -->
+<div class="flex space-x-2">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-surface-container-highest"></div>
+</div>
+<!-- Action -->
+<button class="bg-primary text-on-primary px-8 py-3 rounded-xl font-bold flex items-center space-x-2 shadow-sm hover:bg-primary-container transition-all">
+<span>Próximo</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</footer>
+</div>
+<!-- HIDDEN CONCEPTUAL STEPS (For Logic Visualization) -->
+<!-- 
+    STEP 2 (Student Selection):
+    - Back arrow instead of close
+    - Title [2/3]
+    - "Para qual aluno?" Label
+    - Search Input: bg-surface-container-highest/30 border-b-2 border-outline-variant
+    - List of Recents: 
+        - [AM] Artur Mendes (Avatar Circle Primary)
+        - [LS] Lucas Silva
+    
+    STEP 3 (Tags/Context):
+    - Back arrow
+    - Title [3/3]
+    - "Qual é o contexto?" Label
+    - Bento Grid/Chip Cloud:
+        - Autonomia (Active bg-primary-light)
+        - Comunicação
+        - Motor Fino
+        - Socialização
+        - Outro
+    -->
+</body></html>

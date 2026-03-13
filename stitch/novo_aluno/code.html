@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Novo Aluno - Gestão AEE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#00522f",
+                        "primary-fixed-dim": "#87d7a4",
+                        "surface-dim": "#dadada",
+                        "primary": "#005531",
+                        "on-tertiary-container": "#c5e4d4",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-tint": "#156c42",
+                        "secondary-container": "#e2e0f6",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2f3131",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#454556",
+                        "on-primary-container": "#9defba",
+                        "primary-fixed": "#a2f4bf",
+                        "inverse-primary": "#87d7a4",
+                        "on-background": "#1a1c1c",
+                        "on-secondary-fixed": "#1a1a29",
+                        "tertiary-container": "#4b675b",
+                        "on-secondary-container": "#636375",
+                        "tertiary-fixed-dim": "#afcdbe",
+                        "error": "#ba1a1a",
+                        "secondary": "#5d5d6f",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface": "#f9f9f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed-variant": "#314c41",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#e2e0f6",
+                        "primary-container": "#1a6f45",
+                        "on-surface": "#1a1c1c",
+                        "on-surface-variant": "#3f4941",
+                        "surface-container-high": "#e8e8e8",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c6c4d9",
+                        "outline-variant": "#bfc9bf",
+                        "background": "#f9f9f9",
+                        "surface-container-low": "#f3f3f3",
+                        "outline": "#6f7a71",
+                        "on-primary-fixed": "#002110",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary-fixed": "#cbeada",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#042017",
+                        "tertiary": "#344f43",
+                        "warning-amber": "#F59E0B"
+                    },
+                    fontFamily: {
+                        "headline": ["Lexend", "sans-serif"],
+                        "body": ["Atkinson Hyperlegible", "sans-serif"],
+                        "label": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            background-color: #f9f9f9;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bfc9bf;
+            border-radius: 10px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #005531 !important;
+            box-shadow: 0 0 0 1px #005531;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased min-h-screen flex flex-col">
+<div class="sticky top-0 z-50">
+<div class="bg-warning-amber text-on-primary-fixed py-2 px-4 flex items-center justify-center gap-2 text-sm font-bold shadow-sm">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<span>Você está offline · Dados salvos localmente</span>
+</div>
+<header class="bg-white/80 backdrop-blur-md border-b border-outline-variant/10 px-4 py-4 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-xl font-headline font-bold text-on-surface">Novo Aluno</h1>
+</div>
+<div class="w-10"></div>
+</header>
+</div>
+<main class="flex-1 max-w-3xl mx-auto w-full px-6 py-10 pb-32">
+<div class="mb-10">
+<h2 class="text-4xl font-headline font-bold tracking-tight text-primary mb-2">Ficha de Inscrição</h2>
+<p class="text-on-surface-variant text-lg">Preencha os dados do estudante para iniciar o acompanhamento especializado.</p>
+</div>
+<form class="flex flex-col gap-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-label font-bold text-on-surface-variant px-1" for="nome">Nome Completo</label>
+<input class="min-h-[48px] px-4 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface placeholder:text-outline transition-all" id="nome" placeholder="Ex: João da Silva Santos" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-label font-bold text-on-surface-variant px-1" for="nascimento">Data de Nascimento</label>
+<input class="min-h-[48px] px-4 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface transition-all" id="nascimento" type="date"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-label font-bold text-on-surface-variant px-1" for="escola">Escola Vinculada</label>
+<div class="relative">
+<select class="w-full min-h-[48px] px-4 pr-10 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface appearance-none transition-all" id="escola">
+<option disabled="" selected="" value="">Selecione a unidade</option>
+<option value="1">Escola Municipal Clarice Lispector</option>
+<option value="2">CIEP 449 Leonel Brizola</option>
+<option value="3">Escola Estadual Machado de Assis</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-label font-bold text-on-surface-variant px-1" for="laudo">Laudo/Diagnóstico Principal</label>
+<textarea class="min-h-[120px] p-4 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface placeholder:text-outline transition-all resize-none" id="laudo" placeholder="Descreva as principais características clínicas e pedagógicas..."></textarea>
+</div>
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-sm font-label font-bold text-on-surface-variant px-1" for="professor">Professor de Apoio/PI vinculado</label>
+<div class="relative">
+<select class="w-full min-h-[48px] px-4 pr-10 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface appearance-none transition-all" id="professor">
+<option disabled="" selected="" value="">Vincular profissional responsável</option>
+<option value="1">Profª Ana Beatriz (Especialista TEA)</option>
+<option value="2">Prof. Ricardo Mendes (Psicopedagogo)</option>
+<option value="3">Profª Helena Souza (Libras/DA)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+</div>
+</div>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl flex items-start gap-4 border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary-container mt-1" data-icon="info">info</span>
+<div class="flex flex-col">
+<span class="font-bold text-on-surface">Sincronização Pendente</span>
+<span class="text-sm text-on-surface-variant">Como você está em modo offline, este registro será armazenado no seu dispositivo e enviado ao servidor assim que a conexão for restabelecida.</span>
+</div>
+</div>
+</form>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-outline-variant/20 p-4 z-50">
+<div class="max-w-3xl mx-auto flex items-center gap-4">
+<button class="flex-1 h-12 px-6 font-bold text-primary hover:bg-primary-light/10 rounded-lg transition-all">
+                Cancelar
+            </button>
+<button class="flex-[2] h-12 px-8 bg-primary text-on-primary font-bold rounded-lg shadow-[0_4px_12px_rgba(0,85,49,0.2)] hover:bg-primary-container transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="save">save</span>
+                Salvar Aluno
+            </button>
+</div>
+</footer>
+<div class="hidden">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</div>
+</body></html>

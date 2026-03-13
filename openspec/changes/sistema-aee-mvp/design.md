@@ -1,219 +1,257 @@
 # Design: sistema-aee-mvp
 
-## Architecture Overview
+## Visão Geral da Arquitetura
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         SISTEMA AEE MVP                         │
+│                        SISTEMA AEE MVP                          │
 ├─────────────────────────┬───────────────────────────────────────┤
-│  FRONTEND (PWA)         │  Next.js 14+ App Router               │
-│                         │  Service Worker (offline shell)       │
-│                         │  Dexie.js → IndexedDB (local store)   │
-│                         │  react-pdf (PDF export, client-side)  │
+│  FRONTEND (PWA)         │  Next.js 14 App Router + TypeScript   │
+│                         │  TailwindCSS + shadcn/ui               │
+│                         │  Service Worker (shell offline)        │
+│                         │  Dexie.js → IndexedDB (store local)   │
+│                         │  @react-pdf/renderer (PDF client-side) │
 ├─────────────────────────┼───────────────────────────────────────┤
-│  BACKEND (REST API)     │  Node.js + Fastify  OR  FastAPI        │
-│                         │  JWT auth (via NextAuth / Clerk)       │
+│  BACKEND (REST API)     │  Python 3.12 + FastAPI                 │
+│                         │  Pydantic v2 (validação e schemas)     │
+│                         │  SQLAlchemy 2 async + Alembic          │
+│                         │  JWT (autenticação stateless)          │
 ├─────────────────────────┼───────────────────────────────────────┤
-│  DATABASE               │  PostgreSQL with Row-Level Security    │
+│  BANCO DE DADOS         │  PostgreSQL 16 com Row-Level Security  │
+│                         │  SQLite in-memory (testes pytest)      │
 ├─────────────────────────┼───────────────────────────────────────┤
-│  FILE STORAGE           │  Cloudflare R2 (photos / PDF exports)  │
-├─────────────────────────┼───────────────────────────────────────┤
-│  HOSTING                │  Vercel (frontend) + Railway (API)     │
+│  DEVOPS                 │  Docker + Docker Compose               │
+│                         │  GitHub Actions (CI/CD)                │
 └─────────────────────────┴───────────────────────────────────────┘
 ```
 
 ---
 
-## Data Model
-
-### Core Entities
+## Arquitetura Backend: Clean Architecture + DDD
 
 ```
-tenants                  → multi-tenant isolation (future SEMED use)
-users                    → all users (role stored here)
-schools                  → escolas vinculadas a um tenant
-students                 → alunos com campos sensíveis
-student_school_history   → histórico de transferências
-support_assignments      → vínculo prof_apoio ↔ aluno ↔ período
-report_templates         → definição de seções (JSON) por tipo
-reports                  → documentos preenchidos (snapshot do template)
-photos                   → registros fotográficos vinculados ao aluno
-audit_log                → acesso a campos sensíveis
+backend/
+├── domain/            # Entidades, Value Objects, regras puras de negócio
+├── application/       # Casos de uso (Use Cases)
+├── infrastructure/    # Repositórios, ORM, banco, storage
+└── interfaces/        # FastAPI routers, schemas Pydantic (request/response)
 ```
 
-### Key Field Decisions
+### Entidades do Domínio
 
-| Entity | Notable Fields |
+```python
+# domain/entities/
+Usuario(id, nome, email, papel: Enum[coordenacao|prof_aee|prof_apoio|prof_pi], ativo)
+Aluno(id, nome, data_nascimento, escola_atual, historico_escolas[], diagnostico*, responsavel, status)
+RelatorioAEE(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
+RelatorioAnual(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
+RelatorioTrimestral(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
+Foto(id, aluno_id, autor_id, url, tag_pedagogica, sync_status, created_at)
+VinculoProfessor(id, usuario_id, aluno_id, data_inicio, data_fim?)
+AuditLog(id, usuario_id, acao, entidade, campo_sensivel, timestamp)
+```
+*campo sensível — auditado e nunca exportado em geral*
+
+---
+
+## Modelo de Dados (PostgreSQL)
+
+### Tabelas Principais
+
+```
+tenants                   → isolamento multi-tenant (expansão futura)
+users                     → todos os usuários (papel armazenado aqui)
+schools                   → escolas vinculadas ao tenant
+students                  → alunos com campos sensíveis
+student_school_history    → histórico de transferências
+professor_assignments     → vínculo professor (apoio ou PI) ↔ aluno ↔ período
+report_templates          → seções configuráveis (JSONB) por tipo de relatório
+reports                   → documentos preenchidos (snapshot do template salvo)
+photos                    → registros fotográficos vinculados ao aluno
+audit_log                 → acesso a campos sensíveis
+```
+
+### Campos Críticos por Entidade
+
+| Entidade | Campos Relevantes |
 |---|---|
 | `students` | `status: ativo\|arquivado`, `escola_atual_id`, `consentimento_lgpd`, `data_consentimento`, `base_legal` |
-| `students` (sensitive) | `diagnostico`, `laudo` → flagged `sensivel: true` in app layer |
+| `students` (sensíveis) | `diagnostico`, `laudo` → `sensivel: true` na camada de aplicação |
 | `student_school_history` | `escola_id`, `data_inicio`, `data_fim` |
-| `support_assignments` | `prof_apoio_id`, `aluno_id`, `data_inicio`, `data_fim` |
-| `report_templates` | `tipo: pdi\|atendimento\|periodico\|anual`, `secoes: JSON[]`, `versao` |
-| `reports` | `template_snapshot: JSON` (frozen copy of template at time of creation), `updated_at`, `updated_by` |
-| `photos` | `tag: autonomia\|comunicacao\|motor_fino\|socializacao\|...`, `sync_status: local\|synced` |
+| `professor_assignments` | `usuario_id`, `aluno_id`, `tipo_papel: apoio\|pi`, `data_inicio`, `data_fim` |
+| `report_templates` | `tipo: aee\|anual\|trimestral`, `secoes: JSONB[]`, `versao` |
+| `reports` | `tipo`, `template_snapshot: JSONB`, `updated_at`, `updated_by` |
+| `photos` | `tag: autonomia\|comunicacao\|motor_fino\|socializacao\|outro`, `sync_status: local\|synced` |
 | `audit_log` | `user_id`, `student_id`, `field_accessed`, `accessed_at` |
 
 ---
 
-## Access Control
+## Controle de Acesso (RBAC + RLS)
 
-### Role Matrix
+### Matriz de Permissões
 
-| Action | Coordenador | Prof. AEE | Prof. Apoio |
-|---|---|---|---|
-| Read all students/reports | ✅ (no sensitive fields) | ✅ (own students) | ✅ (assigned only) |
-| CRUD students | ❌ | ✅ | ❌ |
-| Write PDI / attendance reports | ❌ | ✅ | ❌ |
-| Write periodic / annual reports | ❌ | ❌ | ✅ (assigned) |
-| Upload photos | ❌ | ✅ | ❌ |
-| Register school transfer | ❌ | ✅ | ❌ |
-| View sensitive fields (diagnóstico) | ❌ | ✅ | ❌ |
-| Manage support teachers | ❌ | ✅ | ❌ |
-| Register new Prof. AEE | ✅ | ❌ | ❌ |
+| Recurso | Coordenação | Prof. AEE | Prof. Apoio | Prof. PI |
+|---|---|---|---|---|
+| Cadastrar usuários (todos) | ✅ | ✅ (só Prof. Apoio) | ❌ | ❌ |
+| CRUD Alunos | ✅ | ✅ | ❌ | ❌ |
+| Relatório AEE | ✅ | ✅ criar/editar | ❌ | ❌ |
+| Relatório Anual | ✅ | ✅ | ✅ (seus alunos) | ❌ |
+| Relatório Trimestral | ✅ | ✅ | ❌ | ✅ (seus alunos) |
+| Upload de Fotos | ✅ | ✅ | ✅ (seus alunos) | ✅ (seus alunos) |
+| Dashboard global | ✅ | ✅ (sua carteira) | ❌ | ❌ |
+| Ver campos sensíveis | ✅ | ✅ | ❌ | ❌ |
 
-### RLS Strategy (PostgreSQL)
+### Estratégia RLS (PostgreSQL)
 
 ```sql
--- Example: students table
+-- Exemplo: tabela students
 CREATE POLICY student_access ON students
   USING (
-    -- Prof. AEE sees own students
-    (current_role = 'prof_aee' AND tenant_id = current_setting('app.tenant_id')::uuid)
+    -- Coordenação vê todos dentro do tenant
+    (current_setting('app.role') = 'coordenacao'
+      AND tenant_id = current_setting('app.tenant_id')::uuid)
     OR
-    -- Prof. Apoio sees only currently assigned students
-    (current_role = 'prof_apoio' AND id IN (
-      SELECT aluno_id FROM support_assignments
-      WHERE prof_apoio_id = current_setting('app.user_id')::uuid
-        AND data_fim IS NULL
-    ))
+    -- Prof. AEE vê alunos do seu tenant
+    (current_setting('app.role') = 'prof_aee'
+      AND tenant_id = current_setting('app.tenant_id')::uuid)
     OR
-    -- Coordenador sees all within tenant
-    (current_role = 'coordenador' AND tenant_id = current_setting('app.tenant_id')::uuid)
+    -- Prof. Apoio vê apenas alunos atualmente vinculados a ela
+    (current_setting('app.role') IN ('prof_apoio', 'prof_pi')
+      AND id IN (
+        SELECT aluno_id FROM professor_assignments
+        WHERE usuario_id = current_setting('app.user_id')::uuid
+          AND data_fim IS NULL
+      ))
   );
 ```
 
-Every request sets `app.tenant_id` and `app.user_id` and `app.role` in the session before any query executes.
+Cada request ao backend executa `SET LOCAL app.role`, `SET LOCAL app.user_id` e `SET LOCAL app.tenant_id` antes de qualquer query.
+
+### Middleware FastAPI
+
+```python
+# interfaces/middleware/auth.py
+def requer_papel(*papeis: Papel):
+    """Decorator de autorização por papel."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(..., current_user = Depends(get_current_user)):
+            if current_user.papel not in papeis:
+                raise HTTPException(status_code=403, detail="Acesso não autorizado")
+            return await func(...)
+        return wrapper
+    return decorator
+```
 
 ---
 
-## Offline-First Strategy
+## Estratégia Offline-First
 
-### Architecture
+### Fluxo
 
 ```
-USER ACTION (offline)
+AÇÃO DO USUÁRIO (offline)
     │
     ▼
-IndexedDB (Dexie.js)        ← immediate local write
+IndexedDB (Dexie.js)        ← escrita local imediata
     │
-    ▼ (on reconnect)
-Sync Queue Worker           ← background Service Worker
+    ▼ (ao reconectar)
+Sync Queue Worker           ← Service Worker em background
     │
-    ├─► Text/reports        → POST /api/sync/reports
-    └─► Photos              → POST /api/sync/photos (lower priority)
+    ├─► Textos/relatórios   → POST /api/sync/reports   (prioridade 1)
+    └─► Fotos               → POST /api/sync/photos    (prioridade 2, background)
     │
     ▼
-PostgreSQL                  ← canonical source of truth
+PostgreSQL                  ← fonte canônica de verdade
 ```
 
-### Conflict Resolution
+### Resolução de Conflitos
 
-| Data Type | Strategy |
+| Tipo de dado | Estratégia |
 |---|---|
-| Report text | Each report = atomic write unit. `updated_at` timestamp compared on sync. Conflict (same report edited on 2 devices) → both versions preserved, conflict flag set, Prof. AEE notified to resolve manually |
-| Photos | No conflict possible — each photo is an independent entity with UUID. Upload is idempotent |
-| Administrative changes (transfers, assignments) | Server-side timestamp wins; applied on sync with full audit trail |
-
-### Sync Priority
-
-1. Authentication tokens + user metadata
-2. Report texts and template definitions
-3. Student metadata
-4. Photos (background, with progress indicator)
+| Texto de relatório | Unidade atômica. `updated_at` comparado no sync. Conflito detectado → ambas versões preservadas, `conflict_flag` setado, Prof. AEE notificada |
+| Fotos | Sem conflito — cada foto é entidade independente com UUID. Upload idempotente |
+| Mudanças administrativas (transferências, vínculos) | Timestamp do servidor prevalece; aplicado no sync com audit trail |
 
 ---
 
-## "📸 Registrar Momento" — Quick Capture Flow
+## Fluxo "📸 Registrar Momento"
 
 ```
-[Fixed FAB button on Prof. AEE home screen]
+[Botão FAB fixo na tela inicial da Prof. AEE / Coordenação]
     │
     ▼
-Step 1: Select or capture photo           (native file picker / camera)
+Passo 1: Selecionar ou tirar foto        (file picker nativo / câmera)
     │
     ▼
-Step 2: Select student                    (autocomplete — max 2 taps)
+Passo 2: Selecionar aluno                (autocomplete — máx. 2 toques)
     │
     ▼
-Step 3: Select pedagogical tag            (chips: Autonomia / Comunicação /
-    │                                      Motor Fino / Socialização / Outro)
+Passo 3: Selecionar tag pedagógica       (chips: Autonomia / Comunicação /
+    │                                     Motor Fino / Socialização / Outro)
     ▼
-[Save] → stored in IndexedDB immediately → synced when online
+[Salvar] → gravado em IndexedDB imediatamente → sincronizado quando online
 ```
 
-Maximum: **3 taps from FAB to saved**.
+**Máximo: 3 toques do FAB até o registro estar salvo.**
 
 ---
 
-## Document Template System
-
-Templates are stored as JSON arrays of section definitions:
+## Sistema de Templates de Documentos
 
 ```json
 {
-  "tipo": "pdi",
-  "versao": 3,
+  "tipo": "relatorio_aee",
+  "versao": 2,
   "secoes": [
-    { "id": "identificacao", "label": "Identificação", "tipo": "texto" },
-    { "id": "diagnostico",   "label": "Diagnóstico",   "tipo": "texto", "sensivel": true },
-    { "id": "objetivos",     "label": "Objetivos",     "tipo": "lista" },
-    { "id": "estrategias",   "label": "Estratégias",   "tipo": "texto" },
-    { "id": "avaliacao",     "label": "Avaliação",     "tipo": "texto" }
+    { "id": "identificacao",  "label": "Identificação",  "tipo": "texto" },
+    { "id": "objetivos",      "label": "Objetivos",      "tipo": "lista" },
+    { "id": "estrategias",    "label": "Estratégias",    "tipo": "texto" },
+    { "id": "evolucao",       "label": "Evolução",       "tipo": "texto" }
   ]
 }
 ```
 
-When a report is saved, `template_snapshot` stores a frozen copy of the template version used — future template edits never retroactively alter existing reports.
+Ao salvar um relatório, `template_snapshot` guarda uma cópia congelada da versão do template — alterações futuras nunca retroagem sobre relatórios já emitidos.
 
 ---
 
-## LGPD Compliance Implementation
+## Conformidade LGPD
 
-| Requirement | Implementation |
+| Requisito | Implementação |
 |---|---|
-| Basis for processing | `base_legal: "Art. 58 LDB"` stored per student at registration |
-| Consent tracking | `consentimento_lgpd: boolean` + `data_consentimento: timestamp` |
-| Sensitive field audit | Every read of `diagnostico`, `laudo` writes a row to `audit_log` |
-| Access isolation | PostgreSQL RLS — enforced at DB layer, not application layer |
-| No permanent deletion | `status: ativo/arquivado` soft delete. No `DELETE` statements allowed in application code |
-| Data retention policy | Declared as static text in privacy notice UI; automated expiry deferred to Phase 3 |
-| Encryption at rest | Enabled at cloud provider level (Cloudflare R2 + managed PostgreSQL) |
+| Base legal | `base_legal: "Art. 58 LDB"` por aluno no cadastro |
+| Consentimento | `consentimento_lgpd: bool` + `data_consentimento: timestamp` |
+| Auditoria de campos sensíveis | Toda leitura de `diagnostico`, `laudo` grava linha em `audit_log` |
+| Isolamento de acesso | PostgreSQL RLS — imposto na camada de banco, não só na aplicação |
+| Sem exclusão física | `status: ativo/arquivado`. Nenhum `DELETE` no código da aplicação |
+| Política de retenção | Texto estático na tela de privacidade; automação adiada para Fase 3 |
+| Criptografia em repouso | Ativada no provedor cloud (PostgreSQL gerenciado) |
 
 ---
 
-## PDF Export
+## Autenticação
 
-- Generated client-side using `@react-pdf/renderer`
-- Template sections rendered as styled React-PDF primitives
-- No server-side rendering required in MVP — avoids Puppeteer dependency
-- Exported file naming: `[TipoRelatorio]_[NomeAluno]_[Data].pdf`
-
----
-
-## Authentication
-
-- **Email + password only** — no magic links, no public URLs, no passwordless access
-- Session managed by NextAuth (or Clerk) with role stored in JWT
-- Session expiry: 8 hours (configurable)
-- Role injected into PostgreSQL session on every authenticated request (`SET LOCAL app.role`, `SET LOCAL app.user_id`, `SET LOCAL app.tenant_id`)
+- **E-mail + senha** — sem magic links, sem URLs públicas, sem acesso sem senha
+- JWT stateless; papel do usuário embutido no token
+- Sessão de 8 horas (configurável via variável de ambiente)
+- NextAuth.js no frontend; validação/emissão de token no backend FastAPI
 
 ---
 
-## UX Split by Role
+## UX por Papel
 
-| Interface | Target user | Key design principle |
+| Interface | Usuário-alvo | Princípio de design |
 |---|---|---|
-| **Full dashboard** | Prof. AEE | Feature-rich, multi-school view, desktop-first, responsive |
-| **Apoio view** | Prof. Apoio | Step-by-step wizard for report submission, mobile-optimized, minimal navigation |
-| **Coordenador view** | Coordenador Geral | Read-only grid of schools + Professoras AEE, no write actions visible |
+| **Dashboard completo** | Coordenação / Prof. AEE | Multi-escola, desktop-first, responsivo |
+| **Visão Apoio** | Prof. Apoio | Wizard passo-a-passo, mobile-first, navegação mínima |
+| **Visão PI** | Prof. PI | Igual à Visão Apoio, com acesso ao Relatório Trimestral |
+
+---
+
+## Exportação PDF
+
+- Gerado client-side via `@react-pdf/renderer`
+- Seções do template renderizadas como primitivos React-PDF estilizados
+- Sem renderização server-side no MVP (evita dependência de Puppeteer)
+- Nomenclatura: `[TipoRelatorio]_[NomeAluno]_[Data].pdf`

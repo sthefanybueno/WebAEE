@@ -18,3 +18,34 @@ schema: spec-driven
 #       - Always include a "Non-goals" section
 #     tasks:
 #       - Break tasks into chunks of max 2 hours
+
+context: |
+  Porfavor, gere todos os artefatos em Português do Brasil.
+
+  # TECH STACK - BACKEND
+  - Framework: FastAPI
+  - Banco de dados: PostgreSQL
+  - Validação: Pydantic
+
+  # TECH STACK - FRONTEND
+  - Framework: Next.js
+  - Linguagem: TypeScript
+  - Estilo: Tailwind CSS
+  - Componentes: shadcn/ui
+
+  # DOMAIN
+  - Sistema de gestão de Atendimento Educacional Especializado
+  - O sistema deve ser capaz de gerenciar alunos, professores AEE, professoras de Apoio, relatórios, etc.
+    
+rules:
+  proposal:
+    -Toda nova proposta deve especificar claramente os objetivos, não-objetivos e decisões que serão tomadas.
+
+  specs:
+    - Use sempre o formato Given/When/Then (Dado/Quando/Então) para descrever os cenários.
+
+  design:
+    - Backend: Detalhe os modelos do banco de dados (PostgreSQL) e como o schema do FastAPI/Pydantic garante o Type-safety ponta a ponta.
+    - Frontend: Detalhe os componentes do shadcn/ui que serão utilizados e como o Next.js será utilizado para criar o dashboard.
+
+  

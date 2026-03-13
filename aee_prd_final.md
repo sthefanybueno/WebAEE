@@ -1,9 +1,9 @@
 # Sistema AEE — Documento de Requisitos e Proposta Arquitetural Final
 
-**Versão:** 1.0 — Definitiva  
-**Data:** 10/03/2026  
+**Versão:** 1.1 — Revisado  
+**Data:** 13/03/2026  
 **Status:** ✅ Aprovado para desenvolvimento  
-**Autores:** Sessões de exploração arquitetural + Tree-of-Thought (06–10/03/2026)
+**Autores:** Sessões de exploração arquitetural + Tree-of-Thought (06–10/03/2026) + Revisão de papéis (13/03/2026)
 
 ---
 
@@ -26,73 +26,117 @@ Hoje, esse fluxo é caótico: dados espalhados, relatórios sem rastreabilidade,
 
 ---
 
-## 2. Matriz de Papéis e Permissões
+## 2. Entidades do Sistema
+
+O sistema é composto pelas seguintes entidades principais:
+
+| Entidade | Descrição |
+|---|---|
+| **Coordenação** | Perfil administrativo com acesso total ao sistema |
+| **Prof. AEE** | Professora do Atendimento Educacional Especializado — gestora pedagógica |
+| **Prof. Apoio** | Professora de Apoio vinculada a alunos específicos |
+| **Prof. PI** | Professora de Prática Inclusiva vinculada a alunos específicos |
+| **Aluno** | Estudante com NEE atendido pelo sistema |
+| **Relatório Anual** | Documento anual de avaliação do aluno |
+| **Relatório Trimestral** | Documento trimestral de acompanhamento do aluno |
+| **Relatório AEE** | Documento de atendimento produzido pela Prof. AEE |
+
+---
+
+## 3. Matriz de Papéis e Permissões
 
 ### Hierarquia de Acesso
 
 ```
-Coordenador Geral
-    └── Professora AEE  (1 por espaço, pode atuar em N escolas)
-            └── Professora de Apoio  (vinculada a alunos específicos)
+Coordenação  (acesso total)
+    └── Prof. AEE  (gestora pedagógica — 1 por espaço, pode atuar em N escolas)
+            ├── Prof. Apoio  (vinculada a alunos específicos)
+            └── Prof. PI     (vinculada a alunos específicos)
 ```
 
 Os pais/responsáveis **não têm acesso ao sistema** em nenhuma fase.
 
 ---
 
-### 2.1 Coordenador Geral
+### 3.1 Coordenação (Acesso Livre / Administrador Geral)
+
+> **Princípio:** A Coordenação tem acesso irrestrito — pode cadastrar, visualizar, editar e gerenciar todos os dados e todos os usuários do sistema.
 
 | Ação | Permitido |
 |---|---|
-| Visualizar dados pedagógicos de todos os alunos (leitura) | ✅ |
-| Visualizar relatórios e PDIs (leitura) | ✅ |
-| Cadastrar Professoras AEE | ✅ |
-| Vincular Professoras AEE às suas escolas | ✅ |
-| Criar, editar ou excluir alunos, relatórios ou PDIs | ❌ |
-| Acessar laudos médicos detalhados | ❌ (campos marcados como restritos) |
-
-> **Princípio:** O Coordenador Geral tem visão global somente-leitura. Não intervém nos dados pedagógicos.
+| Cadastrar e gerenciar Coordenação, Prof. AEE, Prof. Apoio e Prof. PI | ✅ |
+| Cadastrar, editar e arquivar alunos | ✅ |
+| Criar, editar e excluir qualquer tipo de relatório | ✅ |
+| Visualizar todos os dados pedagógicos | ✅ |
+| Acessar laudos e campos sensíveis | ✅ |
+| Exportar qualquer documento como PDF | ✅ |
+| Ver dashboard de pendências global | ✅ |
+| Registrar fotos pedagógicas dos alunos | ✅ |
 
 ---
 
-### 2.2 Professora AEE (Admin do seu ecossistema)
+### 3.2 Professora AEE (Gestora Pedagógica)
+
+> **Princípio:** A Prof. AEE é administradora do seu ecossistema pedagógico. Cadastra e gerencia professoras de apoio, alunos e todos os tipos de relatório.
 
 | Ação | Permitido |
 |---|---|
+| Cadastrar e gerenciar Prof. Apoio | ✅ |
 | Cadastrar, editar e arquivar alunos | ✅ |
-| Cadastrar e gerenciar Professoras de Apoio | ✅ |
-| Vincular e desvincular Professoras de Apoio a alunos | ✅ |
+| Vincular e desvincular Prof. Apoio e Prof. PI a alunos | ✅ |
 | Registrar transferência de escola de aluno | ✅ |
-| Redigir o PDI do aluno | ✅ (exclusivo) |
-| Redigir relatórios de atendimento | ✅ (exclusivo) |
-| Registrar fotos pedagógicas dos alunos | ✅ (exclusivo) |
+| Redigir **Relatório AEE** (exclusivo) | ✅ |
+| Redigir **Relatório Anual** e **Relatório Trimestral** | ✅ |
+| Visualizar relatórios de todos os tipos de todos os alunos | ✅ |
+| Registrar fotos pedagógicas dos alunos | ✅ |
 | Usar o atalho "📸 Registrar Momento" | ✅ |
-| Visualizar relatórios das Professoras de Apoio | ✅ |
 | Exportar qualquer documento como PDF | ✅ |
 | Ver dashboard de pendências de toda a sua carteira | ✅ |
+| Cadastrar Coordenação ou outras Prof. AEE | ❌ |
 
 ---
 
-### 2.3 Professora de Apoio (Acesso restrito)
+### 3.3 Professora de Apoio (Acesso Restrito)
+
+> **Princípio:** A Prof. Apoio acessa apenas os alunos vinculados a ela. Pode registrar o Relatório Anual e adicionar fotos dos seus alunos.
 
 | Ação | Permitido |
 |---|---|
 | Visualizar apenas os alunos vinculados a ela | ✅ |
-| Redigir relatório periódico (semanal/mensal) dos seus alunos | ✅ |
-| Redigir relatório anual dos seus alunos | ✅ |
+| Redigir **Relatório Anual** dos seus alunos | ✅ |
+| Registrar / fazer upload de fotos dos seus alunos | ✅ |
 | Exportar seus próprios relatórios como PDF | ✅ |
-| Visualizar ou editar PDIs | ❌ |
-| Visualizar relatórios de outras Professoras de Apoio | ❌ |
-| Upload de fotos pedagógicas | ❌ (exclusivo da Prof. AEE) |
-| Gerenciar alunos ou escola | ❌ |
+| Redigir Relatório Trimestral ou Relatório AEE | ❌ |
+| Visualizar relatórios de outras professoras | ❌ |
+| Cadastrar ou gerenciar usuários | ❌ |
+| Cadastrar ou editar alunos | ❌ |
 
-> **Importante:** O acesso da Professora de Apoio a um aluno é **vinculado ao período** de atuação. Após uma transferência ou desvinculação, ela perde o acesso a novos dados — o histórico anterior fica arquivado e visível apenas para a Prof. AEE.
+> **Importante:** O acesso da Prof. Apoio a um aluno é **vinculado ao período** de atuação. Após uma transferência ou desvinculação, ela perde o acesso a novos dados — o histórico anterior fica arquivado e visível apenas para a Prof. AEE.
 
 ---
 
-## 3. Funcionalidades Críticas do MVP (Fase 1)
+### 3.4 Professora PI — Prática Inclusiva (Acesso Restrito)
 
-### 3.1 Autenticação e Controle de Acesso
+> **Princípio:** A Prof. PI acessa apenas os alunos vinculados a ela. Pode registrar o Relatório Trimestral e adicionar fotos dos seus alunos.
+
+| Ação | Permitido |
+|---|---|
+| Visualizar apenas os alunos vinculados a ela | ✅ |
+| Redigir **Relatório Trimestral** dos seus alunos | ✅ |
+| Registrar / fazer upload de fotos dos seus alunos | ✅ |
+| Exportar seus próprios relatórios como PDF | ✅ |
+| Redigir Relatório Anual ou Relatório AEE | ❌ |
+| Visualizar relatórios de outras professoras | ❌ |
+| Cadastrar ou gerenciar usuários | ❌ |
+| Cadastrar ou editar alunos | ❌ |
+
+> **Importante:** Assim como a Prof. Apoio, o acesso da Prof. PI a um aluno é **vinculado ao período** de atuação.
+
+---
+
+## 4. Funcionalidades Críticas do MVP (Fase 1)
+
+### 4.1 Autenticação e Controle de Acesso
 
 - **Login por e-mail e senha** para todos os perfis. **Não haverá magic link nem acesso por URL sem senha**, dado o caráter altamente sensível dos dados de menores com NEE.
 - Sessões com expiração configurável.
@@ -100,7 +144,7 @@ Os pais/responsáveis **não têm acesso ao sistema** em nenhuma fase.
 
 ---
 
-### 3.2 Gestão de Alunos e Histórico
+### 4.2 Gestão de Alunos e Histórico
 
 **Cadastro de alunos**
 - Campos obrigatórios: nome, data de nascimento, escola atual, diagnóstico (campo restrito), responsável legal.
@@ -124,7 +168,7 @@ Os pais/responsáveis **não têm acesso ao sistema** em nenhuma fase.
 
 ---
 
-### 3.3 Funcionalidades de Relatório e Registro
+### 4.3 Funcionalidades de Relatório e Registro
 
 **Templates dinâmicos por tipo de documento**
 
@@ -132,10 +176,9 @@ Cada tipo de relatório possui estrutura própria e mutável ao longo do tempo. 
 
 | Tipo | Quem redige | Periodicidade |
 |---|---|---|
-| PDI (Plano de Desenvolvimento Individual) | Prof. AEE | Por semestre ou sob demanda |
-| Relatório de Atendimento | Prof. AEE | Por sessão / sob demanda |
-| Relatório Periódico (semanal/mensal) | Prof. de Apoio | Periódico |
-| Relatório Anual | Prof. de Apoio | Anual |
+| **Relatório AEE** | Prof. AEE | Por sessão / sob demanda |
+| **Relatório Anual** | Prof. AEE ou Prof. Apoio | Anual |
+| **Relatório Trimestral** | Prof. AEE ou Prof. PI | Trimestral |
 
 - Seções de cada template são adicionáveis/removíveis pela Prof. AEE **sem necessidade de código** (configuração armazenada como JSON estruturado no banco).
 - Relatório **guarda uma snapshot da versão do template** no momento em que foi gerado, garantindo que mudanças futuras no template não alterem relatórios já emitidos.
@@ -154,9 +197,9 @@ Cada tipo de relatório possui estrutura própria e mutável ao longo do tempo. 
 
 ---
 
-## 4. Decisões Arquiteturais e de Segurança
+## 5. Decisões Arquiteturais e de Segurança
 
-### 4.1 Stack Técnica
+### 5.1 Stack Técnica
 
 | Camada | Tecnologia | Justificativa |
 |---|---|---|
@@ -171,7 +214,7 @@ Cada tipo de relatório possui estrutura própria e mutável ao longo do tempo. 
 
 ---
 
-### 4.2 Estratégia Offline-First (PWA)
+### 5.2 Estratégia Offline-First (PWA)
 
 ```
 FLUXO OFFLINE → ONLINE
@@ -194,7 +237,7 @@ FLUXO OFFLINE → ONLINE
 
 ---
 
-### 4.3 Conformidade LGPD — Dados Sensíveis de Crianças com NEE
+### 5.3 Conformidade LGPD — Dados Sensíveis de Crianças com NEE
 
 Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sensíveis). As medidas abaixo são **obrigatórias desde o MVP**:
 
@@ -212,13 +255,13 @@ Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sen
 
 ---
 
-## 5. Escopo Funcional Definitivo do MVP (Fase 1)
+## 6. Escopo Funcional Definitivo do MVP (Fase 1)
 
 ### ✅ Incluído no MVP
 
 **Autenticação e Permissões**
 - Login por e-mail e senha com sessão gerenciada (sem magic link, sem acesso por URL pública)
-- Três perfis com permissões distintas: Coordenador Geral, Prof. AEE, Prof. de Apoio
+- Quatro perfis com permissões distintas: Coordenação, Prof. AEE, Prof. Apoio, Prof. PI
 - RLS no PostgreSQL — habilitado desde o primeiro deploy
 
 **Gestão de Alunos e Histórico**
@@ -250,7 +293,6 @@ Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sen
 | Módulo | Motivo do descarte |
 |---|---|
 | **Magic link / login sem senha** | Incompatível com a sensibilidade dos dados (crianças com NEE, laudos médicos) |
-| **Upload de fotos pela Prof. de Apoio** | Exclusividade pedagógica da Prof. AEE; evita mistura de responsabilidades |
 | **Portal do Responsável / Acesso dos Pais** | Fora do escopo de todas as fases planejadas |
 | **Exclusão física de dados** | Proibido — obrigação legal de manutenção de histórico escolar |
 | **Notificação automática de transferência de escola** | Fase 2 — baixa complexidade, mas não crítico para o MVP |
@@ -259,7 +301,7 @@ Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sen
 
 ---
 
-## 6. Fases de Desenvolvimento
+## 7. Fases de Desenvolvimento
 
 | Fase | Foco | Estimativa |
 |---|---|---|
@@ -269,5 +311,5 @@ Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sen
 
 ---
 
-*Documento definitivo — Sistema AEE — 10/03/2026*  
-*Consolidado a partir das sessões de exploração arquitetural (06/03) e análise Tree-of-Thought (10/03)*
+*Documento definitivo — Sistema AEE — última revisão: 13/03/2026*  
+*Consolidado a partir das sessões de exploração arquitetural (06/03), análise Tree-of-Thought (10/03) e revisão de papéis e entidades (13/03)*

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sistema AEE - App Layout</title>
+<!-- Atkinson Hyperlegible Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "on-surface": "#1a1c1c",
+                        "primary-container": "#1a6f45",
+                        "on-secondary-container": "#636375",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3f4941",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#87d7a4",
+                        "on-primary-container": "#9defba",
+                        "on-primary-fixed": "#002110",
+                        "inverse-on-surface": "#f1f1f1",
+                        "secondary": "#5d5d6f",
+                        "on-tertiary-fixed-variant": "#314c41",
+                        "tertiary": "#344f43",
+                        "surface-tint": "#156c42",
+                        "secondary-container": "#e2e0f6",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-fixed-dim": "#c6c4d9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1a1c1c",
+                        "tertiary-container": "#4b675b",
+                        "primary-fixed-dim": "#87d7a4",
+                        "primary-fixed": "#a2f4bf",
+                        "outline": "#6f7a71",
+                        "background": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "surface": "#f9f9f9",
+                        "on-secondary-fixed": "#1a1a29",
+                        "on-tertiary-fixed": "#042017",
+                        "surface-dim": "#dadada",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e8e8e8",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#bfc9bf",
+                        "inverse-surface": "#2f3131",
+                        "surface-container": "#eeeeee",
+                        "tertiary-fixed-dim": "#afcdbe",
+                        "on-primary-fixed-variant": "#00522f",
+                        "on-tertiary-container": "#c5e4d4",
+                        "secondary-fixed": "#e2e0f6",
+                        "primary": "#005531",
+                        "tertiary-fixed": "#cbeada",
+                        "on-secondary-fixed-variant": "#454556"
+                    },
+                    fontFamily: {
+                        "headline": ["Atkinson Hyperlegible", "sans-serif"],
+                        "body": ["Atkinson Hyperlegible", "sans-serif"],
+                        "label": ["Atkinson Hyperlegible", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Atkinson Hyperlegible', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .safe-area-bottom { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface flex flex-col min-h-screen">
+<!-- TopAppBar (Shell Component) -->
+<header class="fixed top-0 left-0 right-0 h-[56px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] z-[100] px-4 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-sm" data-icon="school" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+</div>
+<h1 class="text-on-surface font-headline font-bold text-lg tracking-tight">Sistema AEE</h1>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-secondary" data-icon="notifications">notifications</span>
+</div>
+</header>
+<!-- ActionPanel / Offline Banner (Shell Component) -->
+<div class="fixed top-[56px] left-0 right-0 z-[90] bg-[#f59e0b] px-4 py-2 flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-white text-sm" data-icon="wifi_off">wifi_off</span>
+<div class="flex flex-col">
+<p class="text-white text-xs font-bold leading-none">Você está offline</p>
+<p class="text-white/90 text-[10px] leading-tight">Dados salvos localmente</p>
+</div>
+<a class="ml-auto text-white text-[10px] underline underline-offset-2 font-bold uppercase tracking-wider" href="#">Ver detalhes</a>
+</div>
+<!-- Creative Canvas: Main Content Area -->
+<main class="flex-1 mt-[100px] px-4 pb-24 overflow-y-auto">
+<!-- Welcome Section (Bento Style Card) -->
+<section class="mb-8 mt-4">
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_8px_30px_rgb(28,28,30,0.04)] border border-outline-variant/10">
+<div class="flex flex-col gap-1">
+<span class="text-primary font-bold text-xs uppercase tracking-[0.2em] mb-2">Visão Geral</span>
+<h2 class="text-3xl font-headline font-bold text-on-surface leading-tight">Olá, <span class="text-primary-container">Especialista</span></h2>
+<p class="text-on-surface-variant text-base mt-2 leading-relaxed">Bem-vindo ao portal de Atendimento Educacional Especializado. Seus registros estão seguros.</p>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-3">
+<div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="group">group</span>
+<span class="text-2xl font-bold">12</span>
+<span class="text-xs text-on-secondary-container font-medium">Alunos Ativos</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="pending_actions">pending_actions</span>
+<span class="text-2xl font-bold">04</span>
+<span class="text-xs text-on-secondary-container font-medium">Planos Pendentes</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Actions Grid -->
+<section class="mb-8">
+<h3 class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4 px-1">Ações Frequentes</h3>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center p-4 bg-white rounded-lg border-b-2 border-primary/10 hover:border-primary transition-all group">
+<div class="w-10 h-10 rounded-full bg-primary-light/10 flex items-center justify-center mr-4 group-hover:bg-primary/10">
+<span class="material-symbols-outlined text-primary" data-icon="person_add">person_add</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Novo Cadastro</h4>
+<p class="text-xs text-on-surface-variant">Registrar novo aluno no AEE</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center p-4 bg-white rounded-lg border-b-2 border-primary/10 hover:border-primary transition-all group">
+<div class="w-10 h-10 rounded-full bg-primary-light/10 flex items-center justify-center mr-4 group-hover:bg-primary/10">
+<span class="material-symbols-outlined text-primary" data-icon="history_edu">history_edu</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Relatórios Semanais</h4>
+<p class="text-xs text-on-surface-variant">Preencher diário de bordo</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-outline-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Abstract Decorative Element -->
+<div class="relative h-32 w-full rounded-2xl overflow-hidden mb-8">
+<div class="absolute inset-0 bg-gradient-to-br from-primary to-primary-container opacity-90"></div>
+<div class="absolute inset-0 mix-blend-overlay opacity-20" data-alt="Abstract geometric cube pattern" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAFHWIFj7Cj0-Wp4u2y7EvCvWHEcx7_QAtRWF39jA7sTsM5ZO_6tryDOeJipJ7lZpzS-Z_eboUO-gX2LOwQJpzc2JQNckM_5W4OILIluMzV8dehA-wEopBwJbYpyUnFBS1lkqmOnnsiXB6dVfsGZvmzHzIgOm741YX_WTScL_8KXr1gmBModejNnZb7RtYza6nuY8jQuCcGGEV46cBWsPH3WUDS2sZmeE4Mr-tsiVSntxLQRPfQFgq3KPwJVDJ3_GzGCib_dxA-gIU');"></div>
+<div class="relative h-full flex flex-col justify-end p-5 text-white">
+<p class="text-[10px] font-bold uppercase tracking-widest opacity-80">Dica do dia</p>
+<p class="text-sm font-medium leading-tight">Organize seus documentos por semestre para facilitar a exportação do MEC.</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Shell Component) -->
+<nav class="fixed bottom-0 left-0 right-0 h-[56px] bg-white border-t border-outline-variant/30 z-[100] flex items-center justify-around px-2 pb-safe">
+<button class="flex flex-col items-center justify-center gap-0.5 flex-1 text-primary">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-0.5 flex-1 text-secondary">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[10px] font-medium">Alunos</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-0.5 flex-1 text-secondary">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[10px] font-medium">Documentos</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-0.5 flex-1 text-secondary">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-[10px] font-medium">Configurações</span>
+</button>
+</nav>
+</body></html>
