@@ -20,32 +20,41 @@ schema: spec-driven
 #       - Break tasks into chunks of max 2 hours
 
 context: |
-  Porfavor, gere todos os artefatos em Português do Brasil.
+  Por favor, gere todos os artefatos em Português do Brasil.
+  Você é ESTRITAMENTE PROIBIDO de adicionar bibliotecas não listadas, de usar frameworks diferentes dos designados e de usar emojis onde ícones são necessários (USE OBRIGATORIAMENTE **Lucide Icons**). Não invente caminhos se a stack já prevê uma solução.
 
   # TECH STACK - BACKEND
   - Framework: FastAPI
-  - Banco de dados: PostgreSQL
-  - Validação: Pydantic
+  - Banco de dados: PostgreSQL (Obrigatório, sem margem para outro banco em produção)
+  - ORM: SQLAlchemy 2.0 (ou SQLModel)
+  - Validação e Schemas: Tipagem estrita via Pydantic v2. Nada de dicionários mágicos; tudo deve ter schema type-safe.
 
   # TECH STACK - FRONTEND
-  - Framework: Next.js
-  - Linguagem: TypeScript
-  - Estilo: Tailwind CSS
-  - Componentes: shadcn/ui
+  - Framework: Next.js com App Router (Obrigatório, não use Pages Router)
+  - Linguagem: TypeScript (Tipagem estrita obrigatória em todos os arquivos)
+  - Estilo: Tailwind CSS (Apenas classes utilitárias base se o shadcn não cobrir)
+  - Componentes: Uso exclusívo e prioritário do ecossistema shadcn/ui. Nunca construa componentes interativos do zero (como modais ou seletores) se existir no shadcn.
+
+  # ORQUESTRAÇÃO / INFRA
+  - Todo o sistema DEVE rodar isolado via Docker e docker-compose. A IA deve gerar os Dockerfiles (Frontend/Backend) pertinentes e declarar volumes/redes adequadamente.
 
   # DOMAIN
-  - Sistema de gestão de Atendimento Educacional Especializado
-  - O sistema deve ser capaz de gerenciar alunos, professores AEE, professoras de Apoio, relatórios, etc.
+  - Sistema de gestão de Atendimento Educacional Especializado (AEE), operado por professoras offline-first (com sync IndexedDB).
     
 rules:
   proposal:
-    -Toda nova proposta deve especificar claramente os objetivos, não-objetivos e decisões que serão tomadas.
+    - Toda nova proposta deve especificar claramente os objetivos, não-objetivos e decisões estritas de base/arquitetura.
 
   specs:
-    - Use sempre o formato Given/When/Then (Dado/Quando/Então) para descrever os cenários.
+    - Use OBRIGATORIAMENTE palavras-chave do padrão RFC 2119 (MUST, SHALL, SHOULD, MUST NOT) em caixa alta na descrição.
+    - Use sempre o formato Dado/Quando/Então (Given/When/Then) para mapeamento dos fluxos em formato testável.
+    - Especifique explicitamente Caminhos de Erro (o que MUST acontecer quando o token está inválido ou banco falha, em vez de só focar nos sucessos).
 
   design:
-    - Backend: Detalhe os modelos do banco de dados (PostgreSQL) e como o schema do FastAPI/Pydantic garante o Type-safety ponta a ponta.
-    - Frontend: Detalhe os componentes do shadcn/ui que serão utilizados e como o Next.js será utilizado para criar o dashboard.
+    - Backend: Detalhe estrutural das tabelas PostgreSQL (chaves estrangeiras, índices e RLS policies) e os contratos exatos do modelo via Pydantic (Type-safety ponta a ponta).
+    - Frontend: Faça clara demarcação de diretórios que são Server Components e que são Client Components (com 'use client'). Liste os componentes do shadcn/ui que serão instalados e utilizados.
+    - Infra: Detalhar a Topologia do Docker Compose, declarando serviços, volumes de dados, chaves env necessárias.
 
-  
+  tasks:
+    - Seja hiper-sequencial entre camadas (Docker -> DB -> API -> Front).
+    - Inclua passos de validação técnica após criações complexas (ex: "Garantir que a renderização passa no build", "Verificar se as relations do SQLAlchemy inicializam corretamente listando os models"). Não passe instruções abstratas.

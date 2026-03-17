@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestão de Relatórios AEE</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Atkinson Hyperlegible & Lexend -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed-dim": "#c6c4d9",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f3f3f3",
+              "on-primary-container": "#9defba",
+              "on-primary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-tertiary-fixed": "#042017",
+              "secondary": "#5d5d6f",
+              "primary": "#005531",
+              "on-tertiary": "#ffffff",
+              "secondary-fixed": "#e2e0f6",
+              "error": "#ba1a1a",
+              "surface-container": "#eeeeee",
+              "background": "#f9f9f9",
+              "surface-container-high": "#e8e8e8",
+              "inverse-primary": "#87d7a4",
+              "on-error-container": "#93000a",
+              "surface-container-highest": "#e2e2e2",
+              "primary-container": "#1a6f45",
+              "tertiary-container": "#4b675b",
+              "tertiary": "#344f43",
+              "outline": "#6f7a71",
+              "on-secondary-container": "#636375",
+              "on-secondary-fixed": "#1a1a29",
+              "surface-bright": "#f9f9f9",
+              "on-surface-variant": "#3f4941",
+              "inverse-surface": "#2f3131",
+              "surface": "#f9f9f9",
+              "primary-fixed": "#a2f4bf",
+              "on-background": "#1a1c1c",
+              "tertiary-fixed": "#cbeada",
+              "on-tertiary-container": "#c5e4d4",
+              "surface-tint": "#156c42",
+              "on-primary-fixed": "#002110",
+              "surface-variant": "#e2e2e2",
+              "outline-variant": "#bfc9bf",
+              "on-tertiary-fixed-variant": "#314c41",
+              "secondary-container": "#e2e0f6",
+              "on-secondary-fixed-variant": "#454556",
+              "primary-fixed-dim": "#87d7a4",
+              "tertiary-fixed-dim": "#afcdbe",
+              "on-secondary": "#ffffff",
+              "inverse-on-surface": "#f1f1f1",
+              "on-surface": "#1a1c1c",
+              "on-primary-fixed-variant": "#00522f",
+              "surface-dim": "#dadada",
+              "on-error": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Atkinson Hyperlegible", "Lexend", "sans-serif"],
+              "body": ["Atkinson Hyperlegible", "Lexend", "sans-serif"],
+              "label": ["Atkinson Hyperlegible", "Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        body {
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(28,28,30,0.04)]">
+<div class="flex justify-between items-center w-full px-6 h-16 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-primary-light/30 rounded-full transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary-container" data-icon="menu">menu</span>
+</button>
+<h1 class="text-2xl font-bold text-primary tracking-tight font-headline">Meus Relatórios</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-primary-light/30 rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="search">search</span>
+</button>
+</div>
+</div>
+<!-- Offline Banner -->
+<div class="bg-secondary-container/50 px-6 py-2 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant text-sm" data-icon="cloud_off">cloud_off</span>
+<span class="text-xs font-medium text-on-secondary-fixed-variant uppercase tracking-wider">Modo Offline Ativo - Sincronização pendente</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-surface-container-low px-6 pt-8 pb-32">
+<!-- Welcome Section -->
+<section class="mb-8">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface mb-2">Painel de Controle</h2>
+<p class="text-on-surface-variant leading-relaxed">Gerencie o progresso e a documentação dos seus alunos do AEE.</p>
+</section>
+<!-- Category Cards Grid -->
+<div class="flex flex-col gap-6 max-w-md mx-auto">
+<!-- Card 1: PDIs -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-shadow border-outline-variant/10 border">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary/5 rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="assignment_ind">assignment_ind</span>
+</div>
+<span class="bg-error-container text-on-error-container text-xs font-bold px-3 py-1 rounded-full">5 pendentes</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">PDIs (Plano de Desenvolvimento Individual)</h3>
+<p class="text-sm text-on-surface-variant mb-6">Planos individuais para acompanhamento pedagógico especializado.</p>
+<div class="flex justify-end">
+<button class="text-primary font-bold hover:underline underline-offset-4 flex items-center gap-1 group active:scale-95 transition-transform">
+                        Ver lista
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Relatórios Diários -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-shadow border-outline-variant/10 border">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary/5 rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="event_note">event_note</span>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant text-xs font-bold px-3 py-1 rounded-full">12 aguardando revisão</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Relatórios Diários</h3>
+<p class="text-sm text-on-surface-variant mb-6">Registro cotidiano das atividades e evoluções em sala de recurso.</p>
+<div class="flex justify-end">
+<button class="text-primary font-bold hover:underline underline-offset-4 flex items-center gap-1 group active:scale-95 transition-transform">
+                        Ver lista
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Relatórios Trimestrais -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-shadow border-outline-variant/10 border">
+<div class="flex justify-between items-start mb-4">
+<div class="p-3 bg-primary/5 rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="summarize">summarize</span>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold px-3 py-1 rounded-full">Todos em dia</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface mb-1">Relatórios Trimestrais</h3>
+<p class="text-sm text-on-surface-variant mb-6">Consolidado trimestral de metas e resultados alcançados.</p>
+<div class="flex justify-end">
+<button class="text-primary font-bold hover:underline underline-offset-4 flex items-center gap-1 group active:scale-95 transition-transform">
+                        Ver lista
+                        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Empty State / Add Action -->
+<div class="mt-4 flex flex-col items-center justify-center p-8 border-2 border-dashed border-outline-variant/30 rounded-2xl">
+<span class="material-symbols-outlined text-4xl text-outline-variant mb-3" data-icon="note_add">note_add</span>
+<p class="text-on-surface-variant font-medium mb-4">Novo documento?</p>
+<button class="bg-primary text-on-primary rounded-md px-8 py-3 font-bold transition-all hover:bg-primary-container active:scale-95 shadow-lg shadow-primary/20">
+                    Criar Relatório
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-3xl z-50">
+<div class="flex justify-around items-center w-full h-20 px-4 max-w-7xl mx-auto">
+<!-- Início -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-bold mt-1">Início</span>
+</a>
+<!-- Relatórios (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="description" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-[10px] font-bold mt-1">Relatórios</span>
+</a>
+<!-- Alunos -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-[10px] font-bold mt-1">Alunos</span>
+</a>
+<!-- Perfil -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold mt-1">Perfil</span>
+</a>
+</div>
+</nav>
+</body></html>

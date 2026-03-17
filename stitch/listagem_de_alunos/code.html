@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-
-<html lang="pt-BR"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Gestão de Alunos - AEE</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -87,6 +84,9 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        body {
+            min-height: max(884px, 100dvh);
+        }
     </style>
 <style>
     body {
@@ -95,147 +95,195 @@
   </style>
   </head>
 <body class="text-on-surface bg-surface min-h-screen flex flex-col">
-<!-- Top Bar -->
 <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/10">
 <div class="max-w-5xl mx-auto px-4 h-16 flex items-center gap-4">
-<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
-<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors" style="">
+<span class="material-symbols-outlined text-on-surface" style="">arrow_back</span>
 </button>
-<h1 class="text-xl font-bold tracking-tight text-on-surface">Gestão de Alunos</h1>
+<h1 class="text-xl font-bold tracking-tight text-on-surface" style="">Gestão de Alunos</h1>
 </div>
 </header>
 <main class="flex-1 max-w-5xl w-full mx-auto px-4 pb-24">
-<!-- Search and Hero Section -->
 <section class="py-8 space-y-6">
 <div class="space-y-2">
-<h2 class="text-4xl font-bold tracking-tighter text-on-surface">Alunos Atendidos</h2>
-<p class="text-secondary max-w-lg">Acompanhe o desenvolvimento e os planos de atendimento especializado de cada estudante.</p>
+<h2 class="text-4xl font-bold tracking-tighter text-on-surface" style="">Alunos</h2>
+<p class="text-secondary max-w-lg" style="">Acompanhe o desenvolvimento e os planos de atendimento especializado de cada estudante.</p>
 </div>
-<!-- Fixed-style Search Bar -->
 <div class="relative group">
 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<span class="material-symbols-outlined text-outline" style="">search</span>
 </div>
-<input class="w-full min-h-[56px] pl-12 pr-4 bg-surface-container-lowest border-b-2 border-outline-variant focus:border-primary focus:ring-0 transition-all duration-300 rounded-t-lg outline-none text-body" placeholder="Buscar aluno pelo nome ou escola..." type="text"/>
+<input class="w-full min-h-[56px] pl-12 pr-4 bg-surface-container-lowest border-b-2 border-outline-variant focus:border-primary focus:ring-0 transition-all duration-300 rounded-t-lg outline-none text-body" placeholder="Buscar aluno pelo nome ..." type="text">
 </div>
-<!-- Scrollable Filter Chips -->
 <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-2">
-<button class="whitespace-nowrap px-6 py-2 rounded-full bg-primary text-on-primary font-bold text-sm transition-all hover:bg-primary-container">Todos</button>
-<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all">Ativos</button>
-<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all">Pendentes</button>
-<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all">Arquivados</button>
+<button class="whitespace-nowrap px-6 py-2 rounded-full bg-primary text-on-primary font-bold text-sm transition-all hover:bg-primary-container" style="">Todos</button>
+<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all" style="">Feitos</button>
+<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all" style="">Pendentes</button>
+<button class="whitespace-nowrap px-6 py-2 rounded-full bg-surface-container-low border border-outline-variant/20 text-secondary font-bold text-sm hover:bg-surface-container-high transition-all" style="">Arquivados</button>
 </div>
 </section>
-<!-- Students List - Bento Style Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- Student Card 1 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
 <div class="relative">
-<img alt="Artur Mendes" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" data-alt="Portrait of a young student boy smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQY-1_tr-Rnok-U9i5zQTWGiT3xf-0TPhNKBjHtTfbECdBbFZ42pPNSDKt5AfsdhrbTo9QSjVGswXeoc5np5b-t4UD_BvGipAKuQ5b5dIC5KFKhKr6spwplhJ9eZNRBNDKvBBQ-tVNehi2L9KV57na6PyHsuNPvV7LKJxmxZCLbjozlCVrhcEMpz7Uf64U1VJOi3HjwvJ7HKa4EwmDrnN9sbddr7Anr3YU4LJjNSy4AEcRkxOJISBkdiuYtmWc2RGy5LgwOyPQhZI"/>
+<img alt="Artur Mendes" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQY-1_tr-Rnok-U9i5zQTWGiT3xf-0TPhNKBjHtTfbECdBbFZ42pPNSDKt5AfsdhrbTo9QSjVGswXeoc5np5b-t4UD_BvGipAKuQ5b5dIC5KFKhKr6spwplhJ9eZNRBNDKvBBQ-tVNehi2L9KV57na6PyHsuNPvV7LKJxmxZCLbjozlCVrhcEMpz7Uf64U1VJOi3HjwvJ7HKa4EwmDrnN9sbddr7Anr3YU4LJjNSy4AEcRkxOJISBkdiuYtmWc2RGy5LgwOyPQhZI" style="">
 <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-primary border-2 border-white rounded-full"></div>
 </div>
 <div>
-<h3 class="text-lg font-bold text-on-surface">Artur Mendes</h3>
-<p class="text-sm text-secondary font-medium">E.M. Primavera</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-light/30 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider">Ativo</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Artur Mendes</h3>
+<p class="text-sm text-secondary font-medium" style="">E.M. Primavera</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-container/20 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider" style="">Feito</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
 </div>
-<!-- Student Card 2 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="pt-3 border-t border-outline-variant/10 bg-surface-container-low/40 rounded-lg p-3">
+<p class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1" style=""><br></p>
+<p class="text-sm font-bold text-on-surface flex items-center gap-2" style=""></p>
+<p class="text-[10px] text-secondary mt-1.5 flex items-center gap-1 opacity-80" style="">
+<span class="material-symbols-outlined text-[12px]" style="">schedule</span>
+                        Atualizado em: 15/05/2024
+                    </p>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
-<img alt="Beatriz Soares" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" data-alt="Portrait of a young school girl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc44Nt0usqElYKJNWJsc5cBK4POpT4kTrZNaBUvgQSmbSvhgGVTI8uosC1Ktamrdn9tnWXZIGl1bB7uCp65RTNhEYJWUUuplcH1UCsZlNDiy5BaSNWKUF40BbNEjkv_Hhx-VrFYo0mEslEU2QjZgZ8KWTY8ckjg5tFqO_X78_gHG8peSN2r-lKhFn0nmlyQkRfYW_SnwPy5lNdIBaAW-1mtXOLPTNXgpX0EPOTDnrJaTYoRSgxGwrNjNAB8P0UnZgPKg4g8vrZMVc"/>
+<img alt="Beatriz Soares" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc44Nt0usqElYKJNWJsc5cBK4POpT4kTrZNaBUvgQSmbSvhgGVTI8uosC1Ktamrdn9tnWXZIGl1bB7uCp65RTNhEYJWUUuplcH1UCsZlNDiy5BaSNWKUF40BbNEjkv_Hhx-VrFYo0mEslEU2QjZgZ8KWTY8ckjg5tFqO_X78_gHG8peSN2r-lKhFn0nmlyQkRfYW_SnwPy5lNdIBaAW-1mtXOLPTNXgpX0EPOTDnrJaTYoRSgxGwrNjNAB8P0UnZgPKg4g8vrZMVc" style="">
 <div>
-<h3 class="text-lg font-bold text-on-surface">Beatriz Soares</h3>
-<p class="text-sm text-secondary font-medium">E.E. Castelo Branco</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-light/30 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider">Ativo</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Beatriz Soares</h3>
+<p class="text-sm text-secondary font-medium" style="">E.E. Castelo Branco</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-container/20 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider" style="">feito</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
 </div>
-<!-- Student Card 3 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="pt-3 border-t border-outline-variant/10 bg-surface-container-low/40 rounded-lg p-3">
+<p class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1" style=""><br></p>
+<p class="text-sm font-bold text-on-surface flex items-center gap-2" style=""></p>
+<p class="text-[10px] text-secondary mt-1.5 flex items-center gap-1 opacity-80" style=""></p>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
-<img alt="Cauã Lopes" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" data-alt="Portrait of a teenage student boy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYAqfTNK4Ai_YSUPWMH466vzuGPm4J9c25nhLCevS17RrvF7ZqM5YEAhHocehFcVoyYgPpskb2qqkdDlTJzqM9bzdqW6xwtBqWUQbznvclucZf76DA_Z8rVfro-7L-7qcaz83N0-CtaciNjAX8psMkdUcm4YRMvIeMD6IOWJOnrLDyTUXCNtxrcRi69w9mC72qvByQSckBCRC1-vKrWkJRKES5DmepQARTZexDEidL9Xpt36nsPROBa1yucAkhJH2HtN7-yC-j9c4"/>
+<img alt="Cauã Lopes" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYAqfTNK4Ai_YSUPWMH466vzuGPm4J9c25nhLCevS17RrvF7ZqM5YEAhHocehFcVoyYgPpskb2qqkdDlTJzqM9bzdqW6xwtBqWUQbznvclucZf76DA_Z8rVfro-7L-7qcaz83N0-CtaciNjAX8psMkdUcm4YRMvIeMD6IOWJOnrLDyTUXCNtxrcRi69w9mC72qvByQSckBCRC1-vKrWkJRKES5DmepQARTZexDEidL9Xpt36nsPROBa1yucAkhJH2HtN7-yC-j9c4" style="">
 <div>
-<h3 class="text-lg font-bold text-on-surface">Cauã Lopes</h3>
-<p class="text-sm text-secondary font-medium">Colégio Municipal Sol</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider">Pendente</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Cauã Lopes</h3>
+<p class="text-sm text-secondary font-medium" style="">Colégio Municipal Sol</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider" style="">Pendente</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
 </div>
-<!-- Student Card 4 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="pt-3 border-t border-outline-variant/10 bg-error-container/10 rounded-lg p-3">
+<p class="text-[11px] font-bold text-error uppercase tracking-wider mb-1" style="">Ação Requerida:</p>
+<p class="text-sm font-bold text-on-error-container flex items-center gap-2" style="">
+<span class="material-symbols-outlined text-[18px]" style="">priority_high</span>
+                        Plano de AEE vencido
+                    </p>
+<p class="text-[10px] text-on-error-container mt-1.5 flex items-center gap-1 opacity-60" style="">
+<span class="material-symbols-outlined text-[12px]" style="">schedule</span>
+                        Vencido desde: 10/05/2024
+                    </p>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
-<img alt="Daniela Vieira" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" data-alt="Portrait of a young girl student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC29DG8JuBwdazphYXq1KyfPWiYAr_NPjLRI4ItEZQhyhXTwIw05s_pCuAHzfYX3_Og7GihP1ADL1us1_LpszzNmRfRH5KJJpXfELommwv-boo_HzYaMnhVuE_XaUSluQpTO8MQAH8OQ8gsdwNx8l3JzTAh9pVrxHT5mHwfGOwTbeIfHGqijSgfSVh-bNReF2hnXNu6LbxznT3enaJ5cqZdLNU-Xk_TB0A1QSiwKtv2y0WedYxMaDYJ6QUu_uwnlvLO5TO2_Dw_OSw"/>
+<img alt="Daniela Vieira" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC29DG8JuBwdazphYXq1KyfPWiYAr_NPjLRI4ItEZQhyhXTwIw05s_pCuAHzfYX3_Og7GihP1ADL1us1_LpszzNmRfRH5KJJpXfELommwv-boo_HzYaMnhVuE_XaUSluQpTO8MQAH8OQ8gsdwNx8l3JzTAh9pVrxHT5mHwfGOwTbeIfHGqijSgfSVh-bNReF2hnXNu6LbxznT3enaJ5cqZdLNU-Xk_TB0A1QSiwKtv2y0WedYxMaDYJ6QUu_uwnlvLO5TO2_Dw_OSw" style="">
 <div>
-<h3 class="text-lg font-bold text-on-surface">Daniela Vieira</h3>
-<p class="text-sm text-secondary font-medium">E.M. Primavera</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-light/30 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider">Ativo</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Daniela Vieira</h3>
+<p class="text-sm text-secondary font-medium" style="">E.M. Primavera</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-container/20 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider" style="">Feito</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
 </div>
-<!-- Student Card 5 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="pt-3 border-t border-outline-variant/10 bg-surface-container-low/40 rounded-lg p-3">
+<p class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1" style=""><br></p>
+<p class="text-sm font-bold text-on-surface flex items-center gap-2" style=""></p>
+<p class="text-[10px] text-secondary mt-1.5 flex items-center gap-1 opacity-80" style="">
+<span class="material-symbols-outlined text-[12px]" style="">schedule</span>
+                        Atualizado em: 18/05/2024
+                    </p>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
-<img alt="Enzo Gabriel" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" data-alt="Portrait of a primary school boy student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-4efYEyLjOXMXHqd7w8Ivj3XU19bp6VjRoAt0cW6kYHlsNaV4owLWqTQNGvLNN13ZA_p5UknchGggwQhSOK6-PzBN2E1EtktQhAbQHVoR1xBbnMFLWjf8WKSJ-CO6wNhYBIMeO616-DXgOrQEJ9zWd7MbQi2BAopPml_xOdhDq0g8e86izgooZa_wj7baDkQO1BpTjaO0NosjLaykOb5hRarb9dBCYqjn5Y0TJpDFsaiumVWyIY5igFktfF_zQbw06ugkBxUErA8"/>
+<img alt="Enzo Gabriel" class="w-14 h-14 rounded-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-4efYEyLjOXMXHqd7w8Ivj3XU19bp6VjRoAt0cW6kYHlsNaV4owLWqTQNGvLNN13ZA_p5UknchGggwQhSOK6-PzBN2E1EtktQhAbQHVoR1xBbnMFLWjf8WKSJ-CO6wNhYBIMeO616-DXgOrQEJ9zWd7MbQi2BAopPml_xOdhDq0g8e86izgooZa_wj7baDkQO1BpTjaO0NosjLaykOb5hRarb9dBCYqjn5Y0TJpDFsaiumVWyIY5igFktfF_zQbw06ugkBxUErA8" style="">
 <div>
-<h3 class="text-lg font-bold text-on-surface">Enzo Gabriel</h3>
-<p class="text-sm text-secondary font-medium">E.M. Primavera</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-light/30 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider">Ativo</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Enzo Gabriel</h3>
+<p class="text-sm text-secondary font-medium" style="">E.M. Primavera</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-primary-container/20 text-on-primary-fixed-variant text-[10px] font-bold uppercase tracking-wider" style="">Feito</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
 </div>
-<!-- Student Card 6 -->
-<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex items-center justify-between">
+<div class="pt-3 border-t border-outline-variant/10 bg-surface-container-low/40 rounded-lg p-3">
+<p class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1" style=""><br></p>
+<p class="text-sm font-bold text-on-surface flex items-center gap-2" style=""></p>
+<p class="text-[10px] text-secondary mt-1.5 flex items-center gap-1 opacity-80" style="">
+<span class="material-symbols-outlined text-[12px]" style="">schedule</span>
+                        Atualizado em: Ontem, 14:30
+                    </p>
+</div>
+</div>
+<div class="group bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/10 shadow-[0_8px_30px_rgb(28,28,30,0.04)] hover:shadow-md transition-all flex flex-col gap-4">
+<div class="flex items-start justify-between">
 <div class="flex items-center gap-4">
-<div class="w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed font-bold text-xl">FS</div>
+<div class="w-14 h-14 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed font-bold text-xl" style="">FS</div>
 <div>
-<h3 class="text-lg font-bold text-on-surface">Felipe Souza</h3>
-<p class="text-sm text-secondary font-medium">E.E. Castelo Branco</p>
-<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary text-[10px] font-bold uppercase tracking-wider">Arquivado</span>
+<h3 class="text-lg font-bold text-on-surface" style="">Felipe Souza</h3>
+<p class="text-sm text-secondary font-medium" style="">E.E. Castelo Branco</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary text-[10px] font-bold uppercase tracking-wider" style="">FEito</span>
 </div>
 </div>
-<button class="p-2 text-outline hover:text-primary hover:bg-primary-light/20 rounded-lg transition-all">
-<span class="material-symbols-outlined" data-icon="edit">edit</span>
+<button class="p-2 text-outline hover:text-primary hover:bg-primary/5 rounded-lg transition-all" style="">
+<span class="material-symbols-outlined" style="">edit</span>
 </button>
+</div>
+<div class="pt-3 border-t border-outline-variant/10 bg-surface-container-low/40 rounded-lg p-3">
+<p class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1" style=""><br></p>
+<p class="text-sm font-bold text-secondary flex items-center gap-2" style=""></p>
+<p class="text-[10px] text-secondary mt-1.5 flex items-center gap-1 opacity-80" style="">
+<span class="material-symbols-outlined text-[12px]" style="">schedule</span>
+                        Arquivado em: 20/12/2023
+                    </p>
+</div>
 </div>
 </div>
 </main>
-<!-- Navigation Bar (Shell Persistence) -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-outline-variant/10 px-6 h-20 flex items-center justify-around z-40">
-<a class="flex flex-col items-center gap-1 group" href="#">
+<a class="flex flex-col items-center gap-1 group" href="#" style="">
 <div class="px-5 py-1 rounded-full bg-primary-container group-hover:bg-primary-container/80 transition-all">
-<span class="material-symbols-outlined text-on-primary-container" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: &quot;FILL&quot; 1;">group</span>
 </div>
-<span class="text-xs font-bold text-on-surface">Alunos</span>
+<span class="text-xs font-bold text-on-surface" style="">Alunos</span>
 </a>
-<a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
-<span class="text-xs font-medium text-secondary">Relatórios</span>
+<a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#" style="">
+<span class="material-symbols-outlined text-secondary" style="">description</span>
+<span class="text-xs font-medium text-secondary" style="">Relatórios</span>
 </a>
-<a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
-<span class="material-symbols-outlined text-secondary" data-icon="settings">settings</span>
-<span class="text-xs font-medium text-secondary">Configurações</span>
+<a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#" style="">
+<span class="material-symbols-outlined text-secondary" style="">settings</span>
+<span class="text-xs font-medium text-secondary" style="">Configurações</span>
 </a>
 </nav>
-<!-- FAB - Floating Action Button -->
-<button class="fixed right-6 bottom-24 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-[0_8px_30px_rgb(26,111,69,0.3)] flex items-center justify-center hover:bg-primary-container hover:scale-105 transition-all z-50">
-<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+<button class="fixed right-6 bottom-24 w-14 h-14 bg-primary text-on-primary rounded-xl shadow-[0_8px_30px_rgb(26,111,69,0.3)] flex items-center justify-center hover:bg-primary-container hover:scale-105 transition-all z-50" style="">
+<span class="material-symbols-outlined text-2xl" style="">add</span>
 </button>
+
 </body></html>

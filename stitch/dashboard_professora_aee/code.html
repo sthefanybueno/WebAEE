@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - Sistema AEE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline": "#6f7a71",
+              "surface": "#f9f9f9",
+              "on-tertiary-fixed-variant": "#314c41",
+              "surface-container-low": "#f3f3f3",
+              "tertiary-fixed": "#cbeada",
+              "primary-fixed-dim": "#87d7a4",
+              "on-secondary-fixed": "#1a1a29",
+              "on-primary-container": "#9defba",
+              "on-background": "#1a1c1c",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#f9f9f9",
+              "tertiary-container": "#4b675b",
+              "outline-variant": "#bfc9bf",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#c5e4d4",
+              "on-surface-variant": "#3f4941",
+              "error-container": "#ffdad6",
+              "error": "#ba1a1a",
+              "tertiary-fixed-dim": "#afcdbe",
+              "surface-container-high": "#e8e8e8",
+              "surface-dim": "#dadada",
+              "secondary-fixed-dim": "#c6c4d9",
+              "on-tertiary-fixed": "#042017",
+              "on-primary-fixed-variant": "#00522f",
+              "on-primary-fixed": "#002110",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "surface-tint": "#156c42",
+              "primary-fixed": "#a2f4bf",
+              "secondary": "#5d5d6f",
+              "tertiary": "#344f43",
+              "on-secondary-container": "#636375",
+              "on-primary": "#ffffff",
+              "surface-variant": "#e2e2e2",
+              "secondary-container": "#e2e0f6",
+              "background": "#f9f9f9",
+              "primary": "#005531",
+              "secondary-fixed": "#e2e0f6",
+              "primary-container": "#1a6f45",
+              "surface-container-lowest": "#ffffff",
+              "inverse-surface": "#2f3131",
+              "surface-container": "#eeeeee",
+              "on-surface": "#1a1c1c",
+              "inverse-primary": "#87d7a4",
+              "inverse-on-surface": "#f1f1f1",
+              "on-secondary-fixed-variant": "#454556",
+              "surface-container-highest": "#e2e2e2"
+            },
+            fontFamily: {
+              "headline": ["Lexend", "Atkinson Hyperlegible", "sans-serif"],
+              "body": ["Atkinson Hyperlegible", "sans-serif"],
+              "label": ["Lexend", "Atkinson Hyperlegible", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Atkinson Hyperlegible', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .font-lexend { font-family: 'Lexend', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgb(28,28,30,0.04)]">
+<div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto py-4">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+<h1 class="font-lexend font-bold tracking-tight text-on-surface text-2xl text-primary tracking-tighter">Sistema AEE</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="relative p-2 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container flex items-center justify-center border-2 border-primary/10">
+<img alt="User profile picture" class="w-full h-full object-cover" data-alt="User profile avatar placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ6nY7Xc8Z8U1Jin0B71hzajopwGhMvWlTKYTZ8JTHbAE2vYXrfpjh1x5VrJtVPrh8_0-jSiAMMIfYPPCmZGqSHgY4deB_nlW0ymsbMHmIVVXt3e-_18QrzAlKfau84kT1SfjH-sZU8xBIthf3smI2yf9DlVlKJmIvVGkpd6ERzd5XaA95UkfnU_IRA5d4uMRI7_MDPWzupylndOxn5Qs603Wjj5x2MXf7OijajSyUsYHIU_tNedfQgqH0JhPZsgjEknk1nn65bdo"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Offline Banner -->
+<div class="bg-amber-100 border-l-4 border-amber-500 p-3 mx-4 mt-4 rounded-lg flex items-center gap-3 shadow-sm">
+<span class="material-symbols-outlined text-amber-700 text-lg" data-icon="cloud_off">cloud_off</span>
+<p class="text-sm font-bold text-amber-900">⚠ Você está offline · Dados salvos localmente</p>
+</div>
+<main class="flex-grow px-6 max-w-7xl mx-auto w-full pt-8 pb-32">
+<!-- Header Section (Asymmetric Editorial Style) -->
+<div class="mb-10">
+<h2 class="font-lexend text-4xl font-extrabold tracking-tight text-on-surface mb-2">Painel de Controle</h2>
+<p class="text-on-surface-variant text-lg">Bem-vinda de volta, Professora.</p>
+</div>
+<!-- Main Filter & Link Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end mb-10">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Selecionar Escola</label>
+<div class="relative">
+<select class="w-full bg-surface-container-highest/30 border-b-2 border-outline-variant focus:border-primary focus:bg-white focus:ring-0 transition-all duration-300 py-3 pl-4 pr-10 appearance-none font-lexend font-medium text-on-surface rounded-t-lg">
+<option>E.E. Castelo Branco</option>
+<option>E.M. Juscelino Kubitschek</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div class="flex items-center gap-3 pb-2">
+<div class="bg-primary-fixed text-on-primary-fixed px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-bold text-sm">15 Alunos vinculados</span>
+</div>
+</div>
+</div>
+<!-- Summary Card (Editorial Style) -->
+<section class="mb-12">
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_8px_30px_rgb(28,28,30,0.04)] border border-outline-variant/10 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8"></div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+<div class="space-y-1">
+<span class="text-primary font-bold text-sm uppercase tracking-tighter">Status de Entrega</span>
+<h3 class="font-lexend text-3xl font-black text-on-surface">8 Relatórios pendentes</h3>
+</div>
+<button class="bg-primary text-on-primary rounded-md px-8 py-3 font-bold transition-all hover:bg-primary-container shadow-md active:scale-95">
+                        Resolver Pendências
+                    </button>
+</div>
+</div>
+</section>
+<!-- Frequent Actions Section (Bento Grid Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="group bg-surface-container-low hover:bg-white p-8 rounded-3xl transition-all duration-300 cursor-pointer border border-transparent hover:border-primary/10 hover:shadow-xl">
+<div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-3xl" data-icon="assignment">assignment</span>
+</div>
+<h4 class="font-lexend text-2xl font-bold text-on-surface mb-2">Relatório Diário</h4>
+<p class="text-on-surface-variant leading-relaxed">Acesse e preencha os acompanhamentos do dia atual para seus alunos.</p>
+<div class="mt-6 flex items-center gap-2 text-primary font-bold">
+<span>Iniciar agora</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<div class="group bg-surface-container-low hover:bg-white p-8 rounded-3xl transition-all duration-300 cursor-pointer border border-transparent hover:border-primary/10 hover:shadow-xl">
+<div class="w-14 h-14 bg-secondary-container rounded-2xl flex items-center justify-center text-primary mb-6 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-3xl" data-icon="group">group</span>
+</div>
+<h4 class="font-lexend text-2xl font-bold text-on-surface mb-2">Alunos</h4>
+<p class="text-on-surface-variant leading-relaxed">Gerencie o portfólio completo de estudantes sob seu cuidado especializado.</p>
+<div class="mt-6 flex items-center gap-2 text-primary font-bold">
+<span>Ver lista completa</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Sheet (Simulated Active State for 'Outros') -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end">
+<div class="w-full max-w-2xl mx-auto bg-white rounded-t-[2.5rem] shadow-2xl p-6 pb-12 transition-transform duration-500 transform translate-y-0">
+<div class="w-12 h-1.5 bg-surface-container-highest rounded-full mx-auto mb-8"></div>
+<div class="flex justify-between items-center mb-8 px-2">
+<h3 class="font-lexend text-2xl font-black text-on-surface">Outros</h3>
+<button class="w-10 h-10 bg-surface-container-low rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<nav class="space-y-2">
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low rounded-2xl transition-all duration-200 group" href="#">
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+</div>
+<span class="font-lexend font-bold text-lg text-on-surface">Gestão de Professores</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low rounded-2xl transition-all duration-200 group" href="#">
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="clinical_notes">clinical_notes</span>
+</div>
+<span class="font-lexend font-bold text-lg text-on-surface">Gestão de Profissional de Apoio</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="flex items-center gap-4 p-5 hover:bg-surface-container-low rounded-2xl transition-all duration-200 group" href="#">
+<div class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+</div>
+<span class="font-lexend font-bold text-lg text-on-surface">Cadastro/Edição de Alunos</span>
+<span class="material-symbols-outlined ml-auto text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.03)] rounded-t-3xl pb-4 pt-2">
+<div class="flex justify-around items-center w-full px-2 max-w-lg mx-auto">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-2 transition-transform scale-95 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-lexend text-[10px] font-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest/50 rounded-2xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="font-lexend text-[10px] font-bold mt-1">Alunos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest/50 rounded-2xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-lexend text-[10px] font-bold mt-1">Relatórios</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:bg-surface-container-highest/50 rounded-2xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+<span class="font-lexend text-[10px] font-bold mt-1">Outros</span>
+</a>
+</div>
+</nav>
+</body></html>

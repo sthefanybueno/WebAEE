@@ -91,6 +91,14 @@ After completing all artifacts, summarize:
 - The schema defines what each artifact should contain - follow it
 - Read dependency artifacts for context before creating new ones
 - Use `template` as the structure for your output file - fill in its sections
+- **CRÍTICO - REGRAS DO PROJETO (AEE PRD v2.0)**: Ao criar as propostas e designs documentais, você **DEVE** aderir estritamente à stack e às restrições do projeto detalhadas no `aee_prd_final.md`:
+  - **Stack Base:** FastAPI, Pydantic v2, PostgreSQL, SQLModel.
+  - **Frontend:** Next.js 14+ (App Router), TypeScript (100%), TailwindCSS e Shadcn/UI exclusivamente.
+  - **Segurança:** Autenticação por JWT obrigatória, proibido Magic Links. Role-Level Security (RLS) no PostgreSQL.
+  - **Infra e Deploy:** Orquestração exclusiva via Docker/docker-compose. Deploy Frontend Vercel, Backend Docker Registry.
+  - **Testes:** Pytest obrigatório para o Backend (>80% cobertura). Vitest / Testing Library para o Frontend.
+  - **Padrão de Código:** Clean Architecture e Domain-Driven Design (DDD). Spec-Driven Development (SDD) primário.
+  - **Armazenamento Bruto:** Armazenamento de arquivos e imagens convertido para PostgreSQL nativo (Bytea / Large Objects) - **NÃO UTILIZAR AWS S3**.
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cadastro - Aura AEE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary": "#344f43",
+              "on-primary": "#ffffff",
+              "on-tertiary-container": "#c5e4d4",
+              "surface-bright": "#f9f9f9",
+              "on-secondary-fixed-variant": "#454556",
+              "surface-tint": "#156c42",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#87d7a4",
+              "on-tertiary": "#ffffff",
+              "on-secondary-container": "#636375",
+              "secondary-fixed-dim": "#c6c4d9",
+              "secondary": "#5d5d6f",
+              "on-background": "#1a1c1c",
+              "primary-fixed-dim": "#87d7a4",
+              "secondary-fixed": "#e2e0f6",
+              "outline-variant": "#bfc9bf",
+              "surface-container-low": "#f3f3f3",
+              "surface-container-highest": "#e2e2e2",
+              "primary": "#005531",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#afcdbe",
+              "surface-container-high": "#e8e8e8",
+              "error": "#ba1a1a",
+              "primary-container": "#1a6f45",
+              "primary-fixed": "#a2f4bf",
+              "surface-container": "#eeeeee",
+              "on-primary-fixed": "#002110",
+              "on-tertiary-fixed-variant": "#314c41",
+              "inverse-surface": "#2f3131",
+              "on-error-container": "#93000a",
+              "tertiary-container": "#4b675b",
+              "on-surface": "#1a1c1c",
+              "surface-variant": "#e2e2e2",
+              "surface-dim": "#dadada",
+              "on-primary-container": "#9defba",
+              "background": "#f9f9f9",
+              "on-primary-fixed-variant": "#00522f",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed": "#cbeada",
+              "on-surface-variant": "#3f4941",
+              "surface": "#f9f9f9",
+              "on-secondary-fixed": "#1a1a29",
+              "secondary-container": "#e2e0f6",
+              "on-tertiary-fixed": "#042017",
+              "outline": "#6f7a71",
+              "inverse-on-surface": "#f1f1f1"
+            },
+            fontFamily: {
+              "inter": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .guided-card {
+            @apply bg-white rounded-xl shadow-sm border border-outline-variant/30 p-6;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-inter">
+<header class="bg-white/80 backdrop-blur-md z-50 sticky top-0 w-full flex items-center justify-between px-4 py-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-bold text-lg text-on-surface">Cadastro</h1>
+</div>
+<div class="w-10"></div>
+</header>
+<div class="bg-amber-50 border-b border-amber-200/50 px-6 py-2 flex items-center gap-3">
+<span class="material-symbols-outlined text-amber-700 text-sm" data-icon="warning">warning</span>
+<p class="text-amber-800 font-medium text-xs">Você está offline · Dados salvos localmente</p>
+</div>
+<main class="flex-1 w-full max-w-lg mx-auto px-5 py-8 space-y-10 pb-36">
+<header class="space-y-2">
+<span class="text-xs font-bold uppercase tracking-widest text-primary-container">Passo 1 de 2</span>
+<h2 class="text-3xl font-extrabold text-on-surface leading-tight tracking-tight">Novo Administrador</h2>
+<p class="text-on-surface-variant text-sm leading-relaxed">Siga o guia abaixo para cadastrar um novo profissional e configurar suas permissões no Aura AEE.</p>
+</header>
+<section class="guided-card space-y-6">
+<div class="flex items-center gap-3 border-b border-surface-container pb-4">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl" data-icon="person">person</span>
+</div>
+<h3 class="font-bold text-lg text-on-surface">Dados do Profissional</h3>
+</div>
+<div class="space-y-5">
+<div class="space-y-1.5">
+<label class="block text-xs font-bold text-on-surface-variant uppercase ml-1">Nome Completo</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent py-3 px-4 text-sm transition-all outline-none" placeholder="Ex: Maria Oliveira Santos" type="text"/>
+</div>
+<div class="space-y-1.5">
+<label class="block text-xs font-bold text-on-surface-variant uppercase ml-1">E-mail Corporativo</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent py-3 px-4 text-sm transition-all outline-none" placeholder="maria.santos@escola.edu.br" type="email"/>
+</div>
+<div class="flex gap-4">
+<div class="flex-1 space-y-1.5">
+<label class="block text-xs font-bold text-on-surface-variant uppercase ml-1">Telefone</label>
+<input class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent py-3 px-4 text-sm transition-all outline-none" placeholder="(11) 99999-9999" type="tel"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="block text-xs font-bold text-on-surface-variant uppercase ml-1">Escola de Atuação</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent py-3 px-4 text-sm transition-all outline-none appearance-none">
+<option disabled="" selected="" value="">Selecione a unidade</option>
+<option value="1">EMEF Clarice Lispector</option>
+<option value="2">EMEF Paulo Freire</option>
+<option value="3">EMEF Monteiro Lobato</option>
+</select>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+<span class="material-symbols-outlined text-outline text-lg" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="guided-card space-y-6">
+<div class="flex items-center gap-3 border-b border-surface-container pb-4">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-xl" data-icon="security">security</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-on-surface">Perfil de Acesso</h3>
+<p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Passo 2 de 2</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="relative flex flex-col p-4 rounded-xl border-2 border-primary-container bg-primary/5 transition-all">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container text-on-primary p-2 rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="psychology">psychology</span>
+</div>
+<span class="font-bold text-primary-container">Professora AEE</span>
+</div>
+<div class="w-5 h-5 rounded-full border-4 border-primary-container bg-white"></div>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">
+<strong class="block text-[11px] text-primary-container uppercase mb-1">O que este perfil pode fazer?</strong>
+                        Gestão de PEIs, avaliações e acompanhamento especializado.
+                    </p>
+</div>
+<div class="relative flex flex-col p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary-container/40 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="school">school</span>
+</div>
+<span class="font-bold text-on-surface">Professor (Regente)</span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant/50"></div>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="block text-[11px] text-on-surface-variant uppercase mb-1">O que este perfil pode fazer?</strong>
+                        Acesso aos planos de aula e relatórios de progresso da sala.
+                    </p>
+</div>
+<div class="relative flex flex-col p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary-container/40 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="volunteer_activism">volunteer_activism</span>
+</div>
+<span class="font-bold text-on-surface">Profissional de Apoio</span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant/50"></div>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="block text-[11px] text-on-surface-variant uppercase mb-1">O que este perfil pode fazer?</strong>
+                        Registro de rotinas diárias e auxílio direto ao estudante.
+                    </p>
+</div>
+<div class="relative flex flex-col p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary-container/40 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="supervisor_account">supervisor_account</span>
+</div>
+<span class="font-bold text-on-surface">Coordenador(a)</span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant/50"></div>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="block text-[11px] text-on-surface-variant uppercase mb-1">O que este perfil pode fazer?</strong>
+                        Visão geral da unidade escolar e aprovação de documentos.
+                    </p>
+</div>
+<div class="relative flex flex-col p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary-container/40 transition-all cursor-pointer">
+<div class="flex items-start justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-surface-container text-on-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined text-lg" data-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<span class="font-bold text-on-surface">Administrador</span>
+</div>
+<div class="w-5 h-5 rounded-full border-2 border-outline-variant/50"></div>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+<strong class="block text-[11px] text-on-surface-variant uppercase mb-1">O que este perfil pode fazer?</strong>
+                        Gerenciamento total de usuários, escolas e configurações do sistema em toda a rede.
+                    </p>
+</div>
+</div>
+</section>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-outline-variant/20 p-5 z-50">
+<div class="max-w-md mx-auto">
+<button class="w-full bg-primary-container text-on-primary py-4 rounded-xl font-bold text-base shadow-lg shadow-primary-container/20 flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-xl" data-icon="check_circle">check_circle</span>
+                Finalizar Cadastro
+            </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-3 font-medium opacity-70">Certifique-se que os dados estão corretos antes de salvar.</p>
+</div>
+</footer>
+
+</body></html>

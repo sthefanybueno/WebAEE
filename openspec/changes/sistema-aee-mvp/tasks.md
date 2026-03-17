@@ -19,56 +19,48 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 ## Fase 1 — Backend Core (20h)
 
 ### Domínio (DDD)
-- [ ] **T-10** Definir entidades de domínio: `Usuario`, `Aluno`, `RelatorioAEE`, `RelatorioAnual`, `RelatorioTrimestral`, `Foto`, `VinculoProfessor`, `AuditLog`
-- [ ] **T-11** Definir value objects: `Papel` (coordenacao | prof_aee | prof_apoio | prof_pi), `StatusAluno`, `TagPedagogica`, `TipoRelatorio`
-- [ ] **T-12** Implementar regras puras de negócio no domínio (sem dependências de infraestrutura)
+- [ ] **T-10** Definir entidades puras de domínio (`Usuario`, `Aluno`, `RelatorioAEE`, etc) e validar conformidade com Python 3.12 types.
+- [ ] **T-11** Definir value objects estritos (`Papel`, `StatusAluno`, `TagPedagogica`) usando Enum e validar com um test assert básico.
+- [ ] **T-12** Implementar regras puras de negócio e rodar check de types do `mypy`/`ruff` OBRIGATORIAMENTE para atestar Type Safety.
 
 ### Banco de Dados
-- [ ] **T-13** Criar modelos SQLAlchemy: `users`, `schools`, `students`, `student_school_history`
-- [ ] **T-14** Criar modelos SQLAlchemy: `professor_assignments` (apoio e PI com campo `tipo_papel`), `report_templates`, `reports`, `photos`, `audit_log`
-- [ ] **T-15** Configurar Alembic e criar migration inicial com todas as tabelas
-- [ ] **T-16** Implementar RLS no PostgreSQL: políticas para `students`, `reports`, `photos`, `professor_assignments`
-- [ ] **T-17** Configurar SQLite in-memory para ambiente de testes (pytest)
+- [ ] **T-13** Criar modelos SQLAlchemy restritos com foreign keys (`users`, `schools`, `students`) e rodar validator pra syntax.
+- [ ] **T-14** Criar modelos de vínculos e relatórios com chaves estrangeiras interconectadas e Índices (e.g., `professor_assignments`).
+- [ ] **T-15** Configurar Alembic, criar e comitar a primeira migration (`alembic upgrade head` MUST passar 100% liso no contêiner docker `db`).
+- [ ] **T-16** Adicionar políticas estruturais RLS do Postgres via raw SQL e verificar aplicabilidade num container de teste.
 
-### Casos de Uso (TDD — testes antes do código)
-- [ ] **T-18** `auth`: login com e-mail/senha, emissão JWT, validação de papel
-- [ ] **T-19** `usuarios`: CRUD de todos os papéis; Coordenação cadastra todo mundo; Prof. AEE só cadastra Prof. Apoio
-- [ ] **T-20** `alunos`: CRUD, transferência de escola (corte de acesso da prof. anterior), arquivamento
-- [ ] **T-21** `relatorios`: criar/editar RelatorioAEE (Prof. AEE), RelatorioAnual (Prof. AEE ou Prof. Apoio), RelatorioTrimestral (Prof. AEE ou Prof. PI); snapshot do template
-- [ ] **T-22** `fotos`: upload com tag pedagógica (Coordenação, Prof. AEE, Prof. Apoio, Prof. PI nos seus alunos)
-- [ ] **T-23** `dashboard`: query agregada de pendências por aluno (PDI / Rel. Anual / Rel. Trimestral)
-- [ ] **T-24** `audit_log`: escrita automática ao acessar campos sensíveis (`diagnostico`, `laudo`)
+### Contratos e Casos de Uso (TypeSafe)
+- [ ] **T-18** Implementar auth via Pydantic v2 schemas: validar intercept e expiração JWT (`pytest` ou assert manual test).
+- [ ] **T-19** Implementar CRUD Pydantic de usuários baseando-se em `BaseModel` estritos (Rejeitar Extra fields). Rodar specs.
+- [ ] **T-20** Implementar lógica estruturada de `alunos` com soft-delete. Adicionar interceptor contra HTTP 422 na camada.
+- [ ] **T-21** Inserção estrita de relatórios (Validar block against malformed JSONB data test).
+- [ ] **T-22** Salvar foto c/ simulador de bucket falso ou volume e auditoria automática gerando Logs validados (`audit_log`).
 
 ### API (FastAPI Routers)
-- [ ] **T-25** Implementar routers: `/auth`, `/usuarios`, `/alunos`, `/relatorios`, `/fotos`, `/dashboard`
-- [ ] **T-26** Middleware de autorização: decorator `@requer_papel([...])` por endpoint
-- [ ] **T-27** Middleware de sessão: `SET LOCAL app.role`, `app.user_id`, `app.tenant_id` antes de cada query
+- [ ] **T-25** Expor routers apontando exclusivamente para schemas Pydantic atrelados a `response_model` do FastAPI.
+- [ ] **T-26** Testar Decorator `@requer_papel([...])`: fazer fake request e garantir MUST return 403 Forbidden para permissão cruzada.
+- [ ] **T-27** Subir Docker api contêiner `docker compose up api db` e bater `GET /docs` validando que aplicação inicializa completamente sem stacktraces de import ou env vars.
 
 ---
 
 ## Fase 2 — Frontend Core (20h)
 
-### Setup
-- [ ] **T-30** Inicializar Next.js 14 com TypeScript, TailwindCSS e shadcn/ui
-- [ ] **T-31** Configurar NextAuth com provider e-mail/senha e JWT contendo papel do usuário
-- [ ] **T-32** Implementar middleware Next.js de proteção de rotas por papel
-- [ ] **T-33** Criar contexto de sessão (`useSession` → expõe `user`, `role`, `tenantId`)
+### Setup (App Router)
+- [ ] **T-30** Instalar Next.js 14 via Docker e configurar **APENAS shadcn/ui** (`npx shadcn-ui@latest add button card dialog form select`). OBRIGATÓRIO: garantir comando de compilação Build sem erro no fim do estágio.
+- [ ] **T-31** Implementar NextAuth JWT configurado garantindo mapping da sessão para Papel/Tenant em layout de server.
+- [ ] **T-32** Componentar proteção de rota (Server side logic app config) e validar redirecionamentos `302/401` com acessos cruzados.
 
-### Layouts por Papel (4 interfaces distintas)
-- [ ] **T-34** Layout **Coordenação** — navegação completa, acesso a todas as entidades
-- [ ] **T-35** Layout **Prof. AEE** — dashboard multi-escola, navegação completa
-- [ ] **T-36** Layout **Prof. Apoio** — wizard simplificado, mobile-first, navegação mínima
-- [ ] **T-37** Layout **Prof. PI** — igual ao Apoio, com acesso ao Relatório Trimestral
+### Componentes Globais e Estruturais
+- [ ] **T-34** Criar Layouts de Agrupamento `(coordenacao)`, `(apoio)` Server-Side provando que hidratam corretamente (sem erro de mismatch SSR/CSR).
+- [ ] **T-35** Abstraição Offline-First do Dexie.js (`use client`). Comprovar renderização limpa da store com checagem assíncrona onMount no hook.
 
-### Telas Principais
-- [ ] **T-38** Tela: Login (e-mail + senha, estados de erro, redirecionamento por papel)
-- [ ] **T-39** Tela: Dashboard de pendências (chips verde/vermelho por aluno e tipo de documento)
-- [ ] **T-40** Tela: Gestão de Alunos (lista com filtros por escola, cadastro com LGPD)
-- [ ] **T-41** Tela: Transferência de escola (fluxo de mudança com revogação de acesso)
-- [ ] **T-42** Tela: Formulário de Relatório dinâmico (baseado em template JSON; tipos: AEE, Anual, Trimestral)
-- [ ] **T-43** Tela: Galeria de fotos por aluno (grid com filtros por tag pedagógica)
-- [ ] **T-44** Componente: FAB "📸 Registrar Momento" (fixo; ≤3 toques; foto → aluno → tag → salvar)
-- [ ] **T-45** Componente: Exportação PDF client-side (`@react-pdf/renderer`)
+### Telas Críticas e Validações UI Estritas
+- [ ] **T-38** Tela: Login Page Server Component + Form Client Component (usando shadcn Form). TESTAR: tentar enviar em branco MUST sublinhar campos visualmente de vermelho.
+- [ ] **T-39** Tela: Dashboard interativo. Buscar do backend e encaixar no layout Card do shadcn. TESTAR build visual.
+- [ ] **T-40** CRUD Alunos (`'use client'` page bounds). Formulário interativo (zod) protegendo envio a `/alunos`. Validar bloqueios explícitos no browser.
+- [ ] **T-42** Interface Formulário Dinâmico de Relatórios. Validar montagem do JSON em submissões offline (`IndexedDB catch block test`).
+- [ ] **T-44** Modal Drawer 📸 Registrar Momento (`'use client'`). Implementar a navegação nos "3 passos". MUST usar `shadcn Dialog/Drawer` limitando reflow para garantir 60fps local.
+- [ ] **T-45** PDF export (usar lib `@react-pdf/renderer` de client only) importado dinamicamente via `next/dynamic` sem quebrar o next SSR output. Validar build (npm run build de check).
 
 ---
 

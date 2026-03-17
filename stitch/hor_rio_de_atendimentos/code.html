@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Horário de Atendimentos - AEE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-container": "#e2e0f6",
+              "outline-variant": "#bfc9bf",
+              "on-error-container": "#93000a",
+              "on-secondary-container": "#636375",
+              "surface-tint": "#156c42",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#00522f",
+              "on-primary-container": "#9defba",
+              "primary": "#005531",
+              "on-primary-fixed": "#002110",
+              "on-background": "#1a1c1c",
+              "tertiary-container": "#4b675b",
+              "surface-container-high": "#e8e8e8",
+              "inverse-primary": "#87d7a4",
+              "on-tertiary-container": "#c5e4d4",
+              "on-secondary-fixed-variant": "#454556",
+              "on-tertiary-fixed-variant": "#314c41",
+              "surface-container": "#eeeeee",
+              "tertiary-fixed-dim": "#afcdbe",
+              "secondary-fixed-dim": "#c6c4d9",
+              "on-surface-variant": "#3f4941",
+              "surface-bright": "#f9f9f9",
+              "on-tertiary-fixed": "#042017",
+              "tertiary-fixed": "#cbeada",
+              "secondary-fixed": "#e2e0f6",
+              "surface-dim": "#dadada",
+              "inverse-on-surface": "#f1f1f1",
+              "on-secondary": "#ffffff",
+              "surface-variant": "#e2e2e2",
+              "surface-container-highest": "#e2e2e2",
+              "surface-container-low": "#f3f3f3",
+              "on-surface": "#1a1c1c",
+              "on-secondary-fixed": "#1a1a29",
+              "primary-fixed-dim": "#87d7a4",
+              "error": "#ba1a1a",
+              "primary-fixed": "#a2f4bf",
+              "outline": "#6f7a71",
+              "inverse-surface": "#2f3131",
+              "background": "#f9f9f9",
+              "on-tertiary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              "error-container": "#ffdad6",
+              "secondary": "#5d5d6f",
+              "primary-container": "#1a6f45",
+              "tertiary": "#344f43",
+              "surface": "#f5f5f5"
+            },
+            fontFamily: {
+              "headline": ["Lexend", "sans-serif"],
+              "body": ["Atkinson Hyperlegible", "sans-serif"],
+              "label": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        font-family: 'Atkinson Hyperlegible', sans-serif;
+        background-color: #f5f5f5;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white/70 backdrop-blur-xl flex items-center w-full px-4 h-16 docked full-width top-0 z-50 shadow-[0_8px_30px_rgb(28,28,30,0.04)] sticky">
+<button aria-label="Voltar" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-primary-light/30 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[#1A6F45]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-lexend font-bold tracking-tight text-on-surface text-lg ml-2">Horário de Atendimentos</h1>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow px-4 pt-4 pb-24 max-w-md mx-auto w-full">
+<!-- Tabs (Day Selector) -->
+<section class="mb-8">
+<div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+<!-- Seg (Active) -->
+<button class="flex-shrink-0 bg-primary-container text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all active:scale-95">
+                    Seg
+                </button>
+<!-- Others (Inactive) -->
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant font-medium px-6 py-2.5 rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+                    Ter
+                </button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant font-medium px-6 py-2.5 rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+                    Qua
+                </button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant font-medium px-6 py-2.5 rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+                    Qui
+                </button>
+<button class="flex-shrink-0 bg-surface-container-highest text-on-surface-variant font-medium px-6 py-2.5 rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+                    Sex
+                </button>
+</div>
+</section>
+<!-- Timeline List -->
+<div class="space-y-6">
+<!-- 07:00 - 07:50: [Occupied] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">07:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<div class="flex-grow bg-white rounded-xl border-l-4 border-primary p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between">
+<div>
+<h3 class="font-bold text-on-surface text-lg leading-tight">Artur Mendes</h3>
+<span class="inline-block mt-1 bg-primary-light text-on-primary-fixed-variant px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">E.M. Flores</span>
+</div>
+<button aria-label="Mais opções" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- 08:00 - 08:50: [Free] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">08:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<button class="flex-grow h-16 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center gap-2 group hover:border-primary-container transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[#1A6F45]" data-icon="add_circle">add_circle</span>
+<span class="text-[#1A6F45] font-bold">Adicionar Aluno</span>
+</button>
+</div>
+<!-- 09:00 - 10:00: [INTERVALO] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">09:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<div class="flex-grow bg-surface-container-highest/60 rounded-xl h-12 flex items-center justify-center">
+<p class="text-on-surface-variant font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="coffee">coffee</span>
+                        Intervalo
+                    </p>
+</div>
+</div>
+<!-- 10:00 - 10:50: [Occupied] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">10:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<div class="flex-grow bg-white rounded-xl border-l-4 border-primary p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between">
+<div>
+<h3 class="font-bold text-on-surface text-lg leading-tight">Beatriz Silva</h3>
+<span class="inline-block mt-1 bg-primary-light text-on-primary-fixed-variant px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">E.M. Girassol</span>
+</div>
+<button aria-label="Mais opções" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- 11:00 - 11:50: [Free] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">11:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<button class="flex-grow h-16 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center gap-2 group hover:border-primary-container transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[#1A6F45]" data-icon="add_circle">add_circle</span>
+<span class="text-[#1A6F45] font-bold">Adicionar Aluno</span>
+</button>
+</div>
+<!-- 12:00 - 13:00: [ALMOÇO] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">12:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<div class="flex-grow bg-surface-container-highest/60 rounded-xl h-14 flex items-center justify-center">
+<p class="text-on-surface-variant font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="restaurant">restaurant</span>
+                        Almoço
+                    </p>
+</div>
+</div>
+<!-- 13:00 - 13:50: [Free] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">13:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<button class="flex-grow h-16 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center gap-2 group hover:border-primary-container transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[#1A6F45]" data-icon="add_circle">add_circle</span>
+<span class="text-[#1A6F45] font-bold">Adicionar Aluno</span>
+</button>
+</div>
+<!-- 14:00 - 14:50: [Occupied] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">14:00</span>
+<div class="w-px h-full bg-outline-variant/30 mt-2"></div>
+</div>
+<div class="flex-grow bg-white rounded-xl border-l-4 border-primary p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex items-center justify-between">
+<div>
+<h3 class="font-bold text-on-surface text-lg leading-tight">Cauã Lopes</h3>
+<span class="inline-block mt-1 bg-primary-light text-on-primary-fixed-variant px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider">E.M. Estrela</span>
+</div>
+<button aria-label="Mais opções" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- 15:00 - 15:50: [Free] -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center pt-2 w-12">
+<span class="text-label-md font-bold text-on-surface-variant opacity-70">15:00</span>
+<!-- No line for the last item -->
+</div>
+<button class="flex-grow h-16 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center gap-2 group hover:border-primary-container transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-[#1A6F45]" data-icon="add_circle">add_circle</span>
+<span class="text-[#1A6F45] font-bold">Adicionar Aluno</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe bg-white/70 backdrop-blur-xl flex justify-around items-center h-20 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+<!-- Início -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest/50 rounded-2xl transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-lexend text-[11px] font-bold mt-1">Início</span>
+</a>
+<!-- Alunos -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest/50 rounded-2xl transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-lexend text-[11px] font-bold mt-1">Alunos</span>
+</a>
+<!-- Relatórios -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest/50 rounded-2xl transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-lexend text-[11px] font-bold mt-1">Relatórios</span>
+</a>
+<!-- Outros (Active for sub-pages like settings/hours) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+<span class="font-lexend text-[11px] font-bold mt-1">Outros</span>
+</a>
+</nav>
+</body></html>

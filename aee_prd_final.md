@@ -1,9 +1,9 @@
-# Sistema AEE — Documento de Requisitos e Proposta Arquitetural Final
+# Sistema AEE — Documento de Requisitos e Proposta Arquitetural (PRD v2.0)
 
-**Versão:** 1.1 — Revisado  
-**Data:** 13/03/2026  
-**Status:** ✅ Aprovado para desenvolvimento  
-**Autores:** Sessões de exploração arquitetural + Tree-of-Thought (06–10/03/2026) + Revisão de papéis (13/03/2026)
+**Versão:** 2.0 — Revisão e Expansão de Escopo  
+**Data:** 17/03/2026  
+**Status:** ✅ Aprovado para desenvolvimento (Fase de Elaboração V2)  
+**Autores:** Sessões de exploração arquitetural + Tree-of-Thought + Expansão V2.0 (Comunidade Pedagógica e Ecossistema da Escola)
 
 ---
 
@@ -11,305 +11,163 @@
 
 ### O que é
 
-O **Sistema AEE** é uma aplicação web progressiva (PWA) para gestão do Atendimento Educacional Especializado em escolas públicas. Centraliza o trabalho da Professora AEE e das Professoras de Apoio, substituindo fluxos dispersos em papel, WhatsApp e drives pessoais.
+O **Sistema AEE** é uma plataforma de colaboração pedagógica multidisciplinar e uma aplicação web progressiva (PWA) para gestão do Atendimento Educacional Especializado e acompanhamento do desenvolvimento de alunos em escolas públicas. Ele centraliza o trabalho da Professora AEE, Professores de Sala Regular e Profissionais de Apoio, substituindo fluxos dispersos em papel, WhatsApp e drives pessoais.
 
 ### Problema Principal
 
-A Professora AEE atua em múltiplas escolas simultaneamente, coordena Professoras de Apoio vinculadas a alunos com Necessidades Educacionais Especiais (NEE), e precisa produzir e organizar documentos pedagógicos (PDI, relatórios de atendimento, relatórios periódicos de apoio) em um ambiente com **conectividade de rede intermitente ou inexistente**.
+A Professora AEE atua em múltiplas escolas simultaneamente, coordenando os atendimentos especializados junto a Profissionais de Apoio, Professores Regulares e alunos com Necessidades Educacionais Especiais (NEE). Este trabalho requer a produção de documentos pedagógicos densos e colaborativos, num cenário de escola pública que frequentemente sofre com **conectividade de rede intermitente ou inexistente**.
 
-Hoje, esse fluxo é caótico: dados espalhados, relatórios sem rastreabilidade, fotos sem contexto pedagógico, pendências invisíveis. O sistema resolve exatamente isso.
+O sistema resolve o problema garantindo que todos os agentes do ecossistema colaborem em um ambiente centralizado, com segurança máxima de acesso aos dados, usabilidade voltada para ação (UX focada em abater pendências) e suporte robusto para trabalho offline.
 
-### Escopo Inicial (MVP — Fase 1)
+### Evolução do Escopo (PRD v2.0)
 
-- **1 Professora AEE** (Valdirene), atuando em até 3 escolas
-- Expansão futura: múltiplas Professoras AEE, múltiplas SEMEDs (multi-tenant)
-
----
-
-## 2. Entidades do Sistema
-
-O sistema é composto pelas seguintes entidades principais:
-
-| Entidade | Descrição |
-|---|---|
-| **Coordenação** | Perfil administrativo com acesso total ao sistema |
-| **Prof. AEE** | Professora do Atendimento Educacional Especializado — gestora pedagógica |
-| **Prof. Apoio** | Professora de Apoio vinculada a alunos específicos |
-| **Prof. PI** | Professora de Prática Inclusiva vinculada a alunos específicos |
-| **Aluno** | Estudante com NEE atendido pelo sistema |
-| **Relatório Anual** | Documento anual de avaliação do aluno |
-| **Relatório Trimestral** | Documento trimestral de acompanhamento do aluno |
-| **Relatório AEE** | Documento de atendimento produzido pela Prof. AEE |
+O sistema expande além de uma ferramenta isolada da Prof. AEE, tornando-se o **ecossistema de colaboração acadêmica** completo para alunos NEE:
+- Integra a grade de horários, turmas e matérias da escola.
+- Incorpora o Professor da Sala Regular ativamente no preenchimento de documentos pedagógicos.
+- Estruturação profunda de hierarquias de entidades (escolas > turmas > matérias > professores > alunos).
 
 ---
 
-## 3. Matriz de Papéis e Permissões
+## 2. Entidades do Sistema e Hierarquia
 
-### Hierarquia de Acesso
+Para suportar fluxos avançados de cruzamento de turmas com a gestão pedagógica, o banco de dados e a sincronização offline atuarão sobre a seguinte hierarquia:
 
-```
-Coordenação  (acesso total)
-    └── Prof. AEE  (gestora pedagógica — 1 por espaço, pode atuar em N escolas)
-            ├── Prof. Apoio  (vinculada a alunos específicos)
-            └── Prof. PI     (vinculada a alunos específicos)
-```
+### 2.1 Ecossistema da Escola (Macro)
+* **Escola:** O ambiente base da instituição.
+* **Matérias (Disciplinas):** Cadastro de currículos (ex: Matemática, Português, R1, R2, etc).
+* **Turmas:** Agrupamentos de alunos que pertencem a uma escola.
+* **Professor (Sala Regular):** Vinculado a uma ou mais matérias; leciona em uma ou mais turmas. Compartilha com o AEE a responsabilidade por partes específicas da documentação do aluno NEE.
+* **Alunos:** Pertencem a uma turma (e, por consequência, herdam os professores atrelados àquela turma).
 
-Os pais/responsáveis **não têm acesso ao sistema** em nenhuma fase.
-
----
-
-### 3.1 Coordenação (Acesso Livre / Administrador Geral)
-
-> **Princípio:** A Coordenação tem acesso irrestrito — pode cadastrar, visualizar, editar e gerenciar todos os dados e todos os usuários do sistema.
-
-| Ação | Permitido |
-|---|---|
-| Cadastrar e gerenciar Coordenação, Prof. AEE, Prof. Apoio e Prof. PI | ✅ |
-| Cadastrar, editar e arquivar alunos | ✅ |
-| Criar, editar e excluir qualquer tipo de relatório | ✅ |
-| Visualizar todos os dados pedagógicos | ✅ |
-| Acessar laudos e campos sensíveis | ✅ |
-| Exportar qualquer documento como PDF | ✅ |
-| Ver dashboard de pendências global | ✅ |
-| Registrar fotos pedagógicas dos alunos | ✅ |
+### 2.2 Gestão AEE (Micro)
+* **Professora AEE:** Atende escolas e gerencia seus alunos foco. Responsável pela coordenação pedagógica da plataforma.
+* **Profissional de Apoio / Prof. PI:** Profissionais vinculados a alunos para suporte ou práticas inclusivas diárias.
+* **Modelos de Relatório (Templates):** Cadastro flexível (mutável) da estrutura dos relatórios avaliativos no banco (JSON/Seções).
+* **Horários de Atendimento:** Grade de horários matriz (Seg a Sex), dividida em blocos ao longo do dia, cruzando o aluno, a Prof. AEE e a grade escolar da turma (matéria / horário) para assegurar o agendamento correto e garantir que o aluno não saia de atividades essenciais curriculares sem planejamento.
 
 ---
 
-### 3.2 Professora AEE (Gestora Pedagógica)
+## 3. Matriz de Papéis e Permissões (Documentos Colaborativos)
 
-> **Princípio:** A Prof. AEE é administradora do seu ecossistema pedagógico. Cadastra e gerencia professoras de apoio, alunos e todos os tipos de relatório.
+A V2.0 refina a divisão de responsabilidades, introduzindo relatórios **colaborativos e particionados**. O sistema deve gerenciar permissões a nível de "seção do documento" utilizando Row-Level Security e validações de aplicação.
 
-| Ação | Permitido |
-|---|---|
-| Cadastrar e gerenciar Prof. Apoio | ✅ |
-| Cadastrar, editar e arquivar alunos | ✅ |
-| Vincular e desvincular Prof. Apoio e Prof. PI a alunos | ✅ |
-| Registrar transferência de escola de aluno | ✅ |
-| Redigir **Relatório AEE** (exclusivo) | ✅ |
-| Redigir **Relatório Anual** e **Relatório Trimestral** | ✅ |
-| Visualizar relatórios de todos os tipos de todos os alunos | ✅ |
-| Registrar fotos pedagógicas dos alunos | ✅ |
-| Usar o atalho "📸 Registrar Momento" | ✅ |
-| Exportar qualquer documento como PDF | ✅ |
-| Ver dashboard de pendências de toda a sua carteira | ✅ |
-| Cadastrar Coordenação ou outras Prof. AEE | ❌ |
+| Papel | Relatório Responsável | Periodicidade |
+| :--- | :--- | :--- |
+| **Professora AEE** | PAEE | Trimestral |
+| | PDI Fundamental (Parte 1) | Trimestral |
+| | PDI Ed. Infantil (Parte 1) | Trimestral |
+| | PEI Ed. Infantil (Parte 1) | Trimestral |
+| | Entrevista Familiar | Anual |
+| | Estudo de Caso | Anual |
+| | Oferta do Atendimento / Desistência | Anual / Sob demanda |
+| | Avaliação Fundamental / Educação | Sob demanda |
+| | Registros de Atividades Desenvolvidas | Todo atendimento (Diário) |
+| | Observações Complementares | A qualquer momento |
+| **Professor (Sala Regular)** | PDI Fundamental (Parte 2 - seção de sua matéria) | Trimestral |
+| | PDI Ed. Infantil (Parte 1)* | Trimestral |
+| | PEI Ed. Infantil (Parte 2) | Trimestral |
+| **Profissional de Apoio**| Relatório de Apoio | Anual |
 
----
+*\* Observação de Colaboração (PDI Ed. Infantil - Parte 1): Como ambos preenchem a Parte 1, a edição ocorrerá em formato colaborativo assíncrono. O sistema auditará alterações. A Prof. AEE terá permissões finais para revisar, consolidar e "travar/fechar" o documento.*
 
-### 3.3 Professora de Apoio (Acesso Restrito)
-
-> **Princípio:** A Prof. Apoio acessa apenas os alunos vinculados a ela. Pode registrar o Relatório Anual e adicionar fotos dos seus alunos.
-
-| Ação | Permitido |
-|---|---|
-| Visualizar apenas os alunos vinculados a ela | ✅ |
-| Redigir **Relatório Anual** dos seus alunos | ✅ |
-| Registrar / fazer upload de fotos dos seus alunos | ✅ |
-| Exportar seus próprios relatórios como PDF | ✅ |
-| Redigir Relatório Trimestral ou Relatório AEE | ❌ |
-| Visualizar relatórios de outras professoras | ❌ |
-| Cadastrar ou gerenciar usuários | ❌ |
-| Cadastrar ou editar alunos | ❌ |
-
-> **Importante:** O acesso da Prof. Apoio a um aluno é **vinculado ao período** de atuação. Após uma transferência ou desvinculação, ela perde o acesso a novos dados — o histórico anterior fica arquivado e visível apenas para a Prof. AEE.
+> **Importante:** Assim como na V1, responsáveis (famílias) e alunos **não possuem acesso** ao sistema por questões de escopo e LGPD. O papel "Coordenação" e "Admin" permanecem como super-usuários para configuração e visão gerencial ampla.
 
 ---
 
-### 3.4 Professora PI — Prática Inclusiva (Acesso Restrito)
+## 4. Mapeamento de Telas e Experiência (UX/UI)
 
-> **Princípio:** A Prof. PI acessa apenas os alunos vinculados a ela. Pode registrar o Relatório Trimestral e adicionar fotos dos seus alunos.
+O foco da interface (Mobile-First / PWA) será impulsionar o encerramento de pendências com **Call-to-Actions (CTAs) eficientes**, evitando "labirintos de navegação".
 
-| Ação | Permitido |
-|---|---|
-| Visualizar apenas os alunos vinculados a ela | ✅ |
-| Redigir **Relatório Trimestral** dos seus alunos | ✅ |
-| Registrar / fazer upload de fotos dos seus alunos | ✅ |
-| Exportar seus próprios relatórios como PDF | ✅ |
-| Redigir Relatório Anual ou Relatório AEE | ❌ |
-| Visualizar relatórios de outras professoras | ❌ |
-| Cadastrar ou gerenciar usuários | ❌ |
-| Cadastrar ou editar alunos | ❌ |
+### 📱 Tela Principal — Professora AEE
+* **Header:** Seletor ágil de Escola (troca de contexto).
+* **Dashboard Resumo:** Total de alunos foco da escola + Qtd. total de relatórios atrasados/pendentes.
+* **Ações Frequentes:** Botão hero (rápido) **"Relatório Diário"** (Atalho *Registrar Momento*, com upload de foto e 3 toques max) e navegação para últimos alunos visualizados.
+* **Footer Navigation:** `Home` \| `Meus Alunos` \| `Meus Relatórios` \| `Outros` *(Acesso as configs: Cadastros Base, Matérias, Perfis de Professores).*
 
-> **Importante:** Assim como a Prof. Apoio, o acesso da Prof. PI a um aluno é **vinculado ao período** de atuação.
+### 📱 Tela Principal — Professor (Sala Regular)
+* **Dashboard Prático:** Qual a quantidade de pendências imediatas? (Focado em preencher a Parte 2 dos PDIs/PEIs de suas disciplinas).
+* **Ações:** Listagem consolidada unicamente dos Alunos NEE mapeados em suas turmas.
+* **Footer Navigation:** `Home` \| `Meus Alunos` \| `Meus Relatórios`.
 
----
+### 📱 Tela Principal — Profissional de Apoio
+* **Dashboard Direto:** Status dos seus Relatórios Anuais / periódicos a realizar.
+* **Ações:** Listagem fechada e restrita aos alunos em que possui vínculo ativo no período vigente.
 
-## 4. Funcionalidades Críticas do MVP (Fase 1)
+### 👤 Perfil do Aluno (Visão Prof. AEE)
+* **Cabeçalho:** Card fotográfico do estudante, Nome, Idade, Status do Relatório Diário / Presença do Atendimento de Hoje (Concluído/Pendente).
+* **Pendências Documentais:** Lista com badges coloridos (vermelho/verde) apontando os PDI/PEIs que faltam assinar, atualizar ou cobrar.
+* **Ação Rápida no Ponto:** "Fazer relatório diário [Data de Hoje]".
+* **Galeria Ativa:** Grid de fotos pedagógicas com o botão central "Adicionar Foto" (captura imersiva offline-ready de fotos indexadas ao aluno).
 
-### 4.1 Autenticação e Controle de Acesso
-
-- **Login por e-mail e senha** para todos os perfis. **Não haverá magic link nem acesso por URL sem senha**, dado o caráter altamente sensível dos dados de menores com NEE.
-- Sessões com expiração configurável.
-- Row-Level Security (RLS) no banco de dados PostgreSQL: cada query retorna exclusivamente os dados autorizados pelo papel e pelo tenant do usuário autenticado. Essa camada de segurança **não é delegada à lógica de aplicação**.
-
----
-
-### 4.2 Gestão de Alunos e Histórico
-
-**Cadastro de alunos**
-- Campos obrigatórios: nome, data de nascimento, escola atual, diagnóstico (campo restrito), responsável legal.
-- Campo `consentimento_lgpd: boolean` + `data_consentimento` + `base_legal: "Art. 58 LDB"` registrados no momento do cadastro.
-- Campos marcados internamente como `sensível: true` (ex: diagnóstico, laudo) nunca aparecem em exportações gerais e geram log ao serem acessados.
-
-**Transferência de escola**
-- Aluno possui `escola_atual` + `histórico_escolas[]` (array de `{escola, data_inicio, data_fim}`).
-- Ao registrar uma transferência, a Prof. de Apoio anterior perde acesso imediato ao aluno.
-- Relatórios e fotos do período anterior ficam **arquivados** — visíveis apenas para a Prof. AEE, não para a nova Prof. de Apoio.
-
-**Arquivamento (Soft Delete)**
-- Nenhum dado é excluído permanentemente do banco.
-- Alunos possuem `status: ativo | arquivado`. Alunos arquivados não aparecem nos fluxos ativos, mas o histórico é preservado integralmente.
-- Política de retenção declarada: dados são mantidos pelo prazo legal aplicável à documentação escolar e exibidos no aviso de privacidade do sistema.
-
-**Dashboard de pendências**
-- Visão por aluno: indicadores de completude por tipo de documento (`PDI`, `Relatório de Apoio`, `Relatório Anual`).
-- Filtros por escola e por período.
-- Implementação: query agregada no PostgreSQL + lista com chips de status (verde/vermelho).
+### 📋 Hub Documental ("Meus Relatórios")
+* A visão central para gestão documental: **Cards agrupados por tipo/modelo**. Ex: Card de "PDIs", Card "Entrevistas", apontando volume e gargalos. Central para baixar versão em lote ou aplicar PDF export.
 
 ---
 
-### 4.3 Funcionalidades de Relatório e Registro
+## 5. Arquitetura Central e Análise Crítica V2.0
 
-**Templates dinâmicos por tipo de documento**
+### 5.1 A Malha Curricular e Matriz de Horários
+Um dos grandes desafios introduzidos na V2.0:
+* O acompanhamento semanal é visual (cruza-se Matéria/Turma x Horário Atendimento x Prof. AEE).
+* A integração precisa ser "à prova de erros" para garantir e rastrear que o Prof de Apoio localize o aluno e que a Prof. AEE não saque o aluno de matérias vitais (Matemática, PT-BR) para ir à sala de recursos.
+* A interface deverá exibir essa Grade de Atendimento em formato calendário simples.
 
-Cada tipo de relatório possui estrutura própria e mutável ao longo do tempo. O sistema implementa templates como **conjuntos de seções configuráveis**:
+### 5.2 Estratégia Offline-First (Cache Progressivo Profundo)
+O problema de conectividade da Prof. AEE na sala de recursos torna-se exponencial com a inclusão de Turmas e Professores Regulares.
+* Quando a Prof. AEE puxa dados online e entra na escola (ficando offline), a persistência local (IndexedDB) tem que trazer **dados relacionais pré-calculados**: turmas daquela escola, grade de matérias da turma, relatórios pendentes, etc.
+* Sem isso, a Prof. AEE, no ambiente sem rede, tentaria iniciar um relatório diário e o celular dela "não saberia" em qual aula o aluno deveria estar, impedindo o preenchimento qualificado.
+* A política de sincronismo offline mantém merge por entidades como text/fields (Relatórios atômicos atualizando o campo `updated_at`) e upload de media isolado (Fila idempotente para o R2 / S3 Storage).
 
-| Tipo | Quem redige | Periodicidade |
+### 5.3 Conformidade com Segurança Sensível e LGPD (Stack Base)
+### 5.3 Conformidade com Segurança Sensível e LGPD (Stack Base)
+A arquitetura permanece baseada na stack imutável apresentada na elaboração V1:
+
+### 5.4 Stack Tecnológica Exigida (O Motor e a Interface)
+
+| Camadas e Disciplinas | Tecnologia Fundamental | Justificativa / Conceitos-Chave |
 |---|---|---|
-| **Relatório AEE** | Prof. AEE | Por sessão / sob demanda |
-| **Relatório Anual** | Prof. AEE ou Prof. Apoio | Anual |
-| **Relatório Trimestral** | Prof. AEE ou Prof. PI | Trimestral |
+| **Backend (API)** | **FastAPI + PostgreSQL** | FastAPI com tipagem estrita via Pydantic v2. Banco de dados relacional PostgreSQL[cite: 107, 123, 209]. |
+| **Frontend (PWA)** | **Next.js 14+ + TypeScript** | Next.js 14+ com App Router. TypeScript obrigatório em 100% dos arquivos[cite: 139, 151]. |
+| **Estilização e UI** | **TailwindCSS + Shadcn/UI** | TailwindCSS e uso exclusivo de componentes do ecossistema shadcn/ui[cite: 162, 163]. |
+| **Banco de Dados (ORM)** | **PostgreSQL + SQLModel** | Nuvem relacional (RLS Habilitado para ocultação forçada baseada em acesso e base legal LGPD Art 58). Manipulação do banco efetuada nativamente através do framework SQLModel. |
+| **Autenticação** | **JWT (JSON Web Tokens)** | Proteção estrita aos endpoints da API. Proibido Magic Links (devido ao sigilo dos dados médicos de alunos). |
+| **Arquivos Brutos (Storage)**| **PostgreSQL (Bytea / Large Objects)** | Armazenamento de arquivos e imagens convertido para armazenamento nativo direto no banco relacional para simplificação de infraestrutura. |
 
-- Seções de cada template são adicionáveis/removíveis pela Prof. AEE **sem necessidade de código** (configuração armazenada como JSON estruturado no banco).
-- Relatório **guarda uma snapshot da versão do template** no momento em que foi gerado, garantindo que mudanças futuras no template não alterem relatórios já emitidos.
-- Campo padrão em todos os relatórios: `última_edição: {timestamp, nome_do_usuário}` — exibido na visualização do documento.
+### 5.5 Arquitetura, Testes e Qualidade
 
-**Exportação PDF**
-- Qualquer relatório ou PDI pode ser exportado como PDF formatado para entrega institucional.
-- PDF gerado a partir do template renderizado no frontend (sem renderização server-side no MVP).
-
-**📸 Atalho "Registrar Momento" (Captura Rápida)**
-- Botão fixo na tela principal da Prof. AEE.
-- Fluxo: abrir → selecionar ou tirar foto → associar ao aluno (autocomplete) → aplicar tag pedagógica (ex: `Autonomia`, `Comunicação`, `Motor Fino`, `Socialização`) → salvar.
-- Máximo de 3 toques do botão até o registro estar salvo.
-- Funciona offline: a foto é gravada localmente (IndexedDB) e sincronizada quando a conexão for restabelecida.
-- Upload de fotos é **exclusivo da Prof. AEE**.
-
----
-
-## 5. Decisões Arquiteturais e de Segurança
-
-### 5.1 Stack Técnica
-
-| Camada | Tecnologia | Justificativa |
-|---|---|---|
-| **Frontend (PWA)** | Next.js + Service Worker | SSR para performance + suporte a PWA instalável |
-| **Cache offline** | Dexie.js (IndexedDB) | API moderna e tipada para persistência local no browser |
-| **Backend (API)** | Node.js (Fastify) ou FastAPI (Python) | A definir conforme stack do time |
-| **Banco de dados** | PostgreSQL com RLS ativado | Controle de acesso no nível de linha — obrigatório |
-| **Armazenamento de fotos** | Cloudflare R2 (ou AWS S3) | Custo baixo, CDN integrado |
-| **Autenticação** | NextAuth (ou Clerk) | Multi-tenant ready, suporte a roles customizados |
-| **Exportação PDF** | `react-pdf` ou `@react-pdf/renderer` | Geração client-side sem dependência de puppeteer no MVP |
-| **Hospedagem** | Vercel (frontend) + Railway ou Render (API) | Deploy simplificado para time pequeno |
-
----
-
-### 5.2 Estratégia Offline-First (PWA)
-
-```
-FLUXO OFFLINE → ONLINE
-
-[Usuário offline]
-    ↓ cria/edita dado
-[IndexedDB local]  ← dados persistidos imediatamente
-    ↓ reconexão detectada
-[Fila de sync]
-    ↓ envia ao backend
-[PostgreSQL]  ← estado canônico
-```
-
-**Política de merge (resolução de conflitos):**
-- **Textos de relatórios** — cada relatório é uma unidade atômica de escrita. `last-write-wins` com timestamp registrado no `updated_at`. Em caso de conflito detectado (mesmo relatório editado em dois dispositivos offline), o sistema preserva ambas as versões e sinaliza conflito para resolução manual pela Prof. AEE. *(Fase 2: interface de diff visual)*
-- **Fotos** — nunca conflitam com textos. Cada foto é uma entidade independente referenciada por ID. Upload é idempotente.
-- **Status de aluno / vínculos** — mudanças administrativas (transferência, desvinculação de apoio) têm precedência de aplicação quando sincronizadas.
-
-**Prioridade de sync:** metadados e textos sincronizam primeiro; arquivos de imagem sincronizam em segundo plano com indicador de progresso.
-
----
-
-### 5.3 Conformidade LGPD — Dados Sensíveis de Crianças com NEE
-
-Os dados gerenciados pelo sistema enquadram-se no **Art. 11 da LGPD** (dados sensíveis). As medidas abaixo são **obrigatórias desde o MVP**:
-
-| Medida | Implementação | Referência LGPD |
-|---|---|---|
-| **RLS no banco de dados** | Políticas RLS no PostgreSQL — toda query é filtrada pelo tenant e pelo papel | Art. 46 |
-| **Log de acesso a dados sensíveis** | Tabela `audit_log`: `quem_acessou`, `quando`, `qual_aluno`, `qual_campo` | Art. 37 |
-| **Campos restritos marcados** | Flag `sensivel: true` no schema — nunca aparecem em exports gerais | Art. 46 |
-| **Consentimento / base legal no cadastro** | Campos `consentimento_lgpd`, `data_consentimento`, `base_legal: "Art. 58 LDB"` | Art. 7, 11 |
-| **Soft delete (nunca exclusão física)** | `status: ativo | arquivado` — dados históricos preservados | Obrigação legal escolar |
-| **Política de retenção declarada** | Texto estático na tela de privacidade e no cadastro do aluno | Art. 9 |
-| **Criptografia em repouso** | Banco de dados com criptografia ativada no provedor (padrão nos serviços cloud indicados) | Art. 46 |
-
-> **Nota:** Responsáveis legais **não têm acesso ao sistema** no MVP nem em fases futuras planejadas. O acesso de terceiros externos (incluindo famílias) não faz parte do escopo deste produto.
-
----
-
-## 6. Escopo Funcional Definitivo do MVP (Fase 1)
-
-### ✅ Incluído no MVP
-
-**Autenticação e Permissões**
-- Login por e-mail e senha com sessão gerenciada (sem magic link, sem acesso por URL pública)
-- Quatro perfis com permissões distintas: Coordenação, Prof. AEE, Prof. Apoio, Prof. PI
-- RLS no PostgreSQL — habilitado desde o primeiro deploy
-
-**Gestão de Alunos e Histórico**
-- CRUD de alunos pela Prof. AEE (com campos sensíveis auditados)
-- Registro de consentimento LGPD + base legal no cadastro
-- Transferência de escola com corte de acesso da Prof. de Apoio anterior
-- Histórico de escolas por aluno (array com datas)
-- Soft delete (arquivamento) — sem exclusão física
-- Dashboard de pendências por aluno (PDI / Relatório Apoio / Relatório Anual)
-
-**Funcionalidades de Relatório e Registro**
-- Templates configuráveis por tipo de documento (JSON de seções)
-- Snapshot do template gravada com cada relatório emitido
-- Campo `última_edição: {timestamp, nome}` em todos os relatórios
-- Exportação PDF de qualquer documento
-- Atalho **"📸 Registrar Momento"** — captura rápida de foto com tag pedagógica (máx. 3 toques)
-- Upload de fotos exclusivo para Prof. AEE
-- Galeria de fotos por aluno
-
-**Infraestrutura**
-- PWA instalável com suporte offline completo
-- Sync offline: merge por entidade (textos e fotos como unidades independentes)
-- Log de acesso a campos sensíveis (tabela `audit_log`)
-
----
-
-### ❌ Módulos Descartados (fora do escopo — não retornam)
-
-| Módulo | Motivo do descarte |
+| Metodologia e Ferramentas | Descrição e Requisitos Mínimos |
 |---|---|
-| **Magic link / login sem senha** | Incompatível com a sensibilidade dos dados (crianças com NEE, laudos médicos) |
-| **Portal do Responsável / Acesso dos Pais** | Fora do escopo de todas as fases planejadas |
-| **Exclusão física de dados** | Proibido — obrigação legal de manutenção de histórico escolar |
-| **Notificação automática de transferência de escola** | Fase 2 — baixa complexidade, mas não crítico para o MVP |
-| **Interface de diff para conflitos de sync** | Fase 2 — conflito resolvido no MVP por timestamp + sinalização |
-| **Exclusão automatizada de dados por cron (LGPD)** | Fase 3 — substituída por política de retenção declarada no MVP |
+| **Arquitetura Base** | Utilização de **Clean Architecture** associada ao **Domain-Driven Design (DDD)** para separação clara de responsabilidades. |
+| **Desenvolvimento API** | Adoção do **Spec-Driven Development (SDD)**: A API deve ser descrita primeiro (OpenAPI/YAML) antes de escrever as rotas. Uso do **Swagger UI** para testes visuais. |
+| **Testes Backend** | Obrigatório uso do **Pytest**, garantindo cobertura rigorosa e indispensável de **>80% do projeto**. Construção forte sobre Pirâmide de Testes (E2E, Integração e Unitários) e Mocking (SQLite em mem). |
+| **Testes Frontend** | Validação através do **Vitest** e **Testing Library** para simulação de interações e comportamento de renderização dos componentes React. |
+
+### 5.6 Infraestrutura, DevOps e Inteligência Artificial
+
+| Domínio DevOps | Aplicação no Projeto |
+|---|---|
+| **Infraestrutura e Orquestração** | Orquestração completa via **Docker e docker-compose**. Otimização com multi-stage builds[cite: 177, 186, 188]. |
+| **Repositório e CI/CD** | **Git/GitHub** com branches isoladas (`main`, `develop`), Pull Requests exigindo Code Review e pipeline construído 100% via **GitHub Actions** para testes e entregas. |
+| **Deploy Oficial** | Frontend na **Vercel** e Backend/DB em provedor de nuvem via **Docker Registry**[cite: 203, 207, 208]. |
+| **Integração IA** | Adotados **Stitch AI** para co-pilotagem de código e **Figma AI** no prototipamento. Condicionante central: Prompt Engineering afiado e validação crítica contra *alucinações*. |
+
+### 5.7 Documentação Final (Entregáveis Críticos)
+
+A documentação será insumo oficial e corresponde a uma parcela central da validação arquitetural. Deverá conter obrigatoriamente:
+1. Especificação de API detalhada via arquivo **OpenAPI/YAML** (gerado no SDD).
+2. **README.md completo** contendo instruções de Setup (Docker), scripts, topologia do DB e comandos primários de build e teste.
 
 ---
 
-## 7. Fases de Desenvolvimento
+### 6. Cronograma e Fases (Constraint de 60 horas)
 
-| Fase | Foco | Estimativa |
+Devido ao cenário de projeto acadêmico/aulas, o desenvolvimento possui **prazo estrito de 60 horas totais de trabalho**. Todas as estimativas abaixo devem caber neste orçamento de tempo agressivo, exigindo uso intenso das ferramentas de produtividade e IA.
+
+| Fase | Foco Prioritário | Esforço Alocado |
 |---|---|---|
-| **Fase 1 — MVP** | Tudo descrito neste documento | 8–12 semanas |
-| **Fase 2 — Consolidação** | Interface de diff para conflitos, notificação de transferência, templates com editor visual | 4–6 semanas |
-| **Fase 3 — Escala** | Multi-tenant completo (várias SEMEDs), onboarding automatizado, exclusão automatizada LGPD | 6–8 semanas |
+| **Semana 1: Arquitetura e SDD** | Setup Docker, Especificação OpenAPI (YAML), Configuração de CI/CD basilar e Modelagem de Dados PostgreSQL (RLS). | ~10 horas |
+| **Semanas 2-3: Core Backend** | Construção das 5 rotas CRUD via FastAPI. Testes TDD via Pytest focados em cobrir >80%. Implementação do JWT e Auth. | ~20 horas |
+| **Semanas 4-5: PWA e Interface** | Setup do Next.js (Server/Client components). Construção ágil das vitrines com *shadcn/ui* e Tailwind. PDI Colaborativo Simplificado. Setup offline base. | ~20 horas |
+| **Semana 6: QA, Integração e Deploy** | Garantia de integração ponta a ponta (Vitest/Testing Library). Deploy vercel (frontend) e nuvem (backend em container). Finalização do `README.md` abrangente. | ~10 horas |
 
----
-
-*Documento definitivo — Sistema AEE — última revisão: 13/03/2026*  
-*Consolidado a partir das sessões de exploração arquitetural (06/03), análise Tree-of-Thought (10/03) e revisão de papéis e entidades (13/03)*
+*(Nota: Fases complexas de "Consolidação V2" como diff visual complexo, template engine drag-and-drop e integrações multi-tenant com SEMEDs ficam oficialmente para evolução futura pós-disciplina, garantindo a entrega do escopo dentro de 60h).*

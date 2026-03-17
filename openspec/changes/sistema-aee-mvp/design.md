@@ -23,6 +23,16 @@
 │  DEVOPS                 │  Docker + Docker Compose               │
 │                         │  GitHub Actions (CI/CD)                │
 └─────────────────────────┴───────────────────────────────────────┘
+
+---
+
+## Topologia Docker (docker-compose.yml)
+
+O `docker-compose.yml` raiz da aplicação DEVE conter a seguinte topologia estrita:
+- **Redes:** `frontend_network` e `backend_network`.
+- **Serviço `db`:** Imagem `postgres:16-alpine`. Volume permanente `postgres_data`. Conectado na `backend_network`. Variáveis essenciais mapeadas.
+- **Serviço `api`:** Build de `./backend/Dockerfile`. Conectado nas redes `backend_network` (pra falar com BD) e `frontend_network`.
+- **Serviço `web`:** Build de `./frontend/Dockerfile`. Conectado na `frontend_network`. Exportará portas Web padrão. Comando explícito ou gerado no Dockerfile (não rodar simple npm scripts pass-through).
 ```
 
 ---
@@ -54,22 +64,26 @@ AuditLog(id, usuario_id, acao, entidade, campo_sensivel, timestamp)
 
 ---
 
-## Modelo de Dados (PostgreSQL)
+## Modelo de Dados Estrito (PostgreSQL + SQLAlchemy 2.0)
 
-### Tabelas Principais
+O banco de dados deve ser construído rigorosamente com as seguintes Relações (FKs) e Índices de Performance, para barrar alucinações na tipagem de objetos OMR.
 
-```
-tenants                   → isolamento multi-tenant (expansão futura)
-users                     → todos os usuários (papel armazenado aqui)
-schools                   → escolas vinculadas ao tenant
-students                  → alunos com campos sensíveis
-student_school_history    → histórico de transferências
-professor_assignments     → vínculo professor (apoio ou PI) ↔ aluno ↔ período
-report_templates          → seções configuráveis (JSONB) por tipo de relatório
-reports                   → documentos preenchidos (snapshot do template salvo)
-photos                    → registros fotográficos vinculados ao aluno
-audit_log                 → acesso a campos sensíveis
-```
+### Tabelas e Contratos Estritos
+
+- **`tenants`**: `id` (PK, UUID, Default `gen_random_uuid()`).
+- **`users`**: `id` (PK), `email` (UK, B-Tree Indexed), `role` (Enum de aplicação), `tenant_id` (FK estrita -> tenants.id).
+- **`schools`**: `id` (PK), `name` (String), `tenant_id` (FK -> tenants.id).
+- **`students`**: `id` (PK), `nome` (String), `status` (Enum: ativo/arquivado). **Índice na coluna `status`**. FK opcional `escola_atual_id` apontando pra `schools`.
+- **`student_school_history`**: `id` (PK), `student_id` (FK -> students.id), `school_id` (FK -> schools.id, Indexado se queries filtradas por escola).
+- **`professor_assignments`**: Tabela associativa pivot. `id` (PK), `usuario_id` (FK -> users.id, Indexed), `aluno_id` (FK -> students.id, Indexed). **Índice Composto: `(usuario_id, aluno_id)`**. Tabela terá a coluna `tipo_papel`.
+- **`report_templates`**: Configuração central do template (`tipo`, `secoes` como JSONB).
+- **`reports`**: O Snapshot. `id` (PK, UUID), `tipo` (Enum), `aluno_id` (FK -> students.id), `autor_id` (FK -> users.id), `template_snapshot` (JSONB congelado).
+
+### Contratos Pydantic v2 (TypeSafe API)
+Todo model de SQLAlchemy da camada Infrastructure DEVE transitar para a interface do FastAPI utilizando contratos rigorosos Pydantic v2. A API NÃO pode retornar o object proxy do banco:
+- `ModelCreate` para entrada POST (Valida tipos, min_length).
+- `ModelUpdate` para PATCH (Campos Optional[] explícitos).
+- `ModelRead` para saídas, empregando obrigatório `model_config = ConfigDict(from_attributes=True)`.
 
 ### Campos Críticos por Entidade
 
@@ -142,6 +156,25 @@ def requer_papel(*papeis: Papel):
         return wrapper
     return decorator
 ```
+
+---
+
+## Arquitetura Frontend: Next.js App Router e shadcn/ui
+
+### Divisão Server/Client Components
+É PROIBIDO criar um frontend caótico onde todo o código roda no Client.
+- **Server Components:** Todo arquivo em `/app/` deve permanecer sendo executado primordialmente no lado do servidor para roteamento, initial load pre-render e acesso protegido via dados.
+- **Client Components:** Só e somente as seções interativas (PWA Dexie.js offline store sync, Formulários longos, Modais contextuais, e botões dinâmicos) utilizarão `'use client'`. Eles ficarão organizados essencialmente sob `/components/`. Não jogue um `'use client'` em páginas cruas que não requerem states locais.
+
+### Mapeamento Estrito de Componentes shadcn/ui
+Para prevenir interfaces inconsistentes ou feitas à caneta de dezenas de classes do Tailwind utilitário puro, a IA MUST instalar e utilizar componentes prontos do **shadcn/ui**.
+| Componente shadcn/ui | Finalidade |
+|---|---|
+| `Button` | Ações primárias (FAB de Registrar Momento em especial), secundárias, Ghost e Destrutivas. |
+| `Card` | Envoltório primário para listagem de alunos, Dashboard de estatísticas offline. |
+| `Dialog` / `Drawer` | Interface de sobreposição de "Registrar Momento" (3 passos) e confirmações destrutivas. |
+| `Badge` | Tags pedagógicas nos artefatos da Galeria e flags de "Pendente" ou "Ativo" |
+| `Form`, `Input`, `Select`, `Textarea` | Central de criação e edição das Entidades (Relatórios com JSON dinâmico). |
 
 ---
 
