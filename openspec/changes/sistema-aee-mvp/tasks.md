@@ -4,75 +4,103 @@
 
 Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + Docker
 
+> **Convenção TDD:** cada bloco começa com a etapa **🔴 RED** (escrever testes que falham),
+> seguida de **🟢 GREEN** (implementação mínima). Nenhuma tarefa de implementação deve
+> ser iniciada sem os testes correspondentes escritos e falhando.
+
 ---
 
-## Fase 0 — Setup e Infraestrutura (4h)
+## Fase 0 — Docker e Infraestrutura de Base (4h)
 
-- [ ] **T-01** Criar estrutura de monorepo (`/backend`, `/frontend`, `/docker-compose.yml`)
-- [ ] **T-02** Configurar `docker-compose.yml` com serviços: `backend`, `db` (PostgreSQL 16), `frontend`
-- [ ] **T-03** Criar `.env.example` para backend e frontend com todas as variáveis necessárias
-- [ ] **T-04** Configurar GitHub Actions: jobs de lint, test e build em push/PR para `main`
+> **Pré-requisito de tudo:** sem o ambiente rodando, nenhuma etapa TDD é verificável.
+
+- [ ] **T-01** Criar estrutura de monorepo (`/backend`, `/frontend`, `docker-compose.yml`)
+- [ ] **T-02** Criar `docker-compose.yml` com serviços: `db` (PostgreSQL 16), `api` (FastAPI), `web` (Next.js); redes `backend_network` e `frontend_network` separadas; volume permanente `postgres_data`
+- [ ] **T-03** Criar `.env.example` com todas as variáveis obrigatórias (backend e frontend). Variáveis secretas NUNCA commitadas
+- [ ] **T-04** Validar que `docker compose up --build` sobe os três serviços sem erro e que `GET /docs` (FastAPI) retorna 200
 - [ ] **T-05** Configurar linting: `ruff` + `mypy` (backend), `eslint` + `prettier` (frontend)
+- [ ] **T-06** Configurar GitHub Actions: jobs de lint, test e build em push/PR para `main` — PR bloqueado sem todos os checks verdes
 
 ---
 
-## Fase 1 — Backend Core (20h)
+## Fase 1 — Backend: Domínio (DDD + TDD) (10h)
 
-### Domínio (DDD)
-- [ ] **T-10** Definir entidades puras de domínio (`Usuario`, `Aluno`, `RelatorioAEE`, etc) e validar conformidade com Python 3.12 types.
-- [ ] **T-11** Definir value objects estritos (`Papel`, `StatusAluno`, `TagPedagogica`) usando Enum e validar com um test assert básico.
-- [ ] **T-12** Implementar regras puras de negócio e rodar check de types do `mypy`/`ruff` OBRIGATORIAMENTE para atestar Type Safety.
+### 🔴 RED — Testes do Domínio (escritos ANTES da implementação)
+
+- [ ] **T-10** Escrever testes unitários para as entidades puras (`Usuario`, `Aluno`, `RelatorioAEE`, `Foto`) — devem falhar com `ImportError` ou `AssertionError` confirmando que nada está implementado
+- [ ] **T-11** Escrever testes para os value objects (`Papel`, `StatusAluno`, `TagPedagogica`): validar transições permitidas e rejeições de valores inválidos — todos devem falhar
+- [ ] **T-12** Escrever testes para as regras puras de negócio: soft-delete de aluno, consentimento LGPD obrigatório, vínculo de professor × escola — todos devem falhar
+
+### 🟢 GREEN — Implementar Domínio
+
+- [ ] **T-13** Implementar entidades de domínio em `domain/` (sem imports de frameworks). Rodar T-10: MUST passar 100%
+- [ ] **T-14** Implementar value objects via `Enum` e dataclasses tipadas. Rodar T-11: MUST passar 100%
+- [ ] **T-15** Implementar regras puras de negócio. Rodar T-12: MUST passar 100%
+- [ ] **T-16** Rodar `mypy` + `ruff` no módulo `domain/` — zero erros permitidos
+
+---
+
+## Fase 2 — Backend: Banco de Dados e Casos de Uso (10h)
 
 ### Banco de Dados
-- [ ] **T-13** Criar modelos SQLModel (Table=True) com foreign keys (`users`, `schools`, `students`) e rodar validator pra syntax.
-- [ ] **T-14** Criar modelos de vínculos e relatórios com chaves estrangeiras interconectadas e Índices (e.g., `professor_assignments`).
-- [ ] **T-15** Configurar Alembic, criar e comitar a primeira migration (`alembic upgrade head` MUST passar 100% liso no contêiner docker `db`).
-- [ ] **T-16** Adicionar políticas estruturais RLS do Postgres via raw SQL e verificar aplicabilidade num container de teste.
 
-### Contratos e Casos de Uso (TypeSafe)
-- [ ] **T-18** Implementar auth via Pydantic v2 schemas: validar intercept e expiração JWT (`pytest` ou assert manual test).
-- [ ] **T-19** Implementar CRUD Pydantic de usuários baseando-se em `BaseModel` estritos (Rejeitar Extra fields). Rodar specs.
-- [ ] **T-20** Implementar lógica estruturada de `alunos` com soft-delete. Adicionar interceptor contra HTTP 422 na camada.
-- [ ] **T-21** Inserção estrita de relatórios (Validar block against malformed JSONB data test).
-- [ ] **T-22** Salvar foto c/ simulador de bucket falso ou volume e auditoria automática gerando Logs validados (`audit_log`).
+- [ ] **T-20** Criar modelos SQLModel (`Table=True`) para `users`, `schools`, `students`, `professor_assignments`; foreign keys e índices declarados
+- [ ] **T-21** Criar modelos de relatórios e fotos com chaves estrangeiras interconectadas
+- [ ] **T-22** Configurar Alembic; criar e aplicar primeira migration — `alembic upgrade head` MUST passar no contêiner `db` sem erro
+- [ ] **T-23** Adicionar políticas RLS do PostgreSQL via raw SQL; verificar no contêiner de teste que papel errado retorna zero rows
 
-### API (FastAPI Routers)
-- [ ] **T-25** Expor routers apontando exclusivamente para schemas Pydantic atrelados a `response_model` do FastAPI.
-- [ ] **T-26** Testar Decorator `@requer_papel([...])`: fazer fake request e garantir MUST return 403 Forbidden para permissão cruzada.
-- [ ] **T-27** Subir Docker api contêiner `docker compose up api db` e bater `GET /docs` validando que aplicação inicializa completamente sem stacktraces de import ou env vars.
+### 🔴 RED — Testes dos Casos de Uso (escritos ANTES da implementação)
 
----
+- [ ] **T-25** Escrever testes de caso de uso para auth JWT: expiração, papel incorreto, token inválido — todos devem falhar
+- [ ] **T-26** Escrever testes de caso de uso para CRUD de usuários: rejeitar campos extra, validar role no payload — devem falhar
+- [ ] **T-27** Escrever testes de caso de uso para gestão de alunos: consentimento LGPD obrigatório (HTTP 422), soft-delete nunca executa `DELETE FROM` — devem falhar
+- [ ] **T-28** Escrever testes de caso de uso para relatórios: bloquear tipo errado por papel (Profissional de Apoio bloqueado em Trimestral), salvar JSON válido — devem falhar
+- [ ] **T-29** Escrever testes para audit_log: toda leitura de campo sensível MUST gerar linha em `audit_log` — deve falhar
 
-## Fase 2 — Frontend Core (20h)
+### 🟢 GREEN — Implementar Casos de Uso
 
-### Setup (App Router)
-- [ ] **T-30** Instalar Next.js (latest) via Docker e configurar **APENAS shadcn/ui** (`npx shadcn-ui@latest add button card dialog form select`). OBRIGATÓRIO: garantir comando de compilação Build sem erro no fim do estágio.
-- [ ] **T-31** Implementar NextAuth JWT configurado garantindo mapping da sessão para Papel/Tenant em layout de server.
-- [ ] **T-32** Componentar proteção de rota (Server side logic app config) e validar redirecionamentos `302/401` com acessos cruzados.
-
-### Componentes Globais e Estruturais
-- [ ] **T-34** Criar Layouts de Agrupamento `(coordenacao)`, `(apoio)`, `(regente)` Server-Side provando que hidratam corretamente (sem erro de mismatch SSR/CSR).
-- [ ] **T-35** Abstraição Offline-First do Dexie.js (`use client`). Comprovar renderização limpa da store com checagem assíncrona onMount no hook.
-
-### Telas Críticas e Validações UI Estritas
-- [ ] **T-38** Tela: Login Page Server Component + Form Client Component (usando shadcn Form). TESTAR: tentar enviar em branco MUST sublinhar campos visualmente de vermelho.
-- [ ] **T-39** Tela: Dashboard interativo. Buscar do backend e encaixar no layout Card do shadcn. TESTAR build visual.
-- [ ] **T-40** CRUD Alunos (`'use client'` page bounds). Formulário interativo (zod) protegendo envio a `/alunos`. Validar bloqueios explícitos no browser.
-- [ ] **T-42** Interface Formulário Dinâmico de Relatórios. Validar montagem do JSON em submissões offline (`IndexedDB catch block test`).
-- [ ] **T-44** Modal Drawer 📸 Registrar Momento (`'use client'`). Implementar a navegação nos "3 passos". MUST usar `shadcn Dialog/Drawer` limitando reflow para garantir 60fps local.
-- [ ] **T-45** PDF export (usar lib `@react-pdf/renderer` de client only) importado dinamicamente via `next/dynamic` sem quebrar o next SSR output. Validar build (npm run build de check).
+- [ ] **T-30** Implementar auth JWT com rotating tokens (TTL via env). Rodar T-25: MUST passar 100%
+- [ ] **T-31** Implementar CRUD de usuários com `BaseModel` Pydantic v2 (`Extra.forbid`). Rodar T-26: MUST passar 100%
+- [ ] **T-32** Implementar lógica de alunos com soft-delete e interceptor HTTP 422 para consentimento. Rodar T-27: MUST passar 100%
+- [ ] **T-33** Implementar lógica de relatórios com guard de papel e validação de JSONB. Rodar T-28: MUST passar 100%
+- [ ] **T-34** Implementar inserção automática em `audit_log` em todos os campos `diagnostico`/`laudo`. Rodar T-29: MUST passar 100%
+- [ ] **T-35** Implementar lógica de foto com simulador de bucket (volume local); audit_log validado nos logs
 
 ---
 
-## Fase 3 — Testes e CI/CD (12h)
+## Fase 3 — Backend: Componentes e Rotas FastAPI (8h)
 
-### Backend (TDD)
-- [ ] **T-50** Escrever testes unitários para todos os casos de uso (pytest + pytest-asyncio)
-- [ ] **T-51** Escrever testes de integração de API: autorização por papel (403 para acessos inválidos)
-- [ ] **T-52** Testes de RLS: validar isolamento entre papéis e entre tenants
-- [ ] **T-53** Cobertura mínima alvo: 80% nas camadas `application` e `interfaces`
+### 🔴 RED — Testes dos Componentes da API (escritos ANTES)
 
-### Casos de teste obrigatórios de autorização
+- [ ] **T-40** Escrever testes para o decorator `@requer_papel([...])`: fazer fake request com papel errado — MUST retornar 403, deve falhar
+- [ ] **T-41** Escrever testes de schema Pydantic de request/response: campos obrigatórios, rejeição de extra fields — devem falhar
+- [ ] **T-42** Escrever testes de CORS: origem não-autorizada MUST ser rejeitada — deve falhar
+
+### 🟢 GREEN — Implementar Componentes da API
+
+- [ ] **T-43** Implementar decorator `@requer_papel` com extração de JWT. Rodar T-40: MUST passar 100%
+- [ ] **T-44** Implementar todos os schemas Pydantic de request/response em `interfaces/`. Rodar T-41: MUST passar 100%
+- [ ] **T-45** Configurar CORS restritivo no FastAPI (lista branca de origens, nunca `*`). Rodar T-42: MUST passar 100%
+
+### 🔴 RED — Testes das Rotas (escritos ANTES)
+
+- [ ] **T-47** Escrever testes de rota para `/auth`, `/usuarios`, `/alunos`: body inválido, token ausente, papel incorreto — devem falhar
+- [ ] **T-48** Escrever testes de rota para `/relatorios` e `/fotos`: validar permissões cruzadas entre todos os 4 papéis — devem falhar
+
+### 🟢 GREEN — Implementar Rotas FastAPI
+
+- [ ] **T-49** Implementar routers FastAPI apontando para `response_model` Pydantic. Rodar T-47: MUST passar 100%
+- [ ] **T-50** Implementar routers de relatórios e fotos. Rodar T-48: MUST passar 100%
+- [ ] **T-51** Validar: `docker compose up api db` + `GET /docs` retorna 200 sem stacktraces
+
+---
+
+## Fase 4 — Backend: Testes de Integração com Banco de Dados (4h)
+
+> **Integração logo após as rotas**, usando banco real PostgreSQL (não SQLite em memória).
+
+- [ ] **T-55** Testes de integração de API: fluxo completo por papel (auth → ação → resultado no banco)
+- [ ] **T-56** Testes de autorização cruzada (tabela obrigatória):
 
 | Cenário | Resultado esperado |
 |---|---|
@@ -85,26 +113,54 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 | Prof. Regente faz upload de foto (aluno vinculado) | 201 Created |
 | Coordenação acessa qualquer endpoint | 200/201 OK |
 
-### Frontend
-- [ ] **T-54** Testes de componentes críticos com Jest + React Testing Library
-- [ ] **T-55** Testes E2E com Playwright: fluxo completo por papel (login → ação → resultado)
-- [ ] **T-56** Teste E2E específico: "📸 Registrar Momento" em ≤ 3 toques
-
-### CI/CD
-- [ ] **T-57** Pipeline GitHub Actions: lint (ruff + eslint) + test (pytest + jest) + build
-- [ ] **T-58** Configurar build Docker multi-stage (menor imagem de produção)
-- [ ] **T-59** PR bloqueado sem todos os checks verdes
+- [ ] **T-57** Testes de RLS PostgreSQL: validar isolamento de dados entre papéis e entre tenants (rows de tenant A nunca visíveis para tenant B)
+- [ ] **T-58** Cobertura mínima alvo: 80% nas camadas `application/` e `interfaces/` — verificado com `pytest --cov`
 
 ---
 
-## Fase 4 — PWA Offline (4h)
+## Fase 5 — Frontend Core (16h)
 
-- [ ] **T-60** Configurar Service Worker via `next-pwa` (cache do shell da aplicação offline)
-- [ ] **T-61** Configurar Dexie.js com schema espelhando entidades: `relatorios_pendentes`, `fotos_pendentes`
-- [ ] **T-62** Implementar escrita-em-IndexedDB-primeiro em todas as ações de criar/editar
-- [ ] **T-63** Implementar fila de sync (dispara ao `navigator.onLine` voltar a true)
-- [ ] **T-64** Detectar conflito de relatório (`updated_at`): versão mais recente prevalece, setar `conflict_flag: true` e exibir aviso na próxima abertura
-- [ ] **T-65** Indicador visual de status online/offline no cabeçalho da aplicação
+### Setup
+
+- [ ] **T-60** Instalar Next.js (latest) via Docker; configurar `shadcn/ui` (`button card dialog form select`); compilar Build sem erro
+- [ ] **T-61** Instalar e configurar Dexie.js (schema: `relatorios_pendentes`, `fotos_pendentes`) e `next-pwa` (cache do shell)
+- [ ] **T-62** Implementar NextAuth JWT com mapping de sessão para `Papel`/`tenant_id` em layout de server
+- [ ] **T-63** Implementar proteção de rota server-side; validar redirecionamentos `302/401` para acessos cruzados
+- [ ] **T-64** Criar layouts de agrupamento `(coordenacao)`, `(prof_aee)`, `(apoio)`, `(regente)` — validar hidratação SSR/CSR sem mismatch
+
+### 🔴 RED — Testes de Componentes Frontend (escritos ANTES)
+
+- [ ] **T-66** Escrever testes com React Testing Library para o formulário de Login: envio em branco MUST sublinhar campos de vermelho — deve falhar
+- [ ] **T-67** Escrever testes para o formulário de Aluno: checkbox de consentimento LGPD desmarcado MUST bloquear envio — deve falhar
+- [ ] **T-68** Escrever testes para o fluxo "📸 Registrar Momento": 3 passos completos em ≤ 3 toques — deve falhar
+
+### 🟢 GREEN — Implementar Telas e Componentes
+
+- [ ] **T-69** Tela Login: Server Component + Form Client (shadcn Form + zod). Rodar T-66: MUST passar
+- [ ] **T-70** Dashboard interativo por papel: buscar dados do backend, layout shadcn Cards
+- [ ] **T-71** CRUD Alunos (`'use client'`): formulário zod com bloqueio de consentimento LGPD. Rodar T-67: MUST passar
+- [ ] **T-72** Interface de Relatórios: formulário dinâmico com fallback offline para IndexedDB
+- [ ] **T-73** Modal "📸 Registrar Momento" (`shadcn Dialog`): navegação em 3 passos, 60fps garantido. Rodar T-68: MUST passar
+- [ ] **T-74** PDF export via `@react-pdf/renderer` importado com `next/dynamic` — validar `npm run build` sem erro SSR
+
+---
+
+## Fase 6 — PWA Offline-First (4h)
+
+- [ ] **T-80** Configurar Service Worker via `next-pwa` (cache do shell offline)
+- [ ] **T-81** Implementar escrita-em-IndexedDB-primeiro em todas as ações de criar/editar
+- [ ] **T-82** Implementar fila de sync (dispara ao `navigator.onLine` voltar `true`): bulk POST idempotente para `/api/sync/*`
+- [ ] **T-83** Detectar conflito de relatório via `updated_at`: versão mais recente prevalece; setar `conflict_flag: true` e exibir aviso na próxima abertura
+- [ ] **T-84** Indicador visual de status online/offline no cabeçalho em todas as telas
+
+---
+
+## Fase 7 — E2E e CI/CD (4h)
+
+- [ ] **T-90** Testes E2E Playwright: fluxo completo por papel (login → ação → resultado)
+- [ ] **T-91** Teste E2E específico: "📸 Registrar Momento" offline→sync em ≤ 3 toques
+- [ ] **T-92** Pipeline GitHub Actions completo: lint + test + build + E2E em push/PR
+- [ ] **T-93** Build Docker multi-stage (imagem de produção mínima)
 
 ---
 
@@ -116,7 +172,7 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 - [ ] Prof. Regente consegue criar Relatório Trimestral e enviar foto de aluno vinculado
 - [ ] Transferência de escola revoga acesso da professora anterior corretamente
 - [ ] "📸 Registrar Momento" funciona offline em ≤ 3 toques e sincroniza ao reconectar
-- [ ] RLS impede vazamento de dados entre papéis (verificado por testes de integração)
+- [ ] RLS impede vazamento de dados entre papéis (verificado por testes de integração com BD real)
 - [ ] `docker compose up --build` sobe todo o ambiente sem configuração manual
 
 ---
@@ -125,11 +181,11 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 
 - Notificação automática de transferência de escola
 - Editor visual de templates (drag-and-drop)
+- Cron de expiração automática de dados LGPD
 
 ## Permanentemente Fora do Escopo
 
 - Magic link / autenticação sem senha
 - Portal de responsáveis / pais
 - Exclusão física de qualquer dado do banco
-- Cron de expiração automática de dados LGPD
 - Expansão multi-tenant (múltiplas SEMEDs)
