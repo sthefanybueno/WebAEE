@@ -41,7 +41,7 @@ Para suportar fluxos avançados de cruzamento de turmas com a gestão pedagógic
 
 ### 2.2 Gestão AEE (Micro)
 * **Professora AEE:** Atende escolas e gerencia seus alunos foco. Responsável pela coordenação pedagógica da plataforma.
-* **Profissional de Apoio / Prof. PI:** Profissionais vinculados a alunos para suporte ou práticas inclusivas diárias.
+* **Profissional de Apoio / Prof. Regente:** Profissionais vinculados a alunos para suporte ou práticas inclusivas diárias.
 * **Modelos de Relatório (Templates):** Cadastro flexível (mutável) da estrutura dos relatórios avaliativos no banco (JSON/Seções).
 * **Horários de Atendimento:** Grade de horários matriz (Seg a Sex), dividida em blocos ao longo do dia, cruzando o aluno, a Prof. AEE e a grade escolar da turma (matéria / horário) para assegurar o agendamento correto e garantir que o aluno não saia de atividades essenciais curriculares sem planejamento.
 
@@ -118,7 +118,6 @@ O problema de conectividade da Prof. AEE na sala de recursos torna-se exponencia
 * Sem isso, a Prof. AEE, no ambiente sem rede, tentaria iniciar um relatório diário e o celular dela "não saberia" em qual aula o aluno deveria estar, impedindo o preenchimento qualificado.
 * A política de sincronismo offline mantém merge por entidades como text/fields (Relatórios atômicos atualizando o campo `updated_at`) e upload de media isolado (Fila idempotente para o R2 / S3 Storage).
 
-### 5.3 Conformidade com Segurança Sensível e LGPD (Stack Base)
 ### 5.3 Conformidade com Segurança Sensível e LGPD (Stack Base)
 A arquitetura permanece baseada na stack imutável apresentada na elaboração V1:
 

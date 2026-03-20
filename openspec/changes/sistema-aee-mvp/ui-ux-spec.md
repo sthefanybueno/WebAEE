@@ -121,7 +121,7 @@
 - **Altura:** 56px, `position: sticky; top: 0; z-index: 100`
 - **Fundo:** `--color-surface-card` com `box-shadow: 0 1px 4px rgba(0,0,0,0.1)`
 - **Conteúdo:** Logotipo AEE (canto esquerdo) · Título da tela atual (centralizado, H2) · Ícone de notificações (canto direito, apenas para Prof. AEE e Coordenação)
-- **Comportamento:** Não mostra ícone de configurações nem de cadastro de usuários para Prof. Apoio e Prof. PI
+- **Comportamento:** Não mostra ícone de configurações nem de cadastro de usuários para Profissional de Apoio e Prof. Regente
 
 ---
 
@@ -136,14 +136,14 @@
 | Documentos | `file-text` | `/documentos` |
 | Configurações | `settings` | `/configuracoes` |
 
-#### Prof. Apoio / Prof. PI
+#### Profissional de Apoio / Prof. Regente
 
 | Tab | Ícone (SVG Lucide) | Rota |
 |---|---|---|
 | Meus Alunos | `users` | `/meus-alunos` |
 | Registros | `file-text` | `/registros` |
 
-> **Regra de hierarquia:** Prof. Apoio e Prof. PI **não têm acesso** às abas de Configurações, Dashboard global ou Cadastro de alunos. A bottom nav reflete isso com apenas 2 abas.
+> **Regra de hierarquia:** Profissional de Apoio e Prof. Regente **não têm acesso** às abas de Configurações, Dashboard global ou Cadastro de alunos. A bottom nav reflete isso com apenas 2 abas.
 
 ---
 
@@ -375,7 +375,7 @@ O modal ocupa **90% da altura da tela** (bottom sheet), sobreposto à tela atual
 
 ---
 
-### 3.4 Tela Inicial Simplificada — Prof. Apoio / Prof. PI
+### 3.4 Tela Inicial Simplificada — Profissional de Apoio / Prof. Regente
 
 **Objetivo:** Interface reduzida ao essencial — lista dos seus alunos e acesso rápido ao relatório autorizado.
 
@@ -418,11 +418,11 @@ O modal ocupa **90% da altura da tela** (bottom sheet), sobreposto à tela atual
 ```
 
 **Detalhes de Interação:**
-- **Prof. Apoio:** O botão primário em cards abre o editor de **Relatório Anual**
-- **Prof. PI:** O botão primário em cards abre o editor de **Relatório Trimestral**
+- **Profissional de Apoio:** O botão primário em cards abre o editor de **Relatório Anual**
+- **Prof. Regente:** O botão primário em cards abre o editor de **Relatório Trimestral**
 - A tela sabe qual papel está logado e adapta o label do botão automaticamente
 - Sem editor de template disponível — templates são pré-definidos pela Prof. AEE
-- Fotos: a Prof. Apoio/PI **pode adicionar fotos** dentro do perfil do aluno, mas **não através do FAB** (o FAB não existe nesta visão)
+- Fotos: a Profissional de Apoio/PI **pode adicionar fotos** dentro do perfil do aluno, mas **não através do FAB** (o FAB não existe nesta visão)
 - O banner offline é idêntico ao da Prof. AEE — mesma visibilidade, mesma urgência
 
 ---
@@ -431,14 +431,14 @@ O modal ocupa **90% da altura da tela** (bottom sheet), sobreposto à tela atual
 
 | Critério | Verificação |
 |---|---|
-| Hierarquia de acesso respeitada | ✅ Prof. Apoio/PI não vê configurações, cadastros ou dashboard global |
+| Hierarquia de acesso respeitada | ✅ Profissional de Apoio/PI não vê configurações, cadastros ou dashboard global |
 | FAB de registro visível na Home da Prof. AEE | ✅ `position: fixed`, acima do nav, sempre acessível |
 | Estado offline visível em todas as telas | ✅ Banner condicional no topo do conteúdo em toda tela |
 | Área de toque mínima 44×44px | ✅ Todos os botões, chips e cards respeitam o mínimo |
 | Contraste WCAG AA (4.5:1) | ✅ Paleta `#1C1C1E` sobre `#F5F5F5` → ratio 15:1 |
 | Fluxo de 3 toques para Registrar Momento | ✅ Passo 1 (foto) → Passo 2 (aluno) → Passo 3 (tag + salvar) |
 | Dados sensíveis ocultados por padrão | ✅ Laudo/diagnóstico atrás de botão explícito com auditoria |
-| Prof. Apoio/PI não vê botão de Registrar Momento (FAB) | ✅ FAB não existe na visão simplificada |
+| Profissional de Apoio/PI não vê botão de Registrar Momento (FAB) | ✅ FAB não existe na visão simplificada |
 | Indicador de sync por item | ✅ Micro-indicador `●` em cada card de relatório e foto |
 | Tipografia acessível e legível | ✅ Atkinson Hyperlegible — otimizada para legibilidade |
 

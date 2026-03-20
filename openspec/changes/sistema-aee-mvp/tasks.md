@@ -24,7 +24,7 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 - [ ] **T-12** Implementar regras puras de negócio e rodar check de types do `mypy`/`ruff` OBRIGATORIAMENTE para atestar Type Safety.
 
 ### Banco de Dados
-- [ ] **T-13** Criar modelos SQLAlchemy restritos com foreign keys (`users`, `schools`, `students`) e rodar validator pra syntax.
+- [ ] **T-13** Criar modelos SQLModel (Table=True) com foreign keys (`users`, `schools`, `students`) e rodar validator pra syntax.
 - [ ] **T-14** Criar modelos de vínculos e relatórios com chaves estrangeiras interconectadas e Índices (e.g., `professor_assignments`).
 - [ ] **T-15** Configurar Alembic, criar e comitar a primeira migration (`alembic upgrade head` MUST passar 100% liso no contêiner docker `db`).
 - [ ] **T-16** Adicionar políticas estruturais RLS do Postgres via raw SQL e verificar aplicabilidade num container de teste.
@@ -46,12 +46,12 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 ## Fase 2 — Frontend Core (20h)
 
 ### Setup (App Router)
-- [ ] **T-30** Instalar Next.js 14 via Docker e configurar **APENAS shadcn/ui** (`npx shadcn-ui@latest add button card dialog form select`). OBRIGATÓRIO: garantir comando de compilação Build sem erro no fim do estágio.
+- [ ] **T-30** Instalar Next.js (latest) via Docker e configurar **APENAS shadcn/ui** (`npx shadcn-ui@latest add button card dialog form select`). OBRIGATÓRIO: garantir comando de compilação Build sem erro no fim do estágio.
 - [ ] **T-31** Implementar NextAuth JWT configurado garantindo mapping da sessão para Papel/Tenant em layout de server.
 - [ ] **T-32** Componentar proteção de rota (Server side logic app config) e validar redirecionamentos `302/401` com acessos cruzados.
 
 ### Componentes Globais e Estruturais
-- [ ] **T-34** Criar Layouts de Agrupamento `(coordenacao)`, `(apoio)` Server-Side provando que hidratam corretamente (sem erro de mismatch SSR/CSR).
+- [ ] **T-34** Criar Layouts de Agrupamento `(coordenacao)`, `(apoio)`, `(regente)` Server-Side provando que hidratam corretamente (sem erro de mismatch SSR/CSR).
 - [ ] **T-35** Abstraição Offline-First do Dexie.js (`use client`). Comprovar renderização limpa da store com checagem assíncrona onMount no hook.
 
 ### Telas Críticas e Validações UI Estritas
@@ -76,13 +76,13 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 
 | Cenário | Resultado esperado |
 |---|---|
-| Prof. Apoio tenta cadastrar aluno | 403 Forbidden |
-| Prof. PI tenta criar Relatório Anual | 403 Forbidden |
-| Prof. Apoio tenta criar Relatório Trimestral | 403 Forbidden |
-| Prof. PI cria Relatório Trimestral (aluno vinculado) | 201 Created |
-| Prof. Apoio cria Relatório Anual (aluno vinculado) | 201 Created |
-| Prof. Apoio faz upload de foto (aluno vinculado) | 201 Created |
-| Prof. PI faz upload de foto (aluno vinculado) | 201 Created |
+| Profissional de Apoio tenta cadastrar aluno | 403 Forbidden |
+| Prof. Regente tenta criar Relatório Anual | 403 Forbidden |
+| Profissional de Apoio tenta criar Relatório Trimestral | 403 Forbidden |
+| Prof. Regente cria Relatório Trimestral (aluno vinculado) | 201 Created |
+| Profissional de Apoio cria Relatório Anual (aluno vinculado) | 201 Created |
+| Profissional de Apoio faz upload de foto (aluno vinculado) | 201 Created |
+| Prof. Regente faz upload de foto (aluno vinculado) | 201 Created |
 | Coordenação acessa qualquer endpoint | 200/201 OK |
 
 ### Frontend
@@ -103,17 +103,17 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 - [ ] **T-61** Configurar Dexie.js com schema espelhando entidades: `relatorios_pendentes`, `fotos_pendentes`
 - [ ] **T-62** Implementar escrita-em-IndexedDB-primeiro em todas as ações de criar/editar
 - [ ] **T-63** Implementar fila de sync (dispara ao `navigator.onLine` voltar a true)
-- [ ] **T-64** Detectar conflito de relatório (`updated_at`): preservar ambas versões, setar `conflict_flag`
+- [ ] **T-64** Detectar conflito de relatório (`updated_at`): versão mais recente prevalece, setar `conflict_flag: true` e exibir aviso na próxima abertura
 - [ ] **T-65** Indicador visual de status online/offline no cabeçalho da aplicação
 
 ---
 
 ## Critérios de Aceite (MVP Completo)
 
-- [ ] Coordenação consegue cadastrar qualquer entidade e acessar todos os dados
-- [ ] Prof. AEE consegue cadastrar aluno, vincular Prof. Apoio e criar todos os tipos de relatório
-- [ ] Prof. Apoio consegue criar Relatório Anual e enviar foto de aluno vinculado
-- [ ] Prof. PI consegue criar Relatório Trimestral e enviar foto de aluno vinculado
+- [ ] Coordenação consegue cadastrar usuários de qualquer tipo, visualizar todos os dados e comentar relatórios — mas NÃO cria nem edita relatórios
+- [ ] Prof. AEE consegue cadastrar aluno, vincular Profissional de Apoio e criar todos os tipos de relatório
+- [ ] Profissional de Apoio consegue criar Relatório Anual e enviar foto de aluno vinculado
+- [ ] Prof. Regente consegue criar Relatório Trimestral e enviar foto de aluno vinculado
 - [ ] Transferência de escola revoga acesso da professora anterior corretamente
 - [ ] "📸 Registrar Momento" funciona offline em ≤ 3 toques e sincroniza ao reconectar
 - [ ] RLS impede vazamento de dados entre papéis (verificado por testes de integração)
@@ -123,7 +123,6 @@ Total estimado: **60 horas** | Stack: FastAPI (Python) + Next.js + PostgreSQL + 
 
 ## Adiado para Fase 2
 
-- Interface de diff visual para conflitos de sync
 - Notificação automática de transferência de escola
 - Editor visual de templates (drag-and-drop)
 

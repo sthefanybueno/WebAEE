@@ -23,38 +23,65 @@ context: |
   Por favor, gere todos os artefatos em Português do Brasil.
   Você é ESTRITAMENTE PROIBIDO de adicionar bibliotecas não listadas, de usar frameworks diferentes dos designados e de usar emojis onde ícones são necessários (USE OBRIGATORIAMENTE **Lucide Icons**). Não invente caminhos se a stack já prevê uma solução.
 
+  # VERSÕES (sempre latest stable de cada pacote)
+  - Usar SEMPRE a versão mais recente disponível e estável de cada dependência.
+  - Não pinar versões nos artefatos gerados a menos que haja incompatibilidade documentada.
+  - Exemplo: `fastapi`, `sqlmodel`, `pydantic`, `next`, `tailwindcss`, `shadcn/ui` → sempre latest.
+
   # TECH STACK - BACKEND
   - Framework: FastAPI
-  - Banco de dados: PostgreSQL (Obrigatório, sem margem para outro banco em produção)
-  - ORM: SQLAlchemy 2.0 (ou SQLModel)
+  - Banco de dados: PostgreSQL 16+ (Obrigatório, sem margem para outro banco em produção)
+  - ORM: SQLModel (latest). SQLModel integra SQLAlchemy + Pydantic v2 em um único model — use sempre para definição de tabelas e schemas de API. Migrations via Alembic (compatível com SQLModel).
+  - Padrão de modelo: um `SQLModel` (Table=True) para a tabela → `SQLModel` (sem Table) para request/response da API. Sem duplicação de schemas separados por camada.
   - Validação e Schemas: Tipagem estrita via Pydantic v2. Nada de dicionários mágicos; tudo deve ter schema type-safe.
 
+  # BACKEND ARCHITECTURE (Clean Architecture + DDD — estrutura obrigatória)
+  - domain/: Entidades, Value Objects, Aggregates e regras puras de negócio. Sem imports de frameworks.
+  - application/: Casos de uso (Use Cases). Orquestra domain/ e chama infrastructure/.
+  - infrastructure/: Repositórios, ORM (SQLModel), storage, integrações externas.
+  - interfaces/: FastAPI routers e schemas Pydantic (request/response). Única camada que conhece HTTP.
+  - SOLID: responsabilidade única por classe. Nenhuma lógica de negócio em routers.
+  - Testes: pytest com fixtures async, SQLite in-memory para testes unitários, cobertura >= 80%.
+
   # TECH STACK - FRONTEND
-  - Framework: Next.js com App Router (Obrigatório, não use Pages Router)
+  - Framework: Next.js com App Router (latest stable — Obrigatório, não use Pages Router)
   - Linguagem: TypeScript (Tipagem estrita obrigatória em todos os arquivos)
-  - Estilo: Tailwind CSS (Apenas classes utilitárias base se o shadcn não cobrir)
-  - Componentes: Uso exclusívo e prioritário do ecossistema shadcn/ui. Nunca construa componentes interativos do zero (como modais ou seletores) se existir no shadcn.
+  - Estilo: Tailwind CSS (latest stable — Apenas classes utilitárias base se o shadcn não cobrir)
+  - Componentes: Uso exclusivo e prioritário do ecossistema shadcn/ui (latest). Nunca construa componentes interativos do zero (como modais ou seletores) se existir no shadcn.
+  - Offline Store: Dexie.js (latest) sobre IndexedDB — ÚNICA biblioteca autorizada para persistência local. Não use localForage, idb nem IndexedDB direto.
+  - PWA / Service Worker: next-pwa (latest) — responsável pelo cache do shell da aplicação. Configuração obrigatória em next.config.js.
 
   # ORQUESTRAÇÃO / INFRA
   - Todo o sistema DEVE rodar isolado via Docker e docker-compose. A IA deve gerar os Dockerfiles (Frontend/Backend) pertinentes e declarar volumes/redes adequadamente.
 
   # DOMAIN
   - Sistema de gestão de Atendimento Educacional Especializado (AEE), operado por professoras offline-first (com sync IndexedDB).
-    
+
+  # SECURITY BASELINE (obrigatório — nunca flexibilizar sem decisão explícita)
+  - Auth: JWT stateless com rotating tokens. TTL de 8 horas configurável via variável de ambiente.
+  - Senha: bcrypt + salt. NUNCA MD5, NUNCA plaintext, NUNCA SHA1 sem salt.
+  - CORS: configuração explícita e restritiva. NUNCA use '*' em produção — lista branca de origens.
+  - RLS: PostgreSQL Row-Level Security para isolamento de dados por papel — implementado no banco, não só na aplicação.
+  - Headers obrigatórios em produção: Content-Security-Policy, X-Frame-Options, HSTS, X-Content-Type-Options.
+  - Campos sensíveis (diagnostico, laudo): NUNCA retornados em listagens gerais; toda leitura grava linha em audit_log.
+  - Variáveis de ambiente: segredos gerenciados via .env (nunca commitados). Exemplo obrigatório em .env.example.
+
 rules:
   proposal:
-    - Toda nova proposta deve especificar claramente os objetivos, não-objetivos e decisões estritas de base/arquitetura.
+    - Toda nova proposta deve especificar claramente os objetivos, não-objetivos e decisões estritas de base/arquitetura, incluindo o impacto nas versões travadas e na segurança.
 
   specs:
     - Use OBRIGATORIAMENTE palavras-chave do padrão RFC 2119 (MUST, SHALL, SHOULD, MUST NOT) em caixa alta na descrição.
     - Use sempre o formato Dado/Quando/Então (Given/When/Then) para mapeamento dos fluxos em formato testável.
     - Especifique explicitamente Caminhos de Erro (o que MUST acontecer quando o token está inválido ou banco falha, em vez de só focar nos sucessos).
+    - Detalhe os requisitos de segurança para cada funcionalidade (ex: "Apenas usuários com role 'admin' PODEM acessar este endpoint").
 
   design:
-    - Backend: Detalhe estrutural das tabelas PostgreSQL (chaves estrangeiras, índices e RLS policies) e os contratos exatos do modelo via Pydantic (Type-safety ponta a ponta).
-    - Frontend: Faça clara demarcação de diretórios que são Server Components e que são Client Components (com 'use client'). Liste os componentes do shadcn/ui que serão instalados e utilizados.
-    - Infra: Detalhar a Topologia do Docker Compose, declarando serviços, volumes de dados, chaves env necessárias.
+    - Backend: Detalhe estrutural das tabelas PostgreSQL (chaves estrangeiras, índices e RLS policies), os contratos exatos do modelo via SQLModel (Type-safety ponta a ponta) e a separação clara das camadas (Controller, Service, Repository). Inclua como a autenticação/autorização será integrada.
+    - Frontend: Faça clara demarcação de diretórios que são Server Components e que são Client Components (com 'use client'). Liste os componentes do shadcn/ui que serão instalados e utilizados. Detalhe como os tokens JWT serão armazenados e utilizados de forma segura.
+    - Infra: Detalhar a Topologia do Docker Compose, declarando serviços, volumes de dados, chaves env necessárias e como as variáveis de ambiente sensíveis serão injetadas.
 
   tasks:
     - Seja hiper-sequencial entre camadas (Docker -> DB -> API -> Front).
-    - Inclua passos de validação técnica após criações complexas (ex: "Garantir que a renderização passa no build", "Verificar se as relations do SQLAlchemy inicializam corretamente listando os models"). Não passe instruções abstratas.
+    - Inclua passos de validação técnica após criações complexas (ex: "Garantir que a renderização passa no build", "Verificar se as relations do SQLModel inicializam corretamente listando os models"). Não passe instruções abstratas.
+    - Adicione tarefas específicas para garantir a conformidade com o travamento de versões e a baseline de segurança (ex: "Configurar CORS no FastAPI", "Implementar validação de esquema Pydantic para todas as entradas de API").

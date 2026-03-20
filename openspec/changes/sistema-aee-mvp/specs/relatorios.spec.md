@@ -18,4 +18,4 @@
 **Given (Dado)** que quem detém a sessão JWT é classificado estritamente como `prof_apoio`,
 **When (Quando)** tenta-se forçar uma injeção de payload para o `/api/reports/trimestral` (permissão estrita da Prof PI),
 **Then (Então)** a API MUST extrair a credencial, negar de imediato (HTTP 403 Forbidden) e abortar transações de write.
-**And (E)** MUST logar no servidor esta tentativa maliciosa ou de glitch de client routing.
+**And (E)** MUST logar no servidor esta tentativa de bypass de permissão — Relatório Trimestral é permissão exclusiva da Prof. Regente, não do Profissional de Apoio.

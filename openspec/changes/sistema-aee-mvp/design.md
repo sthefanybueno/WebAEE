@@ -6,7 +6,7 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                        SISTEMA AEE MVP                          │
 ├─────────────────────────┬───────────────────────────────────────┤
-│  FRONTEND (PWA)         │  Next.js 14 App Router + TypeScript   │
+│  FRONTEND (PWA)         │  Next.js (latest) App Router + TS     │
 │                         │  TailwindCSS + shadcn/ui               │
 │                         │  Service Worker (shell offline)        │
 │                         │  Dexie.js → IndexedDB (store local)   │
@@ -14,7 +14,7 @@
 ├─────────────────────────┼───────────────────────────────────────┤
 │  BACKEND (REST API)     │  Python 3.12 + FastAPI                 │
 │                         │  Pydantic v2 (validação e schemas)     │
-│                         │  SQLAlchemy 2 async + Alembic          │
+│                         │  SQLModel (latest) + Alembic            │
 │                         │  JWT (autenticação stateless)          │
 ├─────────────────────────┼───────────────────────────────────────┤
 │  BANCO DE DADOS         │  PostgreSQL 16 com Row-Level Security  │
@@ -51,20 +51,20 @@ backend/
 
 ```python
 # domain/entities/
-Usuario(id, nome, email, papel: Enum[coordenacao|prof_aee|prof_apoio|prof_pi], ativo)
+Usuario(id, nome, email, papel: Enum[coordenacao|prof_aee|prof_apoio|prof_regente], ativo)
 Aluno(id, nome, data_nascimento, escola_atual, historico_escolas[], diagnostico*, responsavel, status)
 RelatorioAEE(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
 RelatorioAnual(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
 RelatorioTrimestral(id, aluno_id, autor_id, conteudo_json, template_snapshot, updated_at, updated_by)
 Foto(id, aluno_id, autor_id, url, tag_pedagogica, sync_status, created_at)
-VinculoProfessor(id, usuario_id, aluno_id, data_inicio, data_fim?)
+VinculoProfessor(id, usuario_id, escola_id, aluno_id, data_inicio, data_fim?)
 AuditLog(id, usuario_id, acao, entidade, campo_sensivel, timestamp)
 ```
 *campo sensível — auditado e nunca exportado em geral*
 
 ---
 
-## Modelo de Dados Estrito (PostgreSQL + SQLAlchemy 2.0)
+## Modelo de Dados Estrito (PostgreSQL + SQLModel)
 
 O banco de dados deve ser construído rigorosamente com as seguintes Relações (FKs) e Índices de Performance, para barrar alucinações na tipagem de objetos OMR.
 
@@ -79,8 +79,8 @@ O banco de dados deve ser construído rigorosamente com as seguintes Relações 
 - **`report_templates`**: Configuração central do template (`tipo`, `secoes` como JSONB).
 - **`reports`**: O Snapshot. `id` (PK, UUID), `tipo` (Enum), `aluno_id` (FK -> students.id), `autor_id` (FK -> users.id), `template_snapshot` (JSONB congelado).
 
-### Contratos Pydantic v2 (TypeSafe API)
-Todo model de SQLAlchemy da camada Infrastructure DEVE transitar para a interface do FastAPI utilizando contratos rigorosos Pydantic v2. A API NÃO pode retornar o object proxy do banco:
+### Contratos SQLModel (TypeSafe API)
+Todo model da camada Infrastructure DEVE ser um `SQLModel` (Table=True). Os schemas de API (request/response) são `SQLModel` sem `table=True`. A API NÃO pode retornar o object proxy do banco:
 - `ModelCreate` para entrada POST (Valida tipos, min_length).
 - `ModelUpdate` para PATCH (Campos Optional[] explícitos).
 - `ModelRead` para saídas, empregando obrigatório `model_config = ConfigDict(from_attributes=True)`.
@@ -92,7 +92,7 @@ Todo model de SQLAlchemy da camada Infrastructure DEVE transitar para a interfac
 | `students` | `status: ativo\|arquivado`, `escola_atual_id`, `consentimento_lgpd`, `data_consentimento`, `base_legal` |
 | `students` (sensíveis) | `diagnostico`, `laudo` → `sensivel: true` na camada de aplicação |
 | `student_school_history` | `escola_id`, `data_inicio`, `data_fim` |
-| `professor_assignments` | `usuario_id`, `aluno_id`, `tipo_papel: apoio\|pi`, `data_inicio`, `data_fim` |
+| `professor_assignments` | `usuario_id`, `escola_id`, `aluno_id`, `tipo_papel: apoio\|regente`, `data_inicio`, `data_fim` |
 | `report_templates` | `tipo: aee\|anual\|trimestral`, `secoes: JSONB[]`, `versao` |
 | `reports` | `tipo`, `template_snapshot: JSONB`, `updated_at`, `updated_by` |
 | `photos` | `tag: autonomia\|comunicacao\|motor_fino\|socializacao\|outro`, `sync_status: local\|synced` |
@@ -104,15 +104,15 @@ Todo model de SQLAlchemy da camada Infrastructure DEVE transitar para a interfac
 
 ### Matriz de Permissões
 
-| Recurso | Coordenação | Prof. AEE | Prof. Apoio | Prof. PI |
+| Recurso | Coordenação | Prof. AEE | Profissional de Apoio | Professora Regente |
 |---|---|---|---|---|
-| Cadastrar usuários (todos) | ✅ | ✅ (só Prof. Apoio) | ❌ | ❌ |
-| CRUD Alunos | ✅ | ✅ | ❌ | ❌ |
-| Relatório AEE | ✅ | ✅ criar/editar | ❌ | ❌ |
-| Relatório Anual | ✅ | ✅ | ✅ (seus alunos) | ❌ |
-| Relatório Trimestral | ✅ | ✅ | ❌ | ✅ (seus alunos) |
-| Upload de Fotos | ✅ | ✅ | ✅ (seus alunos) | ✅ (seus alunos) |
-| Dashboard global | ✅ | ✅ (sua carteira) | ❌ | ❌ |
+| Cadastrar usuários (qualquer tipo) | ✅ | ✅ (só Profissional de Apoio) | ❌ | ❌ |
+| CRUD Alunos | ✅ (só visualiza) | ✅ criar/editar | ❌ | ❌ |
+| Relatório AEE | ✅ ver+comentar | ✅ criar/editar | ❌ | ❌ |
+| Relatório Anual | ✅ ver+comentar | ✅ | ✅ (seus alunos) | ❌ |
+| Relatório Trimestral | ✅ ver+comentar | ✅ | ❌ | ✅ (seus alunos) |
+| Upload de Fotos | ✅ ver | ✅ | ✅ (seus alunos) | ✅ (seus alunos) |
+| Dashboard global | ✅ | ✅ (suas escolas) | ❌ | ❌ |
 | Ver campos sensíveis | ✅ | ✅ | ❌ | ❌ |
 
 ### Estratégia RLS (PostgreSQL)
@@ -125,12 +125,16 @@ CREATE POLICY student_access ON students
     (current_setting('app.role') = 'coordenacao'
       AND tenant_id = current_setting('app.tenant_id')::uuid)
     OR
-    -- Prof. AEE vê alunos do seu tenant
+    -- Prof. AEE vê alunos das escolas às quais está vinculada
     (current_setting('app.role') = 'prof_aee'
-      AND tenant_id = current_setting('app.tenant_id')::uuid)
+      AND escola_atual_id IN (
+        SELECT escola_id FROM professor_assignments
+        WHERE usuario_id = current_setting('app.user_id')::uuid
+          AND data_fim IS NULL
+      ))
     OR
-    -- Prof. Apoio vê apenas alunos atualmente vinculados a ela
-    (current_setting('app.role') IN ('prof_apoio', 'prof_pi')
+    -- Profissional de Apoio / Professora Regente vê apenas alunos vinculados a ela
+    (current_setting('app.role') IN ('prof_apoio', 'prof_regente')
       AND id IN (
         SELECT aluno_id FROM professor_assignments
         WHERE usuario_id = current_setting('app.user_id')::uuid
@@ -178,6 +182,98 @@ Para prevenir interfaces inconsistentes ou feitas à caneta de dezenas de classe
 
 ---
 
+## Contracts TypeSafe: Schemas Pydantic v2
+
+Todos os requests e responses da API DEVEM passar por schemas Pydantic v2. Nenhum `dict` solto é permitido — tudo com type hints e validação explícita.
+
+### Padrão obrigatório por entidade
+
+Cada entidade tem três schemas separados:
+- `XxxCreate` — entrada de POST (campos obrigatórios, validações estritas)
+- `XxxUpdate` — entrada de PATCH (todos os campos `Optional` explícitos)
+- `XxxRead` — saída (sempre com `model_config = ConfigDict(from_attributes=True)`)
+
+### Schema: Relatório
+
+```python
+from uuid import UUID
+from datetime import datetime
+from typing import Literal, Optional
+from pydantic import BaseModel, Field, field_validator, ConfigDict
+from enum import Enum
+
+class TipoRelatorio(str, Enum):
+    aee = "aee"
+    anual = "anual"
+    trimestral = "trimestral"
+
+class CreateRelatorioRequest(BaseModel):
+    aluno_id: UUID = Field(..., description="ID do aluno — MUST existir e estar ativo")
+    tipo: TipoRelatorio = Field(..., description="Tipo do relatório")
+    conteudo_json: dict = Field(..., description="Conteúdo estruturado conforme template da versão corrente")
+
+    @field_validator("conteudo_json")
+    @classmethod
+    def validate_conteudo(cls, v: dict) -> dict:
+        # MUST conter ao menos a chave 'identificacao'
+        if "identificacao" not in v:
+            raise ValueError("Campo 'identificacao' é obrigatório no conteúdo do relatório")
+        return v
+
+class UpdateRelatorioRequest(BaseModel):
+    conteudo_json: Optional[dict] = None
+
+class RelatorioRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    aluno_id: UUID
+    tipo: TipoRelatorio
+    template_snapshot: dict
+    updated_at: datetime
+    updated_by: UUID
+    sync_status: Literal["synced", "pending", "failed"]
+```
+
+### Schema: Aluno
+
+```python
+from uuid import UUID
+from datetime import date
+from typing import Optional, Literal
+from pydantic import BaseModel, Field, ConfigDict
+
+class AlunoCreate(BaseModel):
+    nome: str = Field(..., min_length=2, max_length=200)
+    data_nascimento: date
+    escola_atual_id: UUID
+    consentimento_lgpd: bool = Field(..., description="MUST ser True para cadastrar")
+    base_legal: str = Field(default="Art. 58 LDB")
+    # Campos sensíveis — exigem papel coordenacao ou prof_aee
+    diagnostico: Optional[str] = Field(None, description="Sensível — auditado em audit_log")
+    laudo: Optional[str] = Field(None, description="Sensível — auditado em audit_log")
+
+class AlunoUpdate(BaseModel):
+    nome: Optional[str] = Field(None, min_length=2, max_length=200)
+    escola_atual_id: Optional[UUID] = None
+    status: Optional[Literal["ativo", "arquivado"]] = None
+
+class AlunoRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    nome: str
+    status: Literal["ativo", "arquivado"]
+    escola_atual_id: Optional[UUID]
+    consentimento_lgpd: bool
+    data_consentimento: Optional[date]
+    # diagnostico e laudo NUNCA retornados em AlunoRead — schema separado com auditoria
+```
+
+> **Regra:** campos `diagnostico` e `laudo` SÓ são retornados pelo endpoint `GET /api/alunos/{id}/dados-sensiveis`, que exige papel `coordenacao` ou `prof_aee` e registra entrada em `audit_log`.
+
+---
+
 ## Estratégia Offline-First
 
 ### Fluxo
@@ -186,7 +282,7 @@ Para prevenir interfaces inconsistentes ou feitas à caneta de dezenas de classe
 AÇÃO DO USUÁRIO (offline)
     │
     ▼
-IndexedDB (Dexie.js)        ← escrita local imediata
+IndexedDB (Dexie.js)        ← escrita local imediata (sync_status: "pending")
     │
     ▼ (ao reconectar)
 Sync Queue Worker           ← Service Worker em background
@@ -202,9 +298,43 @@ PostgreSQL                  ← fonte canônica de verdade
 
 | Tipo de dado | Estratégia |
 |---|---|
-| Texto de relatório | Unidade atômica. `updated_at` comparado no sync. Conflito detectado → ambas versões preservadas, `conflict_flag` setado, Prof. AEE notificada |
+| Texto de relatório | Unidade atômica. `updated_at` comparado no sync. Conflito raro (cada escola tem uma Prof. AEE) — se ocorrer, versão mais recente prevalece e `conflict_flag` é setado |
 | Fotos | Sem conflito — cada foto é entidade independente com UUID. Upload idempotente |
 | Mudanças administrativas (transferências, vínculos) | Timestamp do servidor prevalece; aplicado no sync com audit trail |
+
+### Estratégia Detalhada de Conflito em Texto de Relatório
+
+Um conflito ocorre quando dois dispositivos distintos editam o mesmo relatório enquanto offline.
+
+**Algoritmo de detecção (no endpoint POST /api/sync/reports):**
+
+```
+1. Receber {relatorio_id, updated_at_local, conteudo_json_local}
+2. Buscar updated_at_servidor = SELECT updated_at FROM reports WHERE id = relatorio_id
+3. SE updated_at_servidor > updated_at_local:
+   a. Inserir versão local com status = "conflito" e conflict_flag = true
+   b. Manter versão do servidor como canônica (sync_status = "synced")
+   c. Retornar 409 Conflict com body {versions: [servidor, local]}
+4. SENÃO (sem conflito):
+   a. UPDATE reports SET conteudo_json = ..., updated_at = now(), sync_status = "synced"
+   b. Retornar 200 OK
+```
+
+**Estrutura de dados no IndexedDB (conflito salvo):**
+
+```ts
+interface RelatorioConflict {
+  id: string          // uuid original do relatório
+  versao_local: object
+  versao_servidor: object
+  detectado_em: string  // ISO timestamp
+  resolvido: boolean
+}
+// Tabela Dexie: "conflicts" — consultada no login após reconexão
+```
+
+**UX de resolução:** ao abrir o relatório com conflito, banner exibe as duas versões lado a lado com botões "Manter esta" e "Descartar". A escolha é enviada para `POST /api/sync/reports/resolve`.
+
 
 ---
 
@@ -277,8 +407,8 @@ Ao salvar um relatório, `template_snapshot` guarda uma cópia congelada da vers
 | Interface | Usuário-alvo | Princípio de design |
 |---|---|---|
 | **Dashboard completo** | Coordenação / Prof. AEE | Multi-escola, desktop-first, responsivo |
-| **Visão Apoio** | Prof. Apoio | Wizard passo-a-passo, mobile-first, navegação mínima |
-| **Visão PI** | Prof. PI | Igual à Visão Apoio, com acesso ao Relatório Trimestral |
+| **Visão Apoio** | Profissional de Apoio | Wizard passo-a-passo, mobile-first, navegação mínima |
+| **Visão PI** | Prof. Regente | Igual à Visão Apoio, com acesso ao Relatório Trimestral |
 
 ---
 

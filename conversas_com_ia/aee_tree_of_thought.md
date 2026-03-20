@@ -17,7 +17,7 @@ O sistema precisa funcionar com **falha de conectividade**, **múltiplos atores 
 
 ### 🌱 Ramo 1.A — Conflito de Sincronização Offline
 
-**Cenário:** Valdirene edita o PDI do aluno João no notebook da sala de recursos (offline). Simultaneamente, a Prof. Apoio carrega uma foto no celular (também offline). Quando ambas ficam online, o que acontece?
+**Cenário:** Valdirene edita o PDI do aluno João no notebook da sala de recursos (offline). Simultaneamente, a Profissional de Apoio carrega uma foto no celular (também offline). Quando ambas ficam online, o que acontece?
 
 | Sub-ramo | Abordagem | Impacto | Complexidade | Veredicto |
 |---|---|---|---|---|
@@ -29,7 +29,7 @@ O sistema precisa funcionar com **falha de conectividade**, **múltiplos atores 
 
 ---
 
-### 🌱 Ramo 1.B — Usuária sem Familiaridade Tecnológica (Prof. Apoio)
+### 🌱 Ramo 1.B — Usuária sem Familiaridade Tecnológica (Profissional de Apoio)
 
 **Cenário:** A professora de apoio tem 55 anos, nunca usou sistema web, acessa pelo celular pessoal em 3G. Ela precisa subir um relatório quinzenal.
 
@@ -45,7 +45,7 @@ O sistema precisa funcionar com **falha de conectividade**, **múltiplos atores 
 
 ### 🌱 Ramo 1.C — Troca de Escola no Meio do Ano
 
-**Cenário:** O aluno Pedro é transferido da Escola A para a Escola B em junho. Seus dados, fotos e relatórios devem seguir ele — mas a prof. apoio da Escola A não deve mais acessá-los.
+**Cenário:** O aluno Pedro é transferido da Escola A para a Escola B em junho. Seus dados, fotos e relatórios devem seguir ele — mas a Profissional de Apoio da Escola A não deve mais acessá-los.
 
 | Sub-ramo | Abordagem | Impacto | Complexidade | Veredicto |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ O sistema precisa funcionar com **falha de conectividade**, **múltiplos atores 
 | **1.C.2** Histórico imutável por período | Relatórios anteriores ficam "arquivados" — visíveis apenas para Valdirene, não para a nova apoio | 9 | 3 | ✅ **Incluir no MVP** |
 | **1.C.3** Notificação automática de transferência | Sistema detecta mudança de escola e avisa Valdirene para reatribuir apoio | 7 | 5 | 🔶 **Fase 2** |
 
-> **✅ Decisão Fase 1:** Aluno tem campo `escola_atual` + `histórico de escolas (com datas)`. Permissão de prof. apoio é **vinculada ao período**, não ao aluno. Relatórios "congelados" do período anterior ficam somente para Valdirene.
+> **✅ Decisão Fase 1:** Aluno tem campo `escola_atual` + `histórico de escolas (com datas)`. Permissão de Profissional de Apoio é **vinculada ao período**, não ao aluno. Relatórios "congelados" do período anterior ficam somente para Valdirene.
 
 ---
 
@@ -82,7 +82,7 @@ Funcionalidades simples de implementar que geram **adoção e retenção** imedi
 
 ### 🍏 Ramo 2.B — Relatório com "Última Vez Editado Por"
 
-**Cenário:** Valdirene abre o relatório de uma prof. apoio e não sabe se o que está vendo é a versão mais recente ou uma versão antiga. Não há indicação de quando foi editado ou por quem.
+**Cenário:** Valdirene abre o relatório de uma Profissional de Apoio e não sabe se o que está vendo é a versão mais recente ou uma versão antiga. Não há indicação de quando foi editado ou por quem.
 
 **Ideia:** Cada relatório exibe `Última edição: 08/03 às 14h32 — Profª Ana`. Nenhum "controle de versão" complexo — apenas auditoria simples de `updated_at` + `updated_by`.
 
@@ -121,7 +121,7 @@ Dados de **crianças com diagnóstico de Necessidade Educacional Especial** são
 
 ### 🔴 Ramo 3.A — Dados Sensíveis sem Controle de Acesso Granular
 
-**Cenário:** A prof. apoio Ana consegue, por um bug ou descuido, acessar o laudo médico do aluno que não é dela. Esse laudo contém diagnóstico de TEA.
+**Cenário:** A Profissional de Apoio Ana consegue, por um bug ou descuido, acessar o laudo médico do aluno que não é dela. Esse laudo contém diagnóstico de TEA.
 
 | Sub-ramo | Abordagem | Impacto | Complexidade | Veredicto |
 |---|---|---|---|---|
@@ -166,8 +166,8 @@ Dados de **crianças com diagnóstico de Necessidade Educacional Especial** são
 | ID | Ideia | Fase | Impacto | Complexidade | Prioridade |
 |---|---|---|---|---|---|
 | 1.A.2 | Merge por entidade separada (sync offline) | MVP | 8 | 5 | 🟡 Alta |
-| 1.B.1+2 | UX diferenciada para Prof. Apoio + wizard | MVP | 9 | 4 | 🔴 Crítica |
-| 1.B.3 | Login via magic link para prof. apoio | MVP | 7 | 3 | 🟡 Alta |
+| 1.B.1+2 | UX diferenciada para Profissional de Apoio + wizard | MVP | 9 | 4 | 🔴 Crítica |
+| 1.B.3 | Login via magic link para Profissional de Apoio | MVP | 7 | 3 | 🟡 Alta |
 | 1.C.1+2 | Transferência de escola com corte de acesso | MVP | 9 | 4 | 🔴 Crítica |
 | 2.A | Atalho "📸 Registrar Momento" | MVP | 9 | 3 | 🔴 Crítica |
 | 2.B | "Última edição por [nome]" em relatórios | MVP | 8 | 1 | 🔴 Crítica |
@@ -188,7 +188,7 @@ Dados de **crianças com diagnóstico de Necessidade Educacional Especial** são
 
 Estes itens **não estavam no escopo original** e merecem discussão antes de fechar o PRD:
 
-1. **🔑 Magic link / login simplificado para prof. apoio** — sem isso, a adoção por professoras com baixa afinidade digital fracassa no dia 1.
+1. **🔑 Magic link / login simplificado para Profissional de Apoio** — sem isso, a adoção por professoras com baixa afinidade digital fracassa no dia 1.
 2. **📸 Captura rápida "no momento"** — o fluxo atual exige navegar por menus para tirar uma foto associada; isso mata o hábito de uso.
 3. **⚖️ Base legal declarada no sistema** — sem isso, o sistema pode ser operacionalmente funcional mas juridicamente vulnerável desde o primeiro dado cadastrado.
 4. **🔒 RLS no banco de dados** — a arquitetura atual menciona RLS mas não o coloca como requisito de MVP. Dado que há dados sensíveis de crianças, **não pode ser Fase 2**.

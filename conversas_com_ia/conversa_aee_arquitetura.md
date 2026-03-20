@@ -50,7 +50,7 @@ A aplicação evolui para um sistema de gestão documental com **busca semântic
 │  [Aluno] ──── [Relatórios por período]           │
 │     │──────── [Fotos + tags pedagógicas]         │
 │     │──────── [PDI / Laudo / Parecer]            │
-│  [Prof. Apoio] ── [Diário digital]               │
+│  [Profissional de Apoio] ── [Diário digital]               │
 │  🔍 Busca: "João, 2º bimestre, comunicação"      │
 └──────────────────────────────────────────────────┘
 ```
@@ -102,7 +102,7 @@ A aplicação cobre também a **camada administrativa** das professoras de apoio
 |---|---|---|---|
 | **Complexidade técnica** | 🟡 Média | 🟡 Média-alta | 🔴 Alta |
 | **Valor imediato** | ✅ Alto | 🟡 Médio | ✅ Alto |
-| **Participação da prof. apoio** | Passiva | Ativa (registros) | Ativa + accountability |
+| **Participação da Profissional de Apoio** | Passiva | Ativa (registros) | Ativa + accountability |
 | **Foco principal** | Organização | Evidência pedagógica | Gestão de equipe |
 | **Ideal para** | 1 coordenadora | Mostrar evolução ao aluno/família | Escolas com várias apoios |
 | **Risco principal** | Vira "gaveta digital" | Sobrecarga de registro | Resistência das professoras |
@@ -128,14 +128,14 @@ A aplicação cobre também a **camada administrativa** das professoras de apoio
 ┌─────────────────────────────────────────────────────────────────┐
 │                    CENÁRIO REAL — VALDIRENE                     │
 │  Valdirene (Prof. AEE)                                          │
-│     ├── Escola A ──── Alunos + Prof. Apoio A                   │
-│     ├── Escola B ──── Alunos + Prof. Apoio B                   │
-│     └── Escola C ──── Alunos + Prof. Apoio C                   │
+│     ├── Escola A ──── Alunos + Profissional de Apoio A                   │
+│     ├── Escola B ──── Alunos + Profissional de Apoio B                   │
+│     └── Escola C ──── Alunos + Profissional de Apoio C                   │
 │                                                                 │
 │  Por aluno:                                                     │
 │     ├── 📸 Fotos (galeria por aluno)                            │
 │     ├── 📄 PDI (formato obrigatório, template próprio)          │
-│     └── 📋 Relatório da Prof. Apoio (template diferente)        │
+│     └── 📋 Relatório da Profissional de Apoio (template diferente)        │
 │                                                                 │
 │  Constraints críticos:                                          │
 │  ⚡ Offline-first (wifi instável nas escolas)                   │
@@ -172,7 +172,7 @@ Seções adicionáveis/removíveis sem código
 ## 💬 Respostas Finais do Usuário
 
 **Usuário:**
-> 1. A própria prof. apoio faz o relatório no sistema — ela também terá acesso ao sistema, porém limitado.
+> 1. A própria Profissional de Apoio faz o relatório no sistema — ela também terá acesso ao sistema, porém limitado.
 > 2. As fotos são adicionadas por upload.
 > 3. Sim, a exportação como PDF é necessária.
 > 4. Para os relatórios usa o computador, mas é útil ser responsivo.
@@ -186,7 +186,7 @@ Seções adicionáveis/removíveis sem código
 |---|---|
 | **Escopo inicial** | 1 professora AEE (Valdirene), 3 escolas |
 | **Escopo futuro** | Multi-tenant: várias professoras AEE, possivelmente várias SEMEDs |
-| **Usuários** | Prof. AEE (admin), Prof. Apoio (acesso limitado) |
+| **Usuários** | Prof. AEE (admin), Profissional de Apoio (acesso limitado) |
 | **Relatórios** | Formato obrigatório, templates diferentes por tipo, mutável com o tempo |
 | **Fotos** | Upload por arquivo, vinculadas ao aluno |
 | **Exportação** | PDF formatado para entrega |

@@ -4,7 +4,9 @@
 
 Construir o MVP do **Sistema AEE** — uma Progressive Web App para gestão do Atendimento Educacional Especializado em escolas públicas brasileiras.
 
-O sistema atende **quatro perfis de usuário**: Coordenação (acesso livre), Professora AEE (gestora pedagógica), Professora de Apoio e Professora PI, cada um com responsabilidades e permissões distintas sobre alunos, relatórios e fotos pedagógicas — tudo funcionando em ambiente com **conectividade intermitente ou inexistente**.
+O sistema atende **quatro perfis de usuário**: Coordenação, Professora AEE, Profissional de Apoio e Professora Regente, cada um com responsabilidades e permissões distintas sobre alunos, relatórios e fotos pedagógicas — tudo funcionando em ambiente com **conectividade intermitente ou inexistente**.
+
+Cada escola possui uma Professora AEE responsável. A Professora AEE pode atuar em mais de uma escola, mas só acessa dados das escolas às quais está vinculada.
 
 ---
 
@@ -25,18 +27,18 @@ O fluxo atual é fragmentado entre papel, WhatsApp e drives pessoais:
 Entregar uma PWA offline-first cobrindo:
 
 1. **Quatro perfis de acesso com RBAC**
-   - **Coordenação** — acesso livre: cadastro de todos os usuários e entidades
-   - **Prof. AEE** — cadastra Prof. Apoio, alunos e todos os tipos de relatório
-   - **Prof. Apoio** — cadastra Relatório Anual e fotos dos seus alunos
-   - **Prof. PI** — cadastra Relatório Trimestral e fotos dos seus alunos
+   - **Coordenação** — cadastra usuários de qualquer tipo; visualiza e comenta todos os dados (relatórios e fichas); NÃO cria nem edita relatórios
+   - **Prof. AEE** — cadastra Profissional de Apoio, alunos e todos os tipos de relatório; acessa apenas as escolas às quais está vinculada
+   - **Profissional de Apoio** — cria Relatório Anual e faz upload de fotos dos seus alunos
+   - **Professora Regente** — cria Relatório Trimestral e faz upload de fotos dos seus alunos
 
 2. **Entidades do domínio**
-   - Coordenação, Prof. AEE, Prof. Apoio, Prof. PI, Aluno
+   - Coordenação, Prof. AEE, Profissional de Apoio, Professora Regente, Aluno
    - Relatório AEE, Relatório Anual, Relatório Trimestral
 
 3. **Gestão do ciclo de vida do aluno** — cadastro, transferência de escola com revogação de acesso, arquivamento soft-delete
 
-4. **Templates de documentos flexíveis** — Relatório AEE (Prof. AEE), Relatório Anual (Prof. AEE ou Prof. Apoio), Relatório Trimestral (Prof. AEE ou Prof. PI), cada um com seções configuráveis
+4. **Templates de documentos flexíveis** — Relatório AEE (Prof. AEE), Relatório Anual (Prof. AEE ou Profissional de Apoio), Relatório Trimestral (Prof. AEE ou Professora Regente), cada um com seções configuráveis
 
 5. **Captura rápida de foto** ("📸 Registrar Momento") — máximo 3 toques para vincular foto pedagógica a aluno com tag
 
@@ -50,9 +52,9 @@ Entregar uma PWA offline-first cobrindo:
 
 | Camada | Tecnologia |
 |---|---|
-| Backend | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 (async) |
-| Banco | PostgreSQL 16 (produção), SQLite (testes) |
-| Frontend | TypeScript, Next.js 14, TailwindCSS, shadcn/ui |
+| Backend | Python (latest), FastAPI (latest), SQLModel (latest), Pydantic v2 |
+| Banco | PostgreSQL (produção), SQLite in-memory (testes) |
+| Frontend | TypeScript, Next.js (latest) App Router, TailwindCSS, shadcn/ui |
 | Auth | NextAuth.js + JWT |
 | DevOps | Docker, Docker Compose, GitHub Actions (CI/CD) |
 | Testes | pytest (TDD), Playwright (E2E) |
@@ -71,21 +73,39 @@ Entregar uma PWA offline-first cobrindo:
 
 ## Fora do Escopo (Esta Change)
 
-- Magic link / login sem senha
-- Portal de responsáveis / pais
-- Exclusão física de dados
-- Expiração automatizada de dados LGPD (cron)
-- Expansão multi-tenant (múltiplas SEMEDs)
-- Interface de diff visual para conflitos de sync
+### Definitivamente Fora (nunca será implementado)
+- Magic link / login sem senha — não fará parte do produto
+- Portal de responsáveis / pais (requer fluxo de consentimento ativo fora do controle da escola)
+- Exclusão física de dados (LGPD exige apenas soft-delete; DELETE físico nunca deve existir na aplicação)
+- BI / relatórios de ocupação e evolução pedagógica agregados — não fará parte do produto
+- Autenticação externa (Google OAuth, Office 365) — sem garantias de integração com rede escolar
+
+### Adiado para Fase 2
+- Expiração automatizada de dados LGPD (cron de arquivamento após prazo legal)
+- Templates dinâmicos editáveis pela Coordenação (editor drag-and-drop)
+- Expansão multi-tenant (múltiplas SEMEDs) — arquitetura preparada, mas não executada no MVP
+
+---
+
+## Riscos Conhecidos e Mitigações
+
+| Risco | Impacto | Mitigação |
+|---|---|---|
+| Conectividade intermitente em campo | Alto | IndexedDB + Service Worker; sync queue com retry exponencial ao reconectar |
+| Conflito de sync (mesma Prof. AEE em dois dispositivos offline) | Baixo | Cenário raro — cada escola tem apenas uma Prof. AEE. Se ocorrer: timestamp comparativo (`updated_at`); versão mais recente prevalece; `conflict_flag: true` exibido na próxima abertura |
+| Crescimento de fotos no IndexedDB local | Médio | Compressão antes do upload (max 1MB/foto); alerta ao usuário ao atingir 80% do limite do navegador (≈50MB) |
+| Expiração de JWT enquanto offline | Médio | Refresh token armazenado de forma segura; ao reconectar, rotacionar silenciosamente antes do sync |
+| LGPD — acesso não autorizado a campos sensíveis | Alto | RLS no PostgreSQL + middleware FastAPI; campos `diagnostico`/`laudo` nunca retornados em listagens; toda leitura auditada em `audit_log` |
+| Transferência de escola sem revogação de acesso | Alto | Operação de transferência executa transação atômica: `professor_assignments.data_fim = now()` + nova vinculação + audit_log na mesma transação |
 
 ---
 
 ## Critérios de Sucesso
 
-- [ ] Coordenação consegue cadastrar qualquer entidade e acessar todos os dados
-- [ ] Prof. AEE consegue cadastrar alunos, Prof. Apoio e redigir todos os relatórios
-- [ ] Prof. Apoio consegue redigir Relatório Anual e fazer upload de fotos dos seus alunos
-- [ ] Prof. PI consegue redigir Relatório Trimestral e fazer upload de fotos dos seus alunos
+- [ ] Coordenação consegue cadastrar usuários de qualquer tipo, visualizar todos os dados e comentar relatórios — mas NÃO cria nem edita relatórios
+- [ ] Prof. AEE acessa apenas as escolas às quais está vinculada; consegue cadastrar alunos, Profissional de Apoio e redigir todos os relatórios
+- [ ] Profissional de Apoio consegue redigir Relatório Anual e fazer upload de fotos dos seus alunos
+- [ ] Professora Regente consegue redigir Relatório Trimestral e fazer upload de fotos dos seus alunos
 - [ ] Transferência de escola revoga corretamente o acesso da professora anterior
 - [ ] Campos sensíveis não aparecem em exportações gerais; todo acesso é auditado
 - [ ] Sync funciona sem perda de dados ao reconectar após edições offline
