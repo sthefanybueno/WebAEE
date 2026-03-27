@@ -1,0 +1,89 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────
+# Sistema AEE — Docker Compose (Desenvolvimento)
+# ─────────────────────────────────────────────
+# Serviços:
+#   db   → PostgreSQL 16 (único banco de produção autorizado)
+#   api  → FastAPI (backend Python)
+#   web  → Next.js (frontend — adicionado na Fase 5)
+#
+# RLS: o PostgreSQL 16 suporta Row-Level Security nativamente.
+# A extensão pgcrypto é ativada via init script para gen_random_uuid().
+# ─────────────────────────────────────────────
+
+services:
+
+  # ── Banco de Dados ────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: aee_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aee_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aee_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-aee_db}
+    ports:
+      - "5432:5432" # exposta apenas para desenvolvimento local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    networks:
+      - backend_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aee_user} -d ${POSTGRES_DB:-aee_db}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── API FastAPI ───────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aee_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-aee_user}:${POSTGRES_PASSWORD:-aee_secret}@db:5432/${POSTGRES_DB:-aee_db}
+      SECRET_KEY: ${SECRET_KEY:-change_me_in_production}
+      JWT_TTL_HOURS: ${JWT_TTL_HOURS:-8}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app # hot-reload em desenvolvimento
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  # ── Frontend Next.js (stub — Fase 5) ─────────
+  # web:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: aee_web
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - frontend_network
+
+  # ── Volumes ───────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+
+# ── Redes ─────────────────────────────────────
+networks:
+  backend_network:
+    driver: bridge
+  # frontend_network:
+  #   driver: bridge
+
+  #docker composer up -d --build
+  #docker ps
+  #docker exec -it nome uv run pytest
+
