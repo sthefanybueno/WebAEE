@@ -24,6 +24,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
+from pydantic import model_validator
 from sqlmodel import Field, SQLModel
 
 
@@ -53,6 +54,14 @@ class TagPedagogica(str, enum.Enum):
     OUTRO = "outro"
 
 
+class SyncStatus(str, enum.Enum):
+    """Estado de sincronização para entidades criadas offline."""
+
+    LOCAL = "local"
+    SYNCED = "synced"
+    FAILED = "failed"
+
+
 # ─────────────────────────────────────────────────────────
 # Entidade: Student (Aluno)
 # ─────────────────────────────────────────────────────────
@@ -63,7 +72,22 @@ def _utcnow() -> datetime:
 
     Compatível com Pydantic v2 (não usa datetime.utcnow() depreciado).
     """
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _validate_status_aluno(value: object) -> StatusAluno:
+    """Valida e converte um valor para StatusAluno.
+
+    Lança ValueError se o valor não for um membro válido do enum.
+    Chamado pelo model_validator de Student.
+    """
+    try:
+        return StatusAluno(value)
+    except ValueError as exc:
+        valores_validos = [e.value for e in StatusAluno]
+        raise ValueError(
+            f"status '{value}' inválido. Valores aceitos: {valores_validos}"
+        ) from exc
 
 
 class Student(SQLModel, table=True):
@@ -191,3 +215,14 @@ class Student(SQLModel, table=True):
             "Exibir aviso na próxima abertura do registro."
         ),
     )
+
+    # ── Validação de domínio ──────────────────────────────
+    def __init__(self, **kwargs: object) -> None:
+        """Sobrescreve __init__ para validar enums críticos.
+
+        SQLModel com table=True desativa a validação Pydantic padrão no
+        __init__, então validamos explicitamente o campo 'status' aqui.
+        """
+        if "status" in kwargs:
+            kwargs["status"] = _validate_status_aluno(kwargs["status"])
+        super().__init__(**kwargs)

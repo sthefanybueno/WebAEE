@@ -15,6 +15,13 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+from app.interfaces.routers import students, schools, photos, reports
+
+app.include_router(students.router)
+app.include_router(schools.router)
+app.include_router(photos.router)
+app.include_router(reports.router)
+
 
 @app.get("/health", tags=["infra"])
 async def health_check() -> dict[str, str]:

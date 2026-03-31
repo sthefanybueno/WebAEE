@@ -57,7 +57,7 @@ services:
         condition: service_healthy
     networks:
       - backend_network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
   # ── Frontend Next.js (stub — Fase 5) ─────────
   # web:
   #   build:
@@ -83,7 +83,7 @@ networks:
   # frontend_network:
   #   driver: bridge
 
-  #docker composer up -d --build
+  #docker compose up -d --build
   #docker ps
   #docker exec -it nome uv run pytest
 
