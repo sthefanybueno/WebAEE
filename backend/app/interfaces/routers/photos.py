@@ -59,3 +59,33 @@ async def list_photos_by_student(
     repo = SQLModelPhotoRepository(session)
     photos = await repo.list_by_student(student_id)
     return photos
+
+from app.application.use_cases.photos.sync_photo import SyncPhotoUseCase, SyncPhotoInput
+from app.interfaces.schemas.photo import SyncPhotoRequest
+
+def get_sync_photo_use_case(session: AsyncSession = Depends(get_session)) -> SyncPhotoUseCase:
+    return SyncPhotoUseCase(
+        photo_repo=SQLModelPhotoRepository(session),
+        student_repo=SQLModelStudentRepository(session),
+    )
+
+@router.post("/sync", response_model=List[PhotoResponse])
+async def sync_photos(
+    request: SyncPhotoRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: SyncPhotoUseCase = Depends(get_sync_photo_use_case),
+):
+    inputs = [
+        SyncPhotoInput(
+            id=i.id,
+            aluno_id=i.aluno_id,
+            autor_id=current_user.id,
+            tenant_id=current_user.tenant_id,
+            foto_url=i.foto_url,
+            tag=i.tag,
+            sync_status=i.sync_status
+        ) for i in request.items
+    ]
+    photos = await use_case.execute(inputs)
+    return photos
+

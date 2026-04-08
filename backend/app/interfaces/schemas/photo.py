@@ -16,3 +16,15 @@ class PhotoResponse(BaseModel):
     tag: TagPedagogica
     sync_status: SyncStatus
     created_at: datetime
+
+from typing import List
+
+class SyncPhotoItemRequest(BaseModel):
+    id: uuid.UUID
+    aluno_id: uuid.UUID
+    foto_url: str
+    tag: TagPedagogica
+    sync_status: SyncStatus
+
+class SyncPhotoRequest(BaseModel):
+    items: List[SyncPhotoItemRequest]

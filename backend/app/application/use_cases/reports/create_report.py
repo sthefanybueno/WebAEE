@@ -40,9 +40,9 @@ class CreateReportUseCase:
         # 2. Validar permissão (Mock: vamos assumir que apenas prof_aee ou equipe_gestora pode criar)
         if input_dto.papel_autor not in (
             PapelUsuario.PROF_AEE,
-            PapelUsuario.EQUIPE_GESTORA,
+            PapelUsuario.COORDENACAO,
         ):
-            raise ValueError("Usuário sem permissão para criar relatório.")
+            raise ValueError("Papel de usuário não permitido para este tipo de relatório.")
 
         # 3. Validar se há um template ativo para esse tipo (opcional, pode ser ignorado no MVP, mas implementado aqui)
         template = await self.template_repo.get_active_by_tipo(input_dto.tipo)
@@ -56,6 +56,7 @@ class CreateReportUseCase:
             aluno_id=input_dto.aluno_id,
             autor_id=input_dto.autor_id,
             conteudo_json=input_dto.conteudo_json,
+            template_snapshot=template.model_dump() if template else None
         )
 
         return await self.report_repo.save(report)

@@ -9,9 +9,13 @@ from app.infrastructure.database import engine, init_db
 from app.main import app
 
 
+from typing import AsyncGenerator
+
 @pytest.fixture(autouse=True)
-async def setup_db() -> None:
+async def setup_db() -> AsyncGenerator[None, None]:
     await init_db()
+    yield
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -29,14 +33,10 @@ async def test_multi_tenant_isolation() -> None:
         await session.commit()
 
     headers_a = {
-        "x-user-id": str(uuid.uuid4()),
-        "x-tenant-id": str(tenant_a_id),
-        "x-papel": "prof_aee",
+        "Authorization": f"Bearer mock_token_{uuid.uuid4()}_{tenant_a_id}_coordenacao"
     }
     headers_b = {
-        "x-user-id": str(uuid.uuid4()),
-        "x-tenant-id": str(tenant_b_id),
-        "x-papel": "prof_aee",
+        "Authorization": f"Bearer mock_token_{uuid.uuid4()}_{tenant_b_id}_coordenacao"
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac: # type: ignore[arg-type]

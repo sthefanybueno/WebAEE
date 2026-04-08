@@ -24,8 +24,16 @@ class PapelUsuario(str, enum.Enum):
 
     Determina o que cada usuário pode ver e editar.
     Aplicado via middleware FastAPI + RLS PostgreSQL.
+
+    Hierarquia de permissões:
+        ADMIN        → acesso total ao sistema, gerencia tenants
+        COORDENACAO  → gerencia escola, cria usuários do seu tenant
+        PROF_AEE     → cria relatórios e vínculos de alunos
+        PROF_APOIO   → acompanha alunos, lê relatórios
+        PROF_REGENTE → somente leitura de dados não-sensíveis
     """
 
+    ADMIN = "admin"
     COORDENACAO = "coordenacao"
     PROF_AEE = "prof_aee"
     PROF_APOIO = "prof_apoio"
@@ -76,7 +84,7 @@ class User(SQLModel, table=True):
 
     papel: PapelUsuario = Field(
         nullable=False,
-        description="Papel RBAC: coordenacao | prof_aee | prof_apoio | prof_regente.",
+        description="Papel RBAC: admin | coordenacao | prof_aee | prof_apoio | prof_regente.",
     )
 
     ativo: bool = Field(

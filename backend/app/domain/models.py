@@ -68,9 +68,9 @@ class SyncStatus(str, enum.Enum):
 
 
 def _utcnow() -> datetime:
-    """Retorna o instante atual em UTC com timezone-aware.
+    """Retorna o instante atual em UTC.
 
-    Compatível com Pydantic v2 (não usa datetime.utcnow() depreciado).
+    Compatível com Pydantic v2 e bancos PostgreSQL sem TIMESTAMPTZ (naive em python, mas conceitualmente UTC).
     """
     return datetime.now(timezone.utc).replace(tzinfo=None)
 

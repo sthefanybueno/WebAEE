@@ -8,6 +8,18 @@ from app.application.ports.student_repository import StudentRepository
 from app.domain.models import StatusAluno, Student
 
 
+def _to_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+    """Converte datetime timezone-aware para naive UTC (sem tzinfo).
+    O PostgreSQL armazena TIMESTAMP (sem timezone) e o asyncpg rejeita
+    datetimes offset-aware. Todos os campos de data entram por aqui.
+    """
+    if dt is None:
+        return None
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
+
 @dataclass
 class CreateStudentInput:
     nome: str
@@ -42,10 +54,11 @@ class CreateStudentUseCase:
             consentimento_lgpd=True,
             data_consentimento=datetime.now(timezone.utc).replace(tzinfo=None),
             base_legal=input_dto.base_legal,
-            data_nascimento=input_dto.data_nascimento,
+            data_nascimento=_to_naive_utc(input_dto.data_nascimento),
             diagnostico=input_dto.diagnostico,
             laudo=input_dto.laudo,
             status=StatusAluno.ATIVO.value,
         )
 
         return await self.student_repo.save(student)
+

@@ -38,3 +38,31 @@ class StudentResponse(BaseModel):
     consentimento_lgpd: bool
     created_at: datetime
     updated_at: datetime
+
+class StudentDetailResponse(StudentResponse):
+    """
+    Schema idêntico ao StudentResponse listado.
+    Em compliance com a LGPD (RN-26 e RN-27), nenhum dado de laudo
+    ou diagnóstico vaza nesta rota geral de leitura.
+    """
+    pass
+
+class UpdateStudentRequest(BaseModel):
+    """Payload para edição básica de alunos (sem laudo/diagnóstico)."""
+    nome: Optional[str] = None
+    data_nascimento: Optional[datetime] = None
+
+from app.domain.entities.user import PapelUsuario
+
+class CreateProfessorAssignmentRequest(BaseModel):
+    usuario_id: uuid.UUID
+    tipo_papel: PapelUsuario
+
+class ProfessorAssignmentResponse(BaseModel):
+    id: uuid.UUID
+    usuario_id: uuid.UUID
+    escola_id: uuid.UUID
+    aluno_id: uuid.UUID
+    tipo_papel: PapelUsuario
+    data_inicio: datetime
+    data_fim: Optional[datetime]

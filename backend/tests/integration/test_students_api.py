@@ -9,9 +9,13 @@ from app.infrastructure.database import engine, init_db
 from app.main import app
 
 
+from typing import AsyncGenerator
+
 @pytest.fixture(autouse=True)
-async def setup_db() -> None:
+async def setup_db() -> AsyncGenerator[None, None]:
     await init_db()
+    yield
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
@@ -27,9 +31,7 @@ async def test_create_and_list_student_api() -> None:
         await session.commit()
 
     headers = {
-        "x-user-id": str(user_id),
-        "x-tenant-id": str(tenant_id),
-        "x-papel": "prof_aee",
+        "Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_prof_aee"
     }
 
     payload = {

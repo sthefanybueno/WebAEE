@@ -1,0 +1,42 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0
+rootdir: /app
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-1.3.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 31 items / 2 errors
+
+==================================== ERRORS ====================================
+_________ ERROR collecting tests/integration/test_multi_tenant_api.py __________
+tests/integration/test_multi_tenant_api.py:9: in <module>
+    from app.main import app
+app/main.py:18: in <module>
+    from app.interfaces.routers import students, schools, photos, reports, auth, users, dashboard, sync
+app/interfaces/routers/students.py:35: in <module>
+    from app.interfaces.dependencies import CurrentUser, get_current_user
+app/interfaces/dependencies.py:21: in <module>
+    token: str = Depends(oauth2_scheme)
+                 ^^^^^^^
+E   NameError: name 'Depends' is not defined
+___________ ERROR collecting tests/integration/test_students_api.py ____________
+tests/integration/test_students_api.py:9: in <module>
+    from app.main import app
+app/main.py:18: in <module>
+    from app.interfaces.routers import students, schools, photos, reports, auth, users, dashboard, sync
+app/interfaces/routers/students.py:35: in <module>
+    from app.interfaces.dependencies import CurrentUser, get_current_user
+app/interfaces/dependencies.py:21: in <module>
+    token: str = Depends(oauth2_scheme)
+                 ^^^^^^^
+E   NameError: name 'Depends' is not defined
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/sqlmodel/main.py:583
+  /usr/local/lib/python3.12/site-packages/sqlmodel/main.py:583: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    "SQLModel", super().__new__(cls, name, bases, dict_used, **config_kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/integration/test_multi_tenant_api.py - NameError: name 'Depends' ...
+ERROR tests/integration/test_students_api.py - NameError: name 'Depends' is n...
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 2 errors in 5.08s =========================
