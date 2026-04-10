@@ -2,11 +2,15 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Dependências do sistema necessárias para asyncpg e bcrypt
+# Dependências do sistema necessárias para asyncpg, bcrypt e fuso horário
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    tzdata \
     && rm -rf /var/lib/apt/lists/*
+
+# Fuso horário: America/Sao_Paulo (afeta datetime.now() e todas as libs)
+ENV TZ=America/Sao_Paulo
 
 # Copia apenas o pyproject.toml primeiro (layer de cache)
 COPY pyproject.toml .

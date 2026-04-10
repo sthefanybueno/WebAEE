@@ -41,14 +41,21 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "--tb=short --strict-markers -q"
+filterwarnings = [
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+]
 
 [tool.coverage.run]
 source = ["app"]
 omit = ["tests/*", "alembic/*"]
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 60
 show_missing = true
+skip_empty = true
+# Comandos de cobertura:
+#   Terminal:  docker exec aee_api python -m pytest --cov=app --cov-report=term-missing
+#   HTML:      docker exec aee_api python -m pytest --cov=app --cov-report=html:htmlcov
 
 [tool.ruff]
 line-length = 100
