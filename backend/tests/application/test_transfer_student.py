@@ -13,6 +13,12 @@ from app.domain.entities.student_history import StudentSchoolHistory
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
+class MockAsyncSession:
+    def begin(self): return self
+    async def __aenter__(self): return self
+    async def __aexit__(self, t, v, tb): pass
+
+
 
 class MockStudentRepository:
     def __init__(self) -> None:
@@ -116,6 +122,7 @@ async def test_transfer_student_success(
     )
 
     use_case = TransferStudentUseCase(
+        session=MockAsyncSession(),
         student_repo=repo_student,
         school_repo=repo_school,
         assignment_repo=repo_assignment,
@@ -159,6 +166,7 @@ async def test_transfer_student_to_invalid_school(
     )
 
     use_case = TransferStudentUseCase(
+        session=MockAsyncSession(),
         student_repo=repo_student,
         school_repo=repo_school,
         assignment_repo=repo_assignment,

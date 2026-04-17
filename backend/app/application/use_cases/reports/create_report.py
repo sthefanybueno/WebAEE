@@ -20,43 +20,54 @@ class CreateReportInput:
     conteudo_json: dict
 
 
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 class CreateReportUseCase:
+    """Caso de uso para criação de relatórios pedagógicos (PEI, Plano de AEE, etc).
+    
+    Responsável por validar a existência do aluno no tenant correto, 
+    verificar o papel do autor (RBAC) e anexar o snapshot do template 
+    utilizado no momento da criação, garantindo que alterações futuras 
+    no template não corrompam relatórios históricos.
+    """
     def __init__(
         self,
+        session: AsyncSession,
         report_repo: ReportRepository,
         template_repo: ReportTemplateRepository,
         student_repo: StudentRepository,
     ) -> None:
+        self.session = session
         self.report_repo = report_repo
         self.template_repo = template_repo
         self.student_repo = student_repo
 
     async def execute(self, input_dto: CreateReportInput) -> Report:
-        # 1. Validar se o aluno existe e pertence ao tenant
-        student = await self.student_repo.get_by_id(input_dto.aluno_id)
-        if not student or student.tenant_id != input_dto.tenant_id:
-            raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
+        """Cria um novo relatório para um aluno dentro de uma transação.
+        """
+        async with self.session.begin():
+            # 1. Validar se o aluno existe e pertence ao tenant
+            student = await self.student_repo.get_by_id(input_dto.aluno_id)
+            if not student or student.tenant_id != input_dto.tenant_id:
+                raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
 
-        # 2. Validar permissão (Mock: vamos assumir que apenas prof_aee ou equipe_gestora pode criar)
-        if input_dto.papel_autor not in (
-            PapelUsuario.PROF_AEE,
-            PapelUsuario.COORDENACAO,
-        ):
-            raise ValueError("Papel de usuário não permitido para este tipo de relatório.")
+            # 2. Validar permissão (Mock: vamos assumir que apenas prof_aee ou equipe_gestora pode criar)
+            if input_dto.papel_autor not in (
+                PapelUsuario.PROF_AEE,
+                PapelUsuario.COORDENACAO,
+            ):
+                raise ValueError("Papel de usuário não permitido para este tipo de relatório.")
 
-        # 3. Validar se há um template ativo para esse tipo (opcional, pode ser ignorado no MVP, mas implementado aqui)
-        template = await self.template_repo.get_active_by_tipo(input_dto.tipo)
-        if not template:
-            # Em um sistema robusto, poderíamos rejeitar ou usar schema base.
-            pass
+            # 3. Validar se há um template ativo para esse tipo
+            template = await self.template_repo.get_active_by_tipo(input_dto.tipo)
 
-        # 4. Criar o Relatório
-        report = Report(
-            tipo=input_dto.tipo,
-            aluno_id=input_dto.aluno_id,
-            autor_id=input_dto.autor_id,
-            conteudo_json=input_dto.conteudo_json,
-            template_snapshot=template.model_dump() if template else None
-        )
+            # 4. Criar o Relatório
+            report = Report(
+                tipo=input_dto.tipo,
+                aluno_id=input_dto.aluno_id,
+                autor_id=input_dto.autor_id,
+                conteudo_json=input_dto.conteudo_json,
+                template_snapshot=template.model_dump(mode="json") if template else None
+            )
 
-        return await self.report_repo.save(report)
+            return await self.report_repo.save(report)

@@ -17,11 +17,10 @@ class SQLModelUserRepository(UserRepository):
 
     async def get_by_email(self, email: str) -> Optional[User]:
         statement = select(User).where(User.email == email)
-        result = await self.session.execute(statement)
-        return result.scalars().first()
+        result = await self.session.exec(statement)
+        return result.first()
 
     async def save(self, user: User) -> User:
         self.session.add(user)
-        await self.session.commit()
-        await self.session.refresh(user)
+        await self.session.flush()
         return user

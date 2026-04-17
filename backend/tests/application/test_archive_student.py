@@ -9,6 +9,12 @@ from app.application.use_cases.students.archive_student import (
 from app.domain.entities.audit_log import AuditLog
 from app.domain.models import StatusAluno, Student
 
+class MockAsyncSession:
+    def begin(self): return self
+    async def __aenter__(self): return self
+    async def __aexit__(self, t, v, tb): pass
+
+
 
 class MockStudentRepository:
     def __init__(self) -> None:
@@ -57,7 +63,7 @@ async def test_archive_student_success(
     )
     repo_student.saved_students[student_id] = student
 
-    use_case = ArchiveStudentUseCase(student_repo=repo_student, audit_repo=repo_audit)
+    use_case = ArchiveStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, audit_repo=repo_audit)
     input_dto = ArchiveStudentInput(
         student_id=student_id,
         tenant_id=tenant_id,
@@ -79,7 +85,7 @@ async def test_archive_student_success(
 async def test_archive_student_not_found(
     repo_student: MockStudentRepository, repo_audit: MockAuditLogRepository
 ) -> None:
-    use_case = ArchiveStudentUseCase(student_repo=repo_student, audit_repo=repo_audit)
+    use_case = ArchiveStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, audit_repo=repo_audit)
     input_dto = ArchiveStudentInput(
         student_id=uuid.uuid4(),
         tenant_id=uuid.uuid4(),

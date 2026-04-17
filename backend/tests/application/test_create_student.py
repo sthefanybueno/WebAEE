@@ -9,6 +9,12 @@ from app.application.use_cases.students.create_student import (
 from app.domain.models import Student
 from app.domain.entities.school import School
 
+class MockAsyncSession:
+    def begin(self): return self
+    async def __aenter__(self): return self
+    async def __aexit__(self, t, v, tb): pass
+
+
 class MockStudentRepository:
     def __init__(self) -> None:
         self.saved_students: dict[uuid.UUID, Student] = {}
@@ -46,7 +52,7 @@ def repo_school() -> MockSchoolRepository:
 async def test_create_student_requires_lgpd_consent(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
-    use_case = CreateStudentUseCase(student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()
@@ -66,7 +72,7 @@ async def test_create_student_requires_lgpd_consent(
 async def test_create_student_school_not_found_or_invalid_tenant(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
-    use_case = CreateStudentUseCase(student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()
@@ -95,7 +101,7 @@ async def test_create_student_school_not_found_or_invalid_tenant(
 async def test_create_student_success(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
-    use_case = CreateStudentUseCase(student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()

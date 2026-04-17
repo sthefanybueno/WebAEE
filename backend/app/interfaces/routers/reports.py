@@ -25,6 +25,7 @@ router = APIRouter(prefix="/api/relatorios", tags=["relatorios"])
 
 def get_create_report_use_case(session: AsyncSession = Depends(get_session)) -> CreateReportUseCase:
     return CreateReportUseCase(
+        session=session,
         report_repo=SQLModelReportRepository(session),
         template_repo=SQLModelReportTemplateRepository(session),
         student_repo=SQLModelStudentRepository(session),
@@ -77,10 +78,9 @@ async def list_templates(
 ):
     """Lista templates globais ativos do sistema ou do tenant."""
     from sqlmodel import select
-    # Busca simplificada via SQLModel diretamente
     statement = select(ReportTemplate)
-    result = await session.execute(statement)
-    templates = result.scalars().all()
+    result = await session.exec(statement)
+    templates = result.all()
     return list(templates)
 
 @router.get("/{report_id}", response_model=ReportDetailResponse)
@@ -96,7 +96,12 @@ async def get_report(
     repo = SQLModelReportRepository(session)
     report = await repo.get_by_id(report_id)
     
-    if not report or report.tenant_id != current_user.tenant_id:
+    if not report:
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+        
+    student_repo = SQLModelStudentRepository(session)
+    student = await student_repo.get_by_id(report.aluno_id)
+    if not student or student.tenant_id != current_user.tenant_id:
         raise HTTPException(status_code=404, detail="Relatório não encontrado")
         
     return report
@@ -112,7 +117,12 @@ async def update_report(
     repo = SQLModelReportRepository(session)
     report = await repo.get_by_id(report_id)
     
-    if not report or report.tenant_id != current_user.tenant_id:
+    if not report:
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+        
+    student_repo = SQLModelStudentRepository(session)
+    student = await student_repo.get_by_id(report.aluno_id)
+    if not student or student.tenant_id != current_user.tenant_id:
         raise HTTPException(status_code=404, detail="Relatório não encontrado")
     
     # Atualiza dados dinâmicos do JSON
@@ -128,11 +138,15 @@ from app.interfaces.schemas.report import SyncReportRequest, AddCommentRequest
 
 def get_sync_report_use_case(session: AsyncSession = Depends(get_session)) -> SyncReportUseCase:
     return SyncReportUseCase(
+        session=session,
         report_repo=SQLModelReportRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
 
+from app.infrastructure.rate_limit import limiter
+
 @router.post("/sync", response_model=List[ReportResponse])
+@limiter.exempt
 async def sync_reports(
     request: SyncReportRequest,
     current_user: CurrentUser = Depends(get_current_user),
@@ -153,7 +167,10 @@ async def sync_reports(
     return reports
 
 def get_add_comment_use_case(session: AsyncSession = Depends(get_session)) -> AddCommentUseCase:
-    return AddCommentUseCase(report_repo=SQLModelReportRepository(session))
+    return AddCommentUseCase(
+        session=session,
+        report_repo=SQLModelReportRepository(session)
+    )
 
 @router.post("/{report_id}/comentarios", response_model=ReportResponse)
 async def add_comment(

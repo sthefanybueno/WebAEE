@@ -23,27 +23,30 @@ async def sync_pull(
     Retorna todos os dados que foram modificados **após** o `last_sync` 
     para o tenant do usuário, habilitando o carregamento rápido offline-first.
     """
+    if last_sync.tzinfo is not None:
+        last_sync = last_sync.astimezone(timezone.utc).replace(tzinfo=None)
+        
     # Alunos
     stmt_alunos = select(Student).where(
         Student.tenant_id == current_user.tenant_id,
         Student.updated_at > last_sync
     )
-    result_alunos = await session.execute(stmt_alunos)
-    alunos_atualizados = result_alunos.scalars().all()
+    result_alunos = await session.exec(stmt_alunos)
+    alunos_atualizados = result_alunos.all()
 
     # Relatórios
-    stmt_relatorios = select(Report).where(
-        Report.tenant_id == current_user.tenant_id,
+    stmt_relatorios = select(Report).join(Student, Report.aluno_id == Student.id).where(
+        Student.tenant_id == current_user.tenant_id,
         Report.updated_at > last_sync
     )
-    result_relatorios = await session.execute(stmt_relatorios)
-    relatorios_atualizados = result_relatorios.scalars().all()
+    result_relatorios = await session.exec(stmt_relatorios)
+    relatorios_atualizados = result_relatorios.all()
 
-    return SyncPullResponse(
-        last_sync=datetime.now(timezone.utc).replace(tzinfo=None),
-        alunos=list(alunos_atualizados),
-        relatorios=list(relatorios_atualizados)
-    )
+    return {
+        "last_sync": datetime.now(timezone.utc).replace(tzinfo=None),
+        "alunos": alunos_atualizados,
+        "relatorios": relatorios_atualizados
+    }
 
 @router.post("/reports/resolve", response_model=dict)
 async def resolve_report_conflict(
@@ -57,7 +60,13 @@ async def resolve_report_conflict(
     repo = SQLModelReportRepository(session)
     report = await repo.get_by_id(request.report_id)
     
-    if not report or report.tenant_id != current_user.tenant_id:
+    if not report:
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+        
+    from app.infrastructure.repositories.student_repository_impl import SQLModelStudentRepository
+    student_repo = SQLModelStudentRepository(session)
+    student = await student_repo.get_by_id(report.aluno_id)
+    if not student or student.tenant_id != current_user.tenant_id:
         raise HTTPException(status_code=404, detail="Relatório não encontrado")
     
     # Aplica o conteúdo resolvido

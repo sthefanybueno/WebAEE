@@ -15,7 +15,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any, Optional, Dict, List
 
 from sqlalchemy import Column
 from sqlmodel import Field, SQLModel
@@ -75,7 +75,7 @@ class ReportTemplate(SQLModel, table=True):
         description="Tipo de relatório que este template descreve.",
     )
 
-    secoes: Optional[Any] = Field(
+    secoes: Optional[List[Dict[str, Any]]] = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
         description="Array JSONB de seções e campos configuráveis.",
@@ -134,13 +134,13 @@ class Report(SQLModel, table=True):
         description="FK lógica para users.id.",
     )
 
-    template_snapshot: Optional[Any] = Field(
+    template_snapshot: Optional[Dict[str, Any]] = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
         description="Snapshot do template no momento da criação (imutável).",
     )
 
-    conteudo_json: Optional[Any] = Field(
+    conteudo_json: Optional[Dict[str, Any]] = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
         description="Conteúdo preenchido pelo usuário (mutável até travar).",

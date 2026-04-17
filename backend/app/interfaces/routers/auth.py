@@ -1,13 +1,15 @@
 import uuid
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from app.interfaces.schemas.auth import LoginRequest, LoginResponse, TokenRefreshRequest, TokenRefreshResponse
 from app.domain.entities.user import PapelUsuario
+from app.infrastructure.rate_limit import limiter
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/login", response_model=LoginResponse)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit("5/minute")
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     """
     **🔑 Login de desenvolvimento (Mock)**
 

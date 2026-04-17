@@ -12,6 +12,5 @@ class SQLModelStudentHistoryRepository(StudentSchoolHistoryRepository):
 
     async def save(self, history: StudentSchoolHistory) -> StudentSchoolHistory:
         self._session.add(history)
-        await self._session.commit()
-        await self._session.refresh(history)
+        await self._session.flush()
         return history

@@ -18,10 +18,10 @@ from app.interfaces.schemas.school import CreateSchoolRequest, SchoolResponse
 router = APIRouter(prefix="/api/escolas", tags=["escolas"])
 
 def get_create_school_use_case(session: AsyncSession = Depends(get_session)) -> CreateSchoolUseCase:
-    return CreateSchoolUseCase(school_repo=SQLModelSchoolRepository(session))
+    return CreateSchoolUseCase(session=session, school_repo=SQLModelSchoolRepository(session))
 
 def get_list_schools_use_case(session: AsyncSession = Depends(get_session)) -> ListSchoolsUseCase:
-    return ListSchoolsUseCase(school_repo=SQLModelSchoolRepository(session))
+    return ListSchoolsUseCase(session=session, school_repo=SQLModelSchoolRepository(session))
 
 @router.post("/", response_model=SchoolResponse, status_code=status.HTTP_201_CREATED)
 async def create_school(

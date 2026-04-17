@@ -28,6 +28,5 @@ class SQLModelStudentRepository(StudentRepository):
 
     async def save(self, student: Student) -> Student:
         self._session.add(student)
-        await self._session.commit()
-        await self._session.refresh(student)
+        await self._session.flush()
         return student

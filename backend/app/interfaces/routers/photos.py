@@ -21,6 +21,7 @@ router = APIRouter(prefix="/api/fotos", tags=["fotos"])
 
 def get_create_photo_use_case(session: AsyncSession = Depends(get_session)) -> CreatePhotoUseCase:
     return CreatePhotoUseCase(
+        session=session,
         photo_repo=SQLModelPhotoRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -35,7 +36,7 @@ async def create_photo(
         tenant_id=current_user.tenant_id,
         aluno_id=request.aluno_id,
         autor_id=current_user.id,
-        foto_url=request.foto_url,
+        foto_url=request.url,
         tag=request.tag,
     )
     try:
@@ -65,6 +66,7 @@ from app.interfaces.schemas.photo import SyncPhotoRequest
 
 def get_sync_photo_use_case(session: AsyncSession = Depends(get_session)) -> SyncPhotoUseCase:
     return SyncPhotoUseCase(
+        session=session,
         photo_repo=SQLModelPhotoRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -81,7 +83,7 @@ async def sync_photos(
             aluno_id=i.aluno_id,
             autor_id=current_user.id,
             tenant_id=current_user.tenant_id,
-            foto_url=i.foto_url,
+            foto_url=i.url,
             tag=i.tag,
             sync_status=i.sync_status
         ) for i in request.items

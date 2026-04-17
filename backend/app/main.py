@@ -15,6 +15,15 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from app.infrastructure.rate_limit import limiter
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
 from app.interfaces.routers import students, schools, photos, reports, auth, users, dashboard, sync
 
 app.include_router(students.router)

@@ -19,5 +19,5 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
         statement = select(ReportTemplate).where(
             ReportTemplate.tipo == tipo, ReportTemplate.ativo == True
         )
-        result = await self.session.execute(statement)
-        return result.scalars().first()
+        result = await self.session.exec(statement)
+        return result.first()

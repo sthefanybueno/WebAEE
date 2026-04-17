@@ -10,6 +10,12 @@ from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
+class MockAsyncSession:
+    def begin(self): return self
+    async def __aenter__(self): return self
+    async def __aexit__(self, t, v, tb): pass
+
+
 
 class MockReportRepository:
     def __init__(self) -> None:
@@ -66,11 +72,12 @@ async def test_create_report_success(
     )
 
     template = ReportTemplate(
-        id=uuid.uuid4(), tipo=TipoRelatorio.AEE, secoes={"secao_1": "campo_1"}
+        id=uuid.uuid4(), tipo=TipoRelatorio.AEE, secoes=[{"nome": "secao_1", "campos": ["campo_1"]}]
     )
     repo_template.templates[TipoRelatorio.AEE] = template
 
     use_case = CreateReportUseCase(
+        session=MockAsyncSession(),
         report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
     )
     input_dto = CreateReportInput(
@@ -84,7 +91,8 @@ async def test_create_report_success(
 
     report = await use_case.execute(input_dto)
     assert report.tipo == TipoRelatorio.AEE
-    assert report.template_snapshot == template.model_dump()
+    # Usa mode="json" para comparar UUIDs como strings
+    assert report.template_snapshot == template.model_dump(mode="json")
     assert report.conteudo_json == {"secao_1": "valor"}
 
 
@@ -107,6 +115,7 @@ async def test_create_report_invalid_role(
     )
 
     use_case = CreateReportUseCase(
+        session=MockAsyncSession(),
         report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
     )
     input_dto = CreateReportInput(

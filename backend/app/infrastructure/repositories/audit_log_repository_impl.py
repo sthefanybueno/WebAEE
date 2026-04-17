@@ -19,6 +19,5 @@ class SQLModelAuditLogRepository(AuditLogRepository):
 
     async def save(self, audit_log: AuditLog) -> AuditLog:
         self._session.add(audit_log)
-        await self._session.commit()
-        await self._session.refresh(audit_log)
+        await self._session.flush()
         return audit_log

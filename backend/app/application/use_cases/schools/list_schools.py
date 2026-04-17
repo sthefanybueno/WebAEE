@@ -5,8 +5,11 @@ from app.application.ports.school_repository import SchoolRepository
 from app.domain.entities.school import School
 
 
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 class ListSchoolsUseCase:
-    def __init__(self, school_repo: SchoolRepository) -> None:
+    def __init__(self, session: AsyncSession, school_repo: SchoolRepository) -> None:
+        self.session = session
         self.school_repo = school_repo
 
     async def execute(self, tenant_id: uuid.UUID) -> List[School]:

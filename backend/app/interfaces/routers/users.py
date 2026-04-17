@@ -18,7 +18,7 @@ from app.domain.entities.user import User
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
 
 def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> CreateUserUseCase:
-    return CreateUserUseCase(user_repo=SQLModelUserRepository(session))
+    return CreateUserUseCase(session=session, user_repo=SQLModelUserRepository(session))
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
@@ -49,8 +49,8 @@ async def list_users(
 ):
     """Retorna usuários do mesmo tenant."""
     statement = select(User).where(User.tenant_id == current_user.tenant_id)
-    result = await session.execute(statement)
-    users = result.scalars().all()
+    result = await session.exec(statement)
+    users = result.all()
     return list(users)
 
 @router.get("/me", response_model=UserResponse)
@@ -62,8 +62,8 @@ async def get_me(
     Retorna os dados do usuário autenticado atual, com seu papel validado.
     """
     statement = select(User).where(User.id == current_user.id)
-    result = await session.execute(statement)
-    user = result.scalar_one_or_none()
+    result = await session.exec(statement)
+    user = result.first()
     
     if not user:
         raise HTTPException(

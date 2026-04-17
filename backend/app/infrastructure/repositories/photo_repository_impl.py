@@ -17,11 +17,10 @@ class SQLModelPhotoRepository(PhotoRepository):
 
     async def list_by_student(self, student_id: uuid.UUID) -> List[Photo]:
         statement = select(Photo).where(Photo.aluno_id == student_id)
-        result = await self.session.execute(statement)
-        return list(result.scalars().all())
+        result = await self.session.exec(statement)
+        return list(result.all())
 
     async def save(self, photo: Photo) -> Photo:
         self.session.add(photo)
-        await self.session.commit()
-        await self.session.refresh(photo)
+        await self.session.flush()
         return photo

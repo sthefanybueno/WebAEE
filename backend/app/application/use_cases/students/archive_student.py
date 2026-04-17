@@ -15,33 +15,48 @@ class ArchiveStudentInput:
     user_id: uuid.UUID
 
 
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 class ArchiveStudentUseCase:
+    """Caso de uso para arquivamento (soft-delete) de alunos.
+    
+    Este processo altera o status do aluno para 'arquivado' e registra 
+    um log de auditoria conforme exigido pela LGPD, visto que o 
+    arquivamento é uma operação que impacta a visibilidade de dados sensíveis.
+    """
     def __init__(
-        self, student_repo: StudentRepository, audit_repo: AuditLogRepository
+        self, 
+        session: AsyncSession,
+        student_repo: StudentRepository, 
+        audit_repo: AuditLogRepository
     ) -> None:
+        self.session = session
         self.student_repo = student_repo
         self.audit_repo = audit_repo
 
     async def execute(self, input_dto: ArchiveStudentInput) -> Student:
-        student = await self.student_repo.get_by_id(input_dto.student_id)
+        """Executa o arquivamento do aluno dentro de uma transação.
+        """
+        async with self.session.begin():
+            student = await self.student_repo.get_by_id(input_dto.student_id)
 
-        if not student or student.tenant_id != input_dto.tenant_id:
-            raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
+            if not student or student.tenant_id != input_dto.tenant_id:
+                raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
 
-        # Soft-delete obrigatório
-        student.status = StatusAluno.ARQUIVADO.value  # type: ignore[attr-defined]
-        student.updated_by = input_dto.user_id
-        student.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            # Soft-delete obrigatório
+            student.status = StatusAluno.ARQUIVADO.value  # type: ignore[attr-defined]
+            student.updated_by = input_dto.user_id
+            student.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-        saved_student = await self.student_repo.save(student)
+            saved_student = await self.student_repo.save(student)
 
-        # Registra auditoria do arquivamento
-        audit_log = AuditLog(
-            user_id=input_dto.user_id,
-            student_id=input_dto.student_id,
-            field_accessed="status (arquivamento)",
-            accessed_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        )
-        await self.audit_repo.save(audit_log)
+            # Registra auditoria do arquivamento
+            audit_log = AuditLog(
+                user_id=input_dto.user_id,
+                student_id=input_dto.student_id,
+                field_accessed="status (arquivamento)",
+                accessed_at=datetime.now(timezone.utc).replace(tzinfo=None),
+            )
+            await self.audit_repo.save(audit_log)
 
-        return saved_student
+            return saved_student

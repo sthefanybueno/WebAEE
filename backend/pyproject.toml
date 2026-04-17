@@ -14,6 +14,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3",  # JWT
     "passlib[bcrypt]>=1.7",   # hashing de senha
     "python-multipart>=0.0.9",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
@@ -36,6 +37,8 @@ packages = ["app"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
@@ -50,7 +53,7 @@ source = ["app"]
 omit = ["tests/*", "alembic/*"]
 
 [tool.coverage.report]
-fail_under = 60
+fail_under = 80
 show_missing = true
 skip_empty = true
 # Comandos de cobertura:

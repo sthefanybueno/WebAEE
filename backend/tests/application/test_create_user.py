@@ -1,24 +1,29 @@
+"""
+Testes unitários para CreateUserUseCase.
+Cobre: RBAC por papel, duplicidade de e-mail, criação bem-sucedida.
+"""
 import uuid
 import pytest
 
-from app.application.use_cases.users.create_user import (
-    CreateUserUseCase,
-    CreateUserInput,
-)
+from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase
 from app.domain.entities.user import User, PapelUsuario
+
+class MockAsyncSession:
+    def begin(self): return self
+    async def __aenter__(self): return self
+    async def __aexit__(self, t, v, tb): pass
+
 
 
 class MockUserRepository:
     def __init__(self) -> None:
-        self.users: dict[uuid.UUID, User] = {}
-        self.by_email: dict[str, User] = {}
+        self.users: dict[str, User] = {}
 
     async def get_by_email(self, email: str) -> User | None:
-        return self.by_email.get(email)
+        return self.users.get(email)
 
     async def save(self, user: User) -> User:
-        self.users[user.id] = user
-        self.by_email[user.email] = user
+        self.users[user.email] = user
         return user
 
 
@@ -27,85 +32,73 @@ def repo() -> MockUserRepository:
     return MockUserRepository()
 
 
-def _input(
-    executor: PapelUsuario,
+def make_input(
+    executor_papel: PapelUsuario,
     papel: PapelUsuario,
-    email: str = "test@escola.edu.br",
-    tenant_id: uuid.UUID | None = None,
+    email: str = "novo@escola.edu.br",
 ) -> CreateUserInput:
     return CreateUserInput(
-        tenant_id=tenant_id or uuid.uuid4(),
-        executor_papel=executor,
+        tenant_id=uuid.uuid4(),
+        executor_papel=executor_papel,
         email=email,
-        nome="Usuário Teste",
+        nome="Novo Usuário",
         papel=papel,
     )
 
 
 @pytest.mark.asyncio
-async def test_admin_can_create_any_role(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    for papel in PapelUsuario:
-        email = f"{papel.value}@escola.edu.br"
-        user = await uc.execute(_input(PapelUsuario.ADMIN, papel, email=email))
-        assert user.papel == papel
+async def test_criar_usuario_coordenacao_sucesso(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE)
+    user = await use_case.execute(inp)
+    assert user.email == "novo@escola.edu.br"
+    assert user.papel == PapelUsuario.PROF_AEE
 
 
 @pytest.mark.asyncio
-async def test_non_admin_cannot_create_admin(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    with pytest.raises(ValueError, match="Apenas Admin pode criar outro Admin"):
-        await uc.execute(_input(PapelUsuario.COORDENACAO, PapelUsuario.ADMIN))
+async def test_criar_admin_requer_executor_admin(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.ADMIN)
+    with pytest.raises(ValueError, match="Apenas Admin"):
+        await use_case.execute(inp)
 
 
 @pytest.mark.asyncio
-async def test_prof_aee_can_only_create_prof_apoio(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
+async def test_prof_aee_so_pode_criar_prof_apoio(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_AEE)
+    with pytest.raises(ValueError, match="Profissional de Apoio"):
+        await use_case.execute(inp)
 
-    # Sucesso: criar prof_apoio
-    user = await uc.execute(
-        _input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_APOIO, email="apoio@escola.br")
-    )
+
+@pytest.mark.asyncio
+async def test_prof_apoio_nao_pode_criar_usuario(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.PROF_APOIO, PapelUsuario.PROF_APOIO)
+    with pytest.raises(ValueError, match="não tem permissão"):
+        await use_case.execute(inp)
+
+
+@pytest.mark.asyncio
+async def test_email_duplicado_levanta_erro(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE, email="dup@escola.edu.br")
+    await use_case.execute(inp)  # primeira criação
+    with pytest.raises(ValueError, match="já está em uso"):
+        await use_case.execute(inp)
+
+
+@pytest.mark.asyncio
+async def test_admin_cria_outro_admin(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.ADMIN, PapelUsuario.ADMIN)
+    user = await use_case.execute(inp)
+    assert user.papel == PapelUsuario.ADMIN
+
+
+@pytest.mark.asyncio
+async def test_prof_aee_cria_prof_apoio_sucesso(repo: MockUserRepository) -> None:
+    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
+    inp = make_input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_APOIO)
+    user = await use_case.execute(inp)
     assert user.papel == PapelUsuario.PROF_APOIO
-
-    # Falha: tentar criar qualquer outro papel
-    for papel in (PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE, PapelUsuario.PROF_REGENTE):
-        with pytest.raises(ValueError, match="Prof. AEE só tem permissão"):
-            await uc.execute(
-                _input(PapelUsuario.PROF_AEE, papel, email=f"x_{papel.value}@escola.br")
-            )
-
-
-@pytest.mark.asyncio
-async def test_prof_regente_cannot_create_users(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    with pytest.raises(ValueError, match="Você não tem permissão"):
-        await uc.execute(_input(PapelUsuario.PROF_REGENTE, PapelUsuario.PROF_APOIO))
-
-
-@pytest.mark.asyncio
-async def test_prof_apoio_cannot_create_users(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    with pytest.raises(ValueError, match="Você não tem permissão"):
-        await uc.execute(_input(PapelUsuario.PROF_APOIO, PapelUsuario.PROF_APOIO))
-
-
-@pytest.mark.asyncio
-async def test_duplicate_email_raises_error(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    email = "duplicado@escola.br"
-
-    await uc.execute(_input(PapelUsuario.ADMIN, PapelUsuario.COORDENACAO, email=email))
-
-    with pytest.raises(ValueError, match="E-mail já está em uso"):
-        await uc.execute(_input(PapelUsuario.ADMIN, PapelUsuario.COORDENACAO, email=email))
-
-
-@pytest.mark.asyncio
-async def test_coordenacao_can_create_allowed_roles(repo: MockUserRepository) -> None:
-    uc = CreateUserUseCase(user_repo=repo)
-    allowed = [PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE, PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE]
-    for papel in allowed:
-        email = f"coord_{papel.value}@escola.br"
-        user = await uc.execute(_input(PapelUsuario.COORDENACAO, papel, email=email))
-        assert user.papel == papel

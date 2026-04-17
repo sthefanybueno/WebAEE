@@ -1,8 +1,11 @@
 import uuid
 from typing import List, Optional
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from app.infrastructure.rate_limit import limiter
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.domain.models import StatusAluno
 
 from app.application.use_cases.students.archive_student import (
     ArchiveStudentInput,
@@ -49,6 +52,7 @@ def get_create_student_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> CreateStudentUseCase:
     return CreateStudentUseCase(
+        session=session,
         student_repo=SQLModelStudentRepository(session),
         school_repo=SQLModelSchoolRepository(session),
     )
@@ -58,6 +62,7 @@ def get_archive_student_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> ArchiveStudentUseCase:
     return ArchiveStudentUseCase(
+        session=session,
         student_repo=SQLModelStudentRepository(session),
         audit_repo=SQLModelAuditLogRepository(session),
     )
@@ -67,6 +72,7 @@ def get_transfer_student_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> TransferStudentUseCase:
     return TransferStudentUseCase(
+        session=session,
         student_repo=SQLModelStudentRepository(session),
         school_repo=SQLModelSchoolRepository(session),
         assignment_repo=SQLModelProfessorAssignmentRepository(session),
@@ -157,6 +163,7 @@ def get_assign_professor_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> AssignProfessorUseCase:
     return AssignProfessorUseCase(
+        session=session,
         student_repo=SQLModelStudentRepository(session),
         assignment_repo=SQLModelProfessorAssignmentRepository(session),
     )
@@ -190,8 +197,6 @@ async def list_students(
 ) -> List[StudentResponse]:
     """Lista todos os estudantes do tenant do usuário. Não retorna dados sensíveis."""
     repo = SQLModelStudentRepository(session)
-    from app.domain.models import StatusAluno
-    
     st_enum = None
     if status_aluno:
         try:
@@ -234,7 +239,7 @@ async def update_student(
     
     if not student or student.tenant_id != current_user.tenant_id:
         raise HTTPException(status_code=404, detail="Estudante não encontrado")
-    if student.status == "arquivado":
+    if student.status == StatusAluno.ARQUIVADO:
         raise HTTPException(status_code=400, detail="Aluno arquivado não pode ser editado")
     
     if request.nome is not None:
@@ -255,7 +260,9 @@ class StudentSensitiveDataResponse(BaseModel):
     laudo: Optional[str]
 
 @router.get("/{student_id}/dados-sensiveis", response_model=StudentSensitiveDataResponse)
+@limiter.limit("20/minute")
 async def get_sensitive_data(
+    request: Request,
     student_id: uuid.UUID,
     justificativa: str,
     current_user: CurrentUser = Depends(get_current_user),

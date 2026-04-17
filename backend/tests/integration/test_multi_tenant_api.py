@@ -11,11 +11,6 @@ from app.main import app
 
 from typing import AsyncGenerator
 
-@pytest.fixture(autouse=True)
-async def setup_db() -> AsyncGenerator[None, None]:
-    await init_db()
-    yield
-    await engine.dispose()
 
 
 @pytest.mark.asyncio

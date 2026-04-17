@@ -26,6 +26,5 @@ class SQLModelProfessorAssignmentRepository(ProfessorAssignmentRepository):
 
     async def save(self, assignment: ProfessorAssignment) -> ProfessorAssignment:
         self._session.add(assignment)
-        await self._session.commit()
-        await self._session.refresh(assignment)
+        await self._session.flush()
         return assignment
