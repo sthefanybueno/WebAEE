@@ -13,11 +13,18 @@ from app.application.use_cases.schools.list_schools import ListSchoolsUseCase
 from app.application.use_cases.reports.add_comment import AddCommentInput, AddCommentUseCase
 from app.application.use_cases.students.assign_professor import AssignProfessorInput, AssignProfessorUseCase
 from app.domain.entities.school import School
-from app.domain.entities.report import Report
+from app.domain.entities.report import Report, TipoRelatorio
 from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student, StatusAluno
 from unittest.mock import AsyncMock, MagicMock
+from app.domain.exceptions import (
+    RelatorioNaoEncontradoError, 
+    PermissaoInsuficienteError,
+    AlunoNaoEncontradoError,
+    AlunoSemEscolaError,
+    VinculoDuplicadoError
+)
 
 class MockAsyncSession:
     def begin(self):
@@ -142,7 +149,7 @@ async def test_add_comment_requer_coordenacao() -> None:
         executor_papel=PapelUsuario.PROF_AEE,
         texto="Comentário proibido",
     )
-    with pytest.raises(ValueError, match="coordenação"):
+    with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
 
 
@@ -156,7 +163,7 @@ async def test_add_comment_report_nao_encontrado() -> None:
         executor_papel=PapelUsuario.COORDENACAO,
         texto="Algo",
     )
-    with pytest.raises(ValueError, match="não encontrado"):
+    with pytest.raises(RelatorioNaoEncontradoError):
         await use_case.execute(inp)
 
 
@@ -164,7 +171,7 @@ async def test_add_comment_report_nao_encontrado() -> None:
 async def test_add_comment_sucesso() -> None:
     aluno_id = uuid.uuid4()
     autor_id = uuid.uuid4()
-    report = Report(aluno_id=aluno_id, autor_id=autor_id, conteudo_json=None)
+    report = Report(tipo=TipoRelatorio.AEE, aluno_id=aluno_id, autor_id=autor_id, conteudo_json=None)
     repo = MockReportRepository(report=report)
     use_case = AddCommentUseCase(session=MockAsyncSession(), report_repo=repo)
     inp = AddCommentInput(
@@ -185,6 +192,7 @@ async def test_add_comment_append_em_json_existente() -> None:
     aluno_id = uuid.uuid4()
     autor_id = uuid.uuid4()
     report = Report(
+        tipo=TipoRelatorio.AEE,
         aluno_id=aluno_id,
         autor_id=autor_id,
         conteudo_json={"comentarios": [{"texto": "primeiro", "autor_id": str(autor_id), "created_at": "2024-01-01"}]},
@@ -228,7 +236,7 @@ async def test_assign_aluno_nao_encontrado() -> None:
         usuario_id=uuid.uuid4(),
         tipo_papel=PapelUsuario.PROF_AEE,
     )
-    with pytest.raises(ValueError, match="não encontrado"):
+    with pytest.raises(AlunoNaoEncontradoError):
         await use_case.execute(inp)
 
 
@@ -248,7 +256,7 @@ async def test_assign_aluno_outro_tenant() -> None:
         usuario_id=uuid.uuid4(),
         tipo_papel=PapelUsuario.PROF_AEE,
     )
-    with pytest.raises(ValueError, match="não encontrado"):
+    with pytest.raises(AlunoNaoEncontradoError):
         await use_case.execute(inp)
 
 
@@ -267,7 +275,7 @@ async def test_assign_aluno_sem_escola() -> None:
         usuario_id=uuid.uuid4(),
         tipo_papel=PapelUsuario.PROF_AEE,
     )
-    with pytest.raises(ValueError, match="nenhuma escola"):
+    with pytest.raises(AlunoSemEscolaError):
         await use_case.execute(inp)
 
 
@@ -295,7 +303,7 @@ async def test_assign_vinculo_duplicado() -> None:
         usuario_id=usuario_id,
         tipo_papel=PapelUsuario.PROF_AEE,
     )
-    with pytest.raises(ValueError, match="vínculo ativo"):
+    with pytest.raises(VinculoDuplicadoError):
         await use_case.execute(inp)
 
 

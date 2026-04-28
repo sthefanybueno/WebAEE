@@ -20,9 +20,11 @@ async def test_multi_tenant_isolation() -> None:
     escola_a_id = uuid.uuid4()
     escola_b_id = uuid.uuid4()
 
+    from app.infrastructure.orm_models.school_orm import SchoolORM
+    from app.infrastructure.orm_models.student_orm import StudentORM
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        school_a = School(id=escola_a_id, tenant_id=tenant_a_id, nome="Escola Tenant A")
-        school_b = School(id=escola_b_id, tenant_id=tenant_b_id, nome="Escola Tenant B")
+        school_a = SchoolORM(id=escola_a_id, tenant_id=tenant_a_id, nome="Escola Tenant A", is_active=True)
+        school_b = SchoolORM(id=escola_b_id, tenant_id=tenant_b_id, nome="Escola Tenant B", is_active=True)
         session.add(school_a)
         session.add(school_b)
         await session.commit()

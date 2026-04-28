@@ -4,10 +4,10 @@ from datetime import datetime, timezone, timedelta
 import pytest
 
 from app.application.use_cases.reports.sync_report import (
-    ConcurrencyError,
     SyncReportInput,
     SyncReportUseCase,
 )
+from app.domain.exceptions import ConflitoSincronizacaoError
 from app.domain.entities.report import Report, TipoRelatorio
 
 class MockAsyncSession:
@@ -120,7 +120,7 @@ async def test_sync_report_conflict(repo_report: MockReportRepository, repo_stud
         updated_at_local=now,
     )
 
-    with pytest.raises(ConcurrencyError, match="Conflito detectado na sincronização"):
+    with pytest.raises(ConflitoSincronizacaoError):
         await use_case.execute([input_dto])
         
     assert repo_report.reports[report_id].conflict_flag is True

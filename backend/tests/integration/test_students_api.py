@@ -4,7 +4,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.domain.entities.school import School
+from app.infrastructure.orm_models.school_orm import SchoolORM
 from app.infrastructure.database import engine, init_db
 from app.main import app
 
@@ -21,7 +21,7 @@ async def test_create_and_list_student_api() -> None:
 
     # Preparando o banco de dados com uma Escola válida
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        school = School(id=escola_id, tenant_id=tenant_id, nome="Escola Esperança")
+        school = SchoolORM(id=escola_id, tenant_id=tenant_id, nome="Escola Esperança", is_active=True)
         session.add(school)
         await session.commit()
 
@@ -66,7 +66,7 @@ async def test_create_and_list_student_api() -> None:
 
         # Sensitive data check with too short justification
         sens_res2 = await ac.get(f"/api/alunos/{student_id}/dados-sensiveis?justificativa=curta", headers=headers)
-        assert sens_res2.status_code == 400
+        assert sens_res2.status_code == 422
 
         # Sensitive data check with correct justification
         sens_res3 = await ac.get(f"/api/alunos/{student_id}/dados-sensiveis?justificativa=Necessidade%20Medica%20Urgente", headers=headers)

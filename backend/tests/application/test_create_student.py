@@ -6,6 +6,7 @@ from app.application.use_cases.students.create_student import (
     CreateStudentUseCase,
     CreateStudentInput,
 )
+from app.domain.exceptions import ConsentimentoLGPDAusenteError, EscolaNaoEncontradaError, TenantMismatchError
 from app.domain.models import Student
 from app.domain.entities.school import School
 
@@ -64,7 +65,7 @@ async def test_create_student_requires_lgpd_consent(
         consentimento_lgpd=False,
     )
 
-    with pytest.raises(ValueError, match="consentimento_lgpd DEVE ser True"):
+    with pytest.raises(ConsentimentoLGPDAusenteError):
         await use_case.execute(input_dto)
 
 
@@ -85,15 +86,15 @@ async def test_create_student_school_not_found_or_invalid_tenant(
         consentimento_lgpd=True,
     )
 
-    with pytest.raises(ValueError, match="Escola não encontrada ou pertence a outro tenant"):
+    with pytest.raises(EscolaNaoEncontradaError):
         await use_case.execute(input_dto)
 
     # Escola existe mas em outro tenant
     repo_school.schools[escola_id] = School(
         id=escola_id, tenant_id=uuid.uuid4(), nome="Escola X"
     )
-    
-    with pytest.raises(ValueError, match="Escola não encontrada ou pertence a outro tenant"):
+
+    with pytest.raises(TenantMismatchError):
         await use_case.execute(input_dto)
 
 

@@ -9,6 +9,7 @@ from app.application.use_cases.reports.create_report import (
 from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
+from app.domain.exceptions import PermissaoInsuficienteError
 
 class MockAsyncSession:
     def begin(self): return self
@@ -127,5 +128,5 @@ async def test_create_report_invalid_role(
         conteudo_json={},
     )
 
-    with pytest.raises(ValueError, match="Papel de usuário não permitido para este tipo de relatório."):
+    with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(input_dto)

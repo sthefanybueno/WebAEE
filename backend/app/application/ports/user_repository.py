@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, Protocol
+from typing import Optional, List, Protocol
 
 from app.domain.entities.user import User
 
@@ -12,4 +12,7 @@ class UserRepository(Protocol):
         ...
 
     async def save(self, user: User) -> User:
+        ...
+
+    async def list_by_tenant(self, tenant_id: uuid.UUID) -> List[User]:
         ...

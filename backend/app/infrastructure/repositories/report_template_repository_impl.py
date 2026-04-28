@@ -7,6 +7,7 @@ from app.application.ports.report_template_repository import (
     ReportTemplateRepository,
 )
 from app.domain.entities.report import ReportTemplate, TipoRelatorio
+from app.infrastructure.orm_models.report_orm import ReportTemplateORM
 
 
 class SQLModelReportTemplateRepository(ReportTemplateRepository):
@@ -16,8 +17,11 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
     async def get_active_by_tipo(
         self, tipo: TipoRelatorio
     ) -> Optional[ReportTemplate]:
-        statement = select(ReportTemplate).where(
-            ReportTemplate.tipo == tipo, ReportTemplate.ativo == True
+        statement = select(ReportTemplateORM).where(
+            ReportTemplateORM.tipo == tipo, ReportTemplateORM.ativo == True
         )
         result = await self.session.exec(statement)
-        return result.first()
+        orm = result.first()
+        if orm:
+            return ReportTemplate(**orm.model_dump())
+        return None

@@ -12,7 +12,7 @@ from alembic import context
 from sqlmodel import SQLModel
 
 # Import all models to make sure they are attached to the SQLModel.metadata
-from app.domain import *
+from app.infrastructure.orm_models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

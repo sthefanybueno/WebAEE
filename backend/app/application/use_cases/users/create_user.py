@@ -13,6 +13,12 @@ class CreateUserInput:
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.domain.exceptions import PermissaoInsuficienteError, DomainException
+
+class EmailJaEmUsoError(DomainException):
+    def __init__(self, email: str) -> None:
+        super().__init__(f"O e-mail '{email}' já está em uso por outro usuário.")
+
 class CreateUserUseCase:
     """Caso de uso para criação de novos usuários com validação de hierarquia (RBAC).
     
@@ -35,18 +41,18 @@ class CreateUserUseCase:
             # outros     → não podem criar ninguém
 
             if input_dto.papel == PapelUsuario.ADMIN and input_dto.executor_papel != PapelUsuario.ADMIN:
-                raise ValueError("Apenas Admin pode criar outro Admin.")
+                raise PermissaoInsuficienteError(acao="criar usuário ADMIN", papel_requerido="ADMIN")
 
             if input_dto.executor_papel == PapelUsuario.PROF_AEE and input_dto.papel != PapelUsuario.PROF_APOIO:
-                raise ValueError("Prof. AEE só tem permissão para cadastrar Profissional de Apoio.")
+                raise PermissaoInsuficienteError(acao="criar usuário", papel_requerido="ADMIN ou COORDENACAO")
 
             if input_dto.executor_papel not in (PapelUsuario.ADMIN, PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE):
-                raise ValueError("Você não tem permissão para cadastrar usuários.")
+                raise PermissaoInsuficienteError(acao="cadastrar usuários")
                 
             # Verifica duplicidade
             existing_user = await self.user_repo.get_by_email(input_dto.email)
             if existing_user:
-                raise ValueError("E-mail já está em uso por outro usuário.")
+                raise EmailJaEmUsoError(input_dto.email)
 
             user = User(
                 tenant_id=input_dto.tenant_id,

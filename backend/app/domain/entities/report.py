@@ -8,6 +8,9 @@ Tipos:
   - aee        → criado pela Prof. AEE
   - anual      → Prof. AEE ou Profissional de Apoio
   - trimestral → Prof. AEE ou Professora Regente
+
+[DDD] Report é uma entidade RICA com métodos que encapsulam
+regras de finalização (travar), edição e conflito offline.
 """
 
 from __future__ import annotations
@@ -17,18 +20,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List
 
-from sqlalchemy import Column
-from sqlmodel import Field, SQLModel
+from pydantic import BaseModel, Field
 
 import os
-from sqlalchemy import JSON
-from sqlalchemy.dialects.postgresql import JSONB
-
-_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
-if "sqlite" in _DATABASE_URL:
-    _JSON_TYPE = JSON
-else:
-    _JSON_TYPE = JSONB
+# JSON fallback handled in ORM now.
 
 
 def _utcnow() -> datetime:
@@ -51,56 +46,26 @@ class SyncStatus(str, enum.Enum):
     FAILED = "failed"
 
 
-class ReportTemplate(SQLModel, table=True):
+class ReportTemplate(BaseModel):
     """Template configurável de relatório.
 
-    Tabela: report_templates
     As `secoes` são um array JSONB — a estrutura de campos de cada seção
     fica no banco, permitindo alterar formulários sem redeploy.
     O campo `versao` cresce a cada alteração; relatórios congelam
     o snapshot da versão usada na criação.
     """
 
-    __tablename__ = "report_templates"  # type: ignore[assignment]
-
-    id: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        nullable=False,
-    )
-
-    tipo: TipoRelatorio = Field(
-        nullable=False,
-        index=True,
-        description="Tipo de relatório que este template descreve.",
-    )
-
-    secoes: Optional[List[Dict[str, Any]]] = Field(
-        default=None,
-        sa_column=Column(_JSON_TYPE, nullable=True),
-        description="Array JSONB de seções e campos configuráveis.",
-    )
-
-    versao: int = Field(
-        default=1,
-        nullable=False,
-        description="Versão do template. Incrementa a cada alteração estrutural.",
-    )
-
-    ativo: bool = Field(default=True, nullable=False)
-
-    created_at: datetime = Field(default_factory=_utcnow, nullable=False)
-    updated_at: datetime = Field(
-        default_factory=_utcnow,
-        nullable=False,
-        sa_column_kwargs={"onupdate": _utcnow},
-    )
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    tipo: TipoRelatorio = Field(description="Tipo de relatório que este template descreve.")
+    secoes: Optional[List[Dict[str, Any]]] = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
+    versao: int = Field(default=1, description="Versão do template. Incrementa a cada alteração estrutural.")
+    ativo: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
 
 
-class Report(SQLModel, table=True):
+class Report(BaseModel):
     """Relatório pedagógico.
-
-    Tabela: reports — discriminado por `tipo`.
 
     `template_snapshot`: congela a estrutura do template no momento da criação,
     isolando o relatório de futuras mudanças de template.
@@ -109,71 +74,74 @@ class Report(SQLModel, table=True):
     A UI exibe as duas versões para o usuário resolver manualmente.
     """
 
-    __tablename__ = "reports"  # type: ignore[assignment]
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    tipo: TipoRelatorio = Field(description="Discriminador: aee | anual | trimestral.")
+    aluno_id: uuid.UUID = Field(description="FK lógica para students.id.")
+    autor_id: uuid.UUID = Field(description="FK lógica para users.id.")
+    template_snapshot: Optional[Dict[str, Any]] = Field(default=None, description="Snapshot do template no momento da criação (imutável).")
+    conteudo_json: Optional[Dict[str, Any]] = Field(default=None, description="Conteúdo preenchido pelo usuário (mutável até travar).")
+    travado: bool = Field(default=False, description="True = relatório finalizado; nenhuma edição permitida.")
+    sync_status: SyncStatus = Field(default=SyncStatus.SYNCED, description="Estado de sincronização offline.")
+    conflict_flag: bool = Field(default=False, description="True quando merge offline detectou conflito de versão.")
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow, description="Usado para detecção de conflito no sync offline.")
+    updated_by: Optional[uuid.UUID] = Field(default=None, description="FK lógica para users.id — último editor.")
 
-    id: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        nullable=False,
-    )
+    # ── Comportamentos de domínio (Entidade Rica) ─────────
 
-    tipo: TipoRelatorio = Field(
-        nullable=False,
-        index=True,
-        description="Discriminador: aee | anual | trimestral.",
-    )
+    def pode_ser_editado(self) -> bool:
+        """Retorna True se o relatório ainda aceita edições.
 
-    aluno_id: uuid.UUID = Field(
-        nullable=False,
-        index=True,
-        description="FK lógica para students.id.",
-    )
+        Regra de negócio: relatórios travados são imutáveis.
+        Use Cases devem chamar este método antes de qualquer alteração.
+        """
+        return not self.travado
 
-    autor_id: uuid.UUID = Field(
-        nullable=False,
-        description="FK lógica para users.id.",
-    )
+    def travar(self, user_id: uuid.UUID) -> None:
+        """Finaliza o relatório, tornando-o imutável.
 
-    template_snapshot: Optional[Dict[str, Any]] = Field(
-        default=None,
-        sa_column=Column(_JSON_TYPE, nullable=True),
-        description="Snapshot do template no momento da criação (imutável).",
-    )
+        Regra de negócio: após travado, nenhuma edição é permitida.
+        Representa a assinatura digital do documento pedagógico.
 
-    conteudo_json: Optional[Dict[str, Any]] = Field(
-        default=None,
-        sa_column=Column(_JSON_TYPE, nullable=True),
-        description="Conteúdo preenchido pelo usuário (mutável até travar).",
-    )
+        Args:
+            user_id: ID do usuário que finalizou o relatório.
 
-    travado: bool = Field(
-        default=False,
-        nullable=False,
-        description="True = relatório finalizado; nenhuma edição permitida.",
-    )
+        Raises:
+            RelatorioTravadoError: se já estiver travado.
+        """
+        from app.domain.exceptions import RelatorioTravadoError  # noqa: PLC0415
 
-    sync_status: SyncStatus = Field(
-        default=SyncStatus.SYNCED,
-        nullable=False,
-        description="Estado de sincronização offline.",
-    )
+        if self.travado:
+            raise RelatorioTravadoError()
 
-    conflict_flag: bool = Field(
-        default=False,
-        nullable=False,
-        description="True quando merge offline detectou conflito de versão.",
-    )
+        self.travado = True
+        self.updated_by = user_id
+        self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    created_at: datetime = Field(default_factory=_utcnow, nullable=False)
+    def registrar_conflito(self) -> None:
+        """Sinaliza que houve conflito de versão no merge offline.
 
-    updated_at: datetime = Field(
-        default_factory=_utcnow,
-        nullable=False,
-        sa_column_kwargs={"onupdate": _utcnow},
-        description="Usado para detecção de conflito no sync offline.",
-    )
+        A UI deve exibir aviso para o usuário resolver manualmente.
+        Apenas aciona o flag — não sobrescreve o conteúdo.
+        """
+        self.conflict_flag = True
 
-    updated_by: Optional[uuid.UUID] = Field(
-        default=None,
-        description="FK lógica para users.id — último editor.",
-    )
+    def resolver_conflito(self, conteudo_resolvido: dict, user_id: uuid.UUID) -> None:
+        """Aplica a resolução manual do conflito de sync offline.
+
+        Args:
+            conteudo_resolvido: Conteúdo definitivo escolhido pelo usuário.
+            user_id: ID do usuário que resolveu o conflito.
+
+        Raises:
+            RelatorioTravadoError: se o relatório já estiver travado.
+        """
+        from app.domain.exceptions import RelatorioTravadoError  # noqa: PLC0415
+
+        if self.travado:
+            raise RelatorioTravadoError()
+
+        self.conteudo_json = conteudo_resolvido
+        self.conflict_flag = False
+        self.updated_by = user_id
+        self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)

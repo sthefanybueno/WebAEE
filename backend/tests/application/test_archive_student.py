@@ -7,6 +7,7 @@ from app.application.use_cases.students.archive_student import (
     ArchiveStudentUseCase,
 )
 from app.domain.entities.audit_log import AuditLog
+from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError, TenantMismatchError
 from app.domain.models import StatusAluno, Student
 
 class MockAsyncSession:
@@ -91,7 +92,5 @@ async def test_archive_student_not_found(
         tenant_id=uuid.uuid4(),
         user_id=uuid.uuid4(),
     )
-    with pytest.raises(
-        ValueError, match="Aluno não encontrado ou não pertence a este tenant."
-    ):
+    with pytest.raises(AlunoNaoEncontradoError):
         await use_case.execute(input_dto)

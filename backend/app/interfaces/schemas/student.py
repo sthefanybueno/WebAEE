@@ -23,11 +23,14 @@ class TransferStudentRequest(BaseModel):
     nova_escola_id: uuid.UUID
 
 
-class StudentResponse(BaseModel):
-    """
-    Schema de resposta para alunos.
-    NOTA LGPD: `diagnostico` e `laudo` são intencionalmente omitidos.
-    Para acessar campos sensíveis, um endpoint específico com auditoria é necessário.
+# ── Padrão Plain: base sem relações para evitar import circular ───────────────
+
+
+class StudentPlain(BaseModel):
+    """Campos diretos do aluno sem relações — base para herança.
+
+    [DDD] Padrão Plain: schemas complexos herdam daqui, evitando
+    importações circulares entre schemas que se referenciam.
     """
 
     id: uuid.UUID
@@ -39,24 +42,52 @@ class StudentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class StudentDetailResponse(StudentResponse):
+
+class StudentResponse(StudentPlain):
+    """Schema de resposta padrão para alunos.
+
+    NOTA LGPD: `diagnostico` e `laudo` são intencionalmente omitidos.
+    Para acessar campos sensíveis, use /api/alunos/{id}/dados-sensiveis
+    com justificativa obrigatória e auditoria automática.
     """
-    Schema idêntico ao StudentResponse listado.
+
+    pass
+
+
+class StudentDetailResponse(StudentPlain):
+    """Schema de detalhe de aluno — idêntico ao padrão.
+
     Em compliance com a LGPD (RN-26 e RN-27), nenhum dado de laudo
     ou diagnóstico vaza nesta rota geral de leitura.
     """
+
     pass
+
+
+class StudentSensitiveDataResponse(BaseModel):
+    """Schema para dados sensíveis — retornado apenas com justificativa LGPD.
+
+    Movido do router para cá: schemas devem viver em schemas/, não em routers/.
+    """
+
+    diagnostico: Optional[str]
+    laudo: Optional[str]
+
 
 class UpdateStudentRequest(BaseModel):
     """Payload para edição básica de alunos (sem laudo/diagnóstico)."""
+
     nome: Optional[str] = None
     data_nascimento: Optional[datetime] = None
 
+
 from app.domain.entities.user import PapelUsuario
+
 
 class CreateProfessorAssignmentRequest(BaseModel):
     usuario_id: uuid.UUID
     tipo_papel: PapelUsuario
+
 
 class ProfessorAssignmentResponse(BaseModel):
     id: uuid.UUID

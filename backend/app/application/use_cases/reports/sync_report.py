@@ -14,8 +14,7 @@ def _to_naive_utc(dt: datetime) -> datetime:
     return dt
 
 
-class ConcurrencyError(ValueError):
-    pass
+from app.domain.exceptions import ConflitoSincronizacaoError
 
 @dataclass
 class SyncReportInput:
@@ -69,7 +68,7 @@ class SyncReportUseCase:
                     if existing.updated_at > updated_at_naive:
                         existing.conflict_flag = True
                         await self.report_repo.save(existing)
-                        raise ConcurrencyError("Conflito detectado na sincronização")
+                        raise ConflitoSincronizacaoError()
                         
                     existing.conteudo_json = input_dto.conteudo_json
                     existing.updated_at = updated_at_naive

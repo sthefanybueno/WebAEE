@@ -4,6 +4,7 @@ from app.application.ports.student_history_repository import (
     StudentSchoolHistoryRepository,
 )
 from app.domain.entities.student_history import StudentSchoolHistory
+from app.infrastructure.orm_models.student_history_orm import StudentSchoolHistoryORM
 
 
 class SQLModelStudentHistoryRepository(StudentSchoolHistoryRepository):
@@ -11,6 +12,7 @@ class SQLModelStudentHistoryRepository(StudentSchoolHistoryRepository):
         self._session = session
 
     async def save(self, history: StudentSchoolHistory) -> StudentSchoolHistory:
-        self._session.add(history)
+        orm = StudentSchoolHistoryORM(**history.model_dump())
+        orm = await self._session.merge(orm)
         await self._session.flush()
-        return history
+        return StudentSchoolHistory(**orm.model_dump())

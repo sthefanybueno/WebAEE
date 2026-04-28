@@ -10,8 +10,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from sqlmodel import Field, SQLModel
-
+from pydantic import BaseModel, Field
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
@@ -21,10 +20,8 @@ def _utcnow() -> datetime:
 SENSITIVE_FIELDS = frozenset({"diagnostico", "laudo"})
 
 
-class AuditLog(SQLModel, table=True):
+class AuditLog(BaseModel):
     """Log imutável de acesso a dados sensíveis.
-
-    Tabela: audit_log
 
     Conforme LGPD art. 37: o controlador e o operador devem
     manter registro das operações de tratamento de dados pessoais.
@@ -35,40 +32,9 @@ class AuditLog(SQLModel, table=True):
       `GET /api/alunos/{id}/dados-sensiveis`.
     """
 
-    __tablename__ = "audit_log"  # type: ignore[assignment]
-
-    id: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        nullable=False,
-    )
-
-    user_id: uuid.UUID = Field(
-        nullable=False,
-        index=True,
-        description="FK lógica para users.id — quem acessou.",
-    )
-
-    student_id: uuid.UUID = Field(
-        nullable=False,
-        index=True,
-        description="FK lógica para students.id — de quem foram acessados os dados.",
-    )
-
-    field_accessed: str = Field(
-        max_length=100,
-        nullable=False,
-        description="Nome do campo sensível acessado (ex: 'diagnostico').",
-    )
-
-    accessed_at: datetime = Field(
-        default_factory=_utcnow,
-        nullable=False,
-        description="Timestamp UTC do acesso.",
-    )
-
-    ip_address: str | None = Field(
-        default=None,
-        max_length=45,
-        description="Endereço IP do cliente (IPv4 ou IPv6, opcional).",
-    )
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+    user_id: uuid.UUID = Field(description="FK lógica para users.id — quem acessou.")
+    student_id: uuid.UUID = Field(description="FK lógica para students.id — de quem foram acessados os dados.")
+    field_accessed: str = Field(max_length=100, description="Nome do campo sensível acessado (ex: 'diagnostico').")
+    accessed_at: datetime = Field(default_factory=_utcnow, description="Timestamp UTC do acesso.")
+    ip_address: str | None = Field(default=None, max_length=45, description="Endereço IP do cliente (IPv4 ou IPv6, opcional).")

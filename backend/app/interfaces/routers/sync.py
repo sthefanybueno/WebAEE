@@ -6,6 +6,8 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.domain.models import Student
 from app.domain.entities.report import Report
+from app.infrastructure.orm_models.student_orm import StudentORM
+from app.infrastructure.orm_models.report_orm import ReportORM
 from app.infrastructure.database import get_session
 from app.infrastructure.repositories.report_repository_impl import SQLModelReportRepository
 from app.interfaces.dependencies import CurrentUser, get_current_user
@@ -27,20 +29,20 @@ async def sync_pull(
         last_sync = last_sync.astimezone(timezone.utc).replace(tzinfo=None)
         
     # Alunos
-    stmt_alunos = select(Student).where(
-        Student.tenant_id == current_user.tenant_id,
-        Student.updated_at > last_sync
+    stmt_alunos = select(StudentORM).where(
+        StudentORM.tenant_id == current_user.tenant_id,
+        StudentORM.updated_at > last_sync
     )
     result_alunos = await session.exec(stmt_alunos)
-    alunos_atualizados = result_alunos.all()
+    alunos_atualizados = [Student(**orm.model_dump()) for orm in result_alunos.all()]
 
     # Relatórios
-    stmt_relatorios = select(Report).join(Student, Report.aluno_id == Student.id).where(
-        Student.tenant_id == current_user.tenant_id,
-        Report.updated_at > last_sync
+    stmt_relatorios = select(ReportORM).join(StudentORM, ReportORM.aluno_id == StudentORM.id).where(
+        StudentORM.tenant_id == current_user.tenant_id,
+        ReportORM.updated_at > last_sync
     )
     result_relatorios = await session.exec(stmt_relatorios)
-    relatorios_atualizados = result_relatorios.all()
+    relatorios_atualizados = [Report(**orm.model_dump()) for orm in result_relatorios.all()]
 
     return {
         "last_sync": datetime.now(timezone.utc).replace(tzinfo=None),

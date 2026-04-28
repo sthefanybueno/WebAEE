@@ -4,6 +4,7 @@ from app.application.ports.student_repository import StudentRepository
 from app.application.ports.professor_assignment_repository import ProfessorAssignmentRepository
 from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import AlunoNaoEncontradoError, AlunoSemEscolaError, VinculoDuplicadoError
 
 @dataclass
 class AssignProfessorInput:
@@ -38,16 +39,16 @@ class AssignProfessorUseCase:
             student = await self.student_repo.get_by_id(input_dto.student_id)
             
             if not student or student.tenant_id != input_dto.tenant_id:
-                raise ValueError("Aluno não encontrado no seu tenant.")
+                raise AlunoNaoEncontradoError(input_dto.student_id)
                 
             if not student.escola_atual_id:
-                raise ValueError("Aluno não está vinculado a nenhuma escola.")
+                raise AlunoSemEscolaError()
 
             # Verificar se já existe vinculo ativo
             ativos = await self.assignment_repo.list_active_by_student(input_dto.student_id)
             for a in ativos:
                 if a.usuario_id == input_dto.usuario_id and a.ativo:
-                    raise ValueError("Este usuário já possui um vínculo ativo com o aluno especificado.")
+                    raise VinculoDuplicadoError()
 
             assignment = ProfessorAssignment(
                 usuario_id=input_dto.usuario_id,

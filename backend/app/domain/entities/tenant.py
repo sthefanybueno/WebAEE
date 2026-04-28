@@ -11,53 +11,24 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlmodel import Field, SQLModel
-
+from pydantic import BaseModel, Field
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-class Tenant(SQLModel, table=True):
+class Tenant(BaseModel):
     """Unidade administrativa (ex: SEMED).
 
     Tabela: tenants
     Todo dado do sistema é isolado por tenant via RLS e FK.
     """
 
-    __tablename__ = "tenants"  # type: ignore[assignment]
-
-    id: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        index=True,
-        nullable=False,
-        description="PK gerada pela aplicação.",
-    )
-
-    nome: str = Field(
-        min_length=2,
-        max_length=255,
-        nullable=False,
-        description="Nome da unidade administrativa (ex: 'SEMED Manaus').",
-    )
-
-    ativo: bool = Field(
-        default=True,
-        nullable=False,
-        description="Tenant desativado bloqueia todos os usuários vinculados.",
-    )
-
-    created_at: datetime = Field(
-        default_factory=_utcnow,
-        nullable=False,
-    )
-
-    updated_at: datetime = Field(
-        default_factory=_utcnow,
-        nullable=False,
-        sa_column_kwargs={"onupdate": _utcnow},
-    )
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, description="PK gerada pela aplicação.")
+    nome: str = Field(min_length=2, max_length=255, description="Nome da unidade administrativa (ex: 'SEMED Manaus').")
+    ativo: bool = Field(default=True, description="Tenant desativado bloqueia todos os usuários vinculados.")
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
 
     # ── Evita conflito de metadados ao usar table=True em múltiplos modelos ──
     class Config:

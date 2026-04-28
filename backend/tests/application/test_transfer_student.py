@@ -11,6 +11,7 @@ from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.school import School
 from app.domain.entities.student_history import StudentSchoolHistory
 from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import AlunoNaoEncontradoError, EscolaNaoEncontradaError, TenantMismatchError
 from app.domain.models import Student
 
 class MockAsyncSession:
@@ -180,7 +181,5 @@ async def test_transfer_student_to_invalid_school(
         user_id=uuid.uuid4(),
     )
 
-    with pytest.raises(
-        ValueError, match="Nova escola não encontrada ou pertence a outro tenant."
-    ):
+    with pytest.raises(EscolaNaoEncontradaError):
         await use_case.execute(input_dto)

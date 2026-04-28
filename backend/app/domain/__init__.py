@@ -5,6 +5,7 @@ Re-exports centralizados para uso interno.
 
 De fora do pacote domain, importe sempre desta raiz:
     from app.domain import Student, StatusAluno, TagPedagogica
+    from app.domain import AlunoNaoEncontradoError, DomainException
 """
 
 from app.domain.models import StatusAluno, Student, SyncStatus, TagPedagogica
@@ -15,6 +16,18 @@ from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
 from app.domain.entities.photo import Photo
 from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.audit_log import AuditLog, SENSITIVE_FIELDS
+from app.domain.exceptions import (
+    DomainException,
+    AlunoNaoEncontradoError,
+    UsuarioNaoEncontradoError,
+    EscolaNaoEncontradaError,
+    TenantMismatchError,
+    PermissaoInsuficienteError,
+    AlunoJaArquivadoError,
+    RelatorioTravadoError,
+    ConsentimentoLGPDAusenteError,
+    JustificativaInsuficienteError,
+)
 
 __all__ = [
     # models.py (entidade principal + enums)
@@ -34,4 +47,15 @@ __all__ = [
     "ProfessorAssignment",
     "AuditLog",
     "SENSITIVE_FIELDS",
+    # exceptions/
+    "DomainException",
+    "AlunoNaoEncontradoError",
+    "UsuarioNaoEncontradoError",
+    "EscolaNaoEncontradaError",
+    "TenantMismatchError",
+    "PermissaoInsuficienteError",
+    "AlunoJaArquivadoError",
+    "RelatorioTravadoError",
+    "ConsentimentoLGPDAusenteError",
+    "JustificativaInsuficienteError",
 ]

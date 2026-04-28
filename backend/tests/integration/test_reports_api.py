@@ -81,5 +81,5 @@ async def test_reports_api_full_flow() -> None:
         assert (await ac.get(f"/api/relatorios/{fake_id}", headers=headers)).status_code == 404
         assert (await ac.get(f"/api/relatorios/aluno/{fake_id}", headers=headers)).status_code == 404
         assert (await ac.put(f"/api/relatorios/{fake_id}", json={"conteudo_json":{}}, headers=headers)).status_code == 404
-        assert (await ac.post(f"/api/relatorios/{fake_id}/comentarios", json={"texto":""}, headers=headers)).status_code == 400
+        assert (await ac.post(f"/api/relatorios/{fake_id}/comentarios", json={"texto":""}, headers=headers)).status_code == 404
 

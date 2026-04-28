@@ -5,8 +5,9 @@ Cobre: RBAC por papel, duplicidade de e-mail, criação bem-sucedida.
 import uuid
 import pytest
 
-from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase
+from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase, EmailJaEmUsoError
 from app.domain.entities.user import User, PapelUsuario
+from app.domain.exceptions import PermissaoInsuficienteError
 
 class MockAsyncSession:
     def begin(self): return self
@@ -59,7 +60,7 @@ async def test_criar_usuario_coordenacao_sucesso(repo: MockUserRepository) -> No
 async def test_criar_admin_requer_executor_admin(repo: MockUserRepository) -> None:
     use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
     inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.ADMIN)
-    with pytest.raises(ValueError, match="Apenas Admin"):
+    with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
 
 
@@ -67,7 +68,7 @@ async def test_criar_admin_requer_executor_admin(repo: MockUserRepository) -> No
 async def test_prof_aee_so_pode_criar_prof_apoio(repo: MockUserRepository) -> None:
     use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
     inp = make_input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_AEE)
-    with pytest.raises(ValueError, match="Profissional de Apoio"):
+    with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
 
 
@@ -75,7 +76,7 @@ async def test_prof_aee_so_pode_criar_prof_apoio(repo: MockUserRepository) -> No
 async def test_prof_apoio_nao_pode_criar_usuario(repo: MockUserRepository) -> None:
     use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
     inp = make_input(PapelUsuario.PROF_APOIO, PapelUsuario.PROF_APOIO)
-    with pytest.raises(ValueError, match="não tem permissão"):
+    with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
 
 
@@ -84,7 +85,7 @@ async def test_email_duplicado_levanta_erro(repo: MockUserRepository) -> None:
     use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo)
     inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE, email="dup@escola.edu.br")
     await use_case.execute(inp)  # primeira criação
-    with pytest.raises(ValueError, match="já está em uso"):
+    with pytest.raises(EmailJaEmUsoError):
         await use_case.execute(inp)
 
 

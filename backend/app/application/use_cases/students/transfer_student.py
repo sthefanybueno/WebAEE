@@ -1,8 +1,19 @@
+"""
+Use Case: Transferir Aluno
+==========================
+Orquestra a transferência de escola de um aluno (operação atômica).
+
+Mudança DDD (v2): usa exceções de domínio e chama métodos ricos
+(student.transferir_para, assignment.revogar) em vez de manipular
+campos diretamente.
+"""
+
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.application.ports.professor_assignment_repository import (
     ProfessorAssignmentRepository,
 )
@@ -12,6 +23,11 @@ from app.application.ports.student_history_repository import (
 )
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.student_history import StudentSchoolHistory
+from app.domain.exceptions import (
+    AlunoNaoEncontradoError,
+    EscolaNaoEncontradaError,
+    TenantMismatchError,
+)
 from app.domain.models import Student
 
 
@@ -25,12 +41,17 @@ class TransferStudentInput:
 
 class TransferStudentUseCase:
     """Caso de uso para transferência de escola de um aluno.
-    
+
     Esta operação é complexa pois envolve:
     1. Vinculação do aluno a uma nova escola.
     2. Revogação automática de todos os acessos (vínculos) de professores da escola anterior.
     3. Registro de histórico de transferências para rastreabilidade pedagógica.
+
+    [DDD v2] Delega para métodos ricos das entidades:
+    - student.transferir_para() — encapsula mudança de escola + auditoria
+    - assignment.revogar() — encapsula encerramento de vínculo com data_fim
     """
+
     def __init__(
         self,
         session: AsyncSession,
@@ -47,34 +68,36 @@ class TransferStudentUseCase:
 
     async def execute(self, input_dto: TransferStudentInput) -> Student:
         """Executa a transferência do aluno entre escolas do mesmo tenant.
-        
+
         Esta operação é executada dentro de uma transação atômica.
         """
         async with self.session.begin():
             student = await self.student_repo.get_by_id(input_dto.student_id)
-            if not student or student.tenant_id != input_dto.tenant_id:
-                raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
+            if student is None:
+                raise AlunoNaoEncontradoError(input_dto.student_id)
+            if student.tenant_id != input_dto.tenant_id:
+                raise TenantMismatchError("aluno")
 
             nova_escola = await self.school_repo.get_by_id(input_dto.nova_escola_id)
-            if not nova_escola or nova_escola.tenant_id != input_dto.tenant_id:
-                raise ValueError("Nova escola não encontrada ou pertence a outro tenant.")
+            if nova_escola is None:
+                raise EscolaNaoEncontradaError(input_dto.nova_escola_id)
+            if nova_escola.tenant_id != input_dto.tenant_id:
+                raise TenantMismatchError("escola de destino")
 
-            # Revogar acessos dos professores atuais
+            # Revogar vínculos ativos via método rico da entidade
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             active_assignments = await self.assignment_repo.list_active_by_student(
                 input_dto.student_id
             )
-            now = datetime.now(timezone.utc).replace(tzinfo=None)
             for assignment in active_assignments:
-                assignment.data_fim = now
+                assignment.revogar(now)
                 await self.assignment_repo.save(assignment)
 
-            # Atualizar a escola do aluno
-            student.escola_atual_id = input_dto.nova_escola_id
-            student.updated_at = now
-            student.updated_by = input_dto.user_id
+            # Transferir via método rico da entidade (valida estado + rastreabilidade)
+            student.transferir_para(input_dto.nova_escola_id, input_dto.user_id)
             saved_student = await self.student_repo.save(student)
 
-            # Salvar histórico
+            # Salvar histórico imutável da transferência
             history = StudentSchoolHistory(
                 student_id=input_dto.student_id,
                 school_id=input_dto.nova_escola_id,

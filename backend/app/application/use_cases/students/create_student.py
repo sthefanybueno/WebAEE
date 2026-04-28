@@ -1,10 +1,26 @@
+"""
+Use Case: Criar Aluno
+=====================
+Orquestra o cadastro de novos alunos com conformidade LGPD.
+
+Mudança DDD (v2): usa exceções de domínio e chama métodos da entidade rica
+em vez de manipular campos diretamente.
+"""
+
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.application.ports.school_repository import SchoolRepository
 from app.application.ports.student_repository import StudentRepository
+from app.domain.exceptions import (
+    ConsentimentoLGPDAusenteError,
+    EscolaNaoEncontradaError,
+    TenantMismatchError,
+)
 from app.domain.models import StatusAluno, Student
 
 
@@ -32,48 +48,53 @@ class CreateStudentInput:
     base_legal: str = "Art. 58 LDB"
 
 
-from sqlmodel.ext.asyncio.session import AsyncSession
-
 class CreateStudentUseCase:
     """Caso de uso para matrícula de novos alunos com conformidade LGPD.
-    
-    Este processo exige o consentimento explícito (consentimento_lgpd=True) 
-    para processamento de dados sensíveis (diagnóstico/laudo) e valida 
+
+    Este processo exige o consentimento explícito (consentimento_lgpd=True)
+    para processamento de dados sensíveis (diagnóstico/laudo) e valida
     se a escola de destino pertence ao mesmo tenant do executor.
+
+    [DDD v2] Chama entidade.registrar_consentimento_lgpd() em vez de
+    atribuir campos diretamente — a regra reside na entidade.
     """
+
     def __init__(
-        self, 
+        self,
         session: AsyncSession,
-        student_repo: StudentRepository, 
-        school_repo: SchoolRepository
+        student_repo: StudentRepository,
+        school_repo: SchoolRepository,
     ) -> None:
         self.session = session
         self.student_repo = student_repo
         self.school_repo = school_repo
 
     async def execute(self, input_dto: CreateStudentInput) -> Student:
-        """Executa a criação do aluno dento de uma transação.
-        """
+        """Executa a criação do aluno dentro de uma transação."""
         async with self.session.begin():
+            # Regra de negócio 1: consentimento é obrigatório
             if not input_dto.consentimento_lgpd:
-                raise ValueError("consentimento_lgpd DEVE ser True para criar um aluno.")
+                raise ConsentimentoLGPDAusenteError()
 
+            # Regra de negócio 2: escola deve existir e pertencer ao tenant
             school = await self.school_repo.get_by_id(input_dto.escola_atual_id)
-            if not school or school.tenant_id != input_dto.tenant_id:
-                raise ValueError("Escola não encontrada ou pertence a outro tenant.")
+            if school is None:
+                raise EscolaNaoEncontradaError(input_dto.escola_atual_id)
+            if school.tenant_id != input_dto.tenant_id:
+                raise TenantMismatchError("escola")
 
+            # Cria a entidade e usa método rico para registrar consentimento
             student = Student(
                 nome=input_dto.nome,
                 tenant_id=input_dto.tenant_id,
                 escola_atual_id=input_dto.escola_atual_id,
-                consentimento_lgpd=True,
-                data_consentimento=datetime.now(timezone.utc).replace(tzinfo=None),
-                base_legal=input_dto.base_legal,
                 data_nascimento=_to_naive_utc(input_dto.data_nascimento),
                 diagnostico=input_dto.diagnostico,
                 laudo=input_dto.laudo,
                 status=StatusAluno.ATIVO.value,
             )
 
-            return await self.student_repo.save(student)
+            # Método rico encapsula: flag + timestamp + base_legal juntos
+            student.registrar_consentimento_lgpd(input_dto.base_legal)
 
+            return await self.student_repo.save(student)

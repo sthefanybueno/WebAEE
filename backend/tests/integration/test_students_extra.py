@@ -78,15 +78,15 @@ async def test_students_api_extra() -> None:
         assert arc_res.status_code == 200
 
         # Update archived should fail
-        assert (await ac.put(f"/api/alunos/{student_id}", json={"nome":"X"}, headers=headers)).status_code == 400
+        assert (await ac.put(f"/api/alunos/{student_id}", json={"nome":"X"}, headers=headers)).status_code == 409
 
         # Delete / bad routes or 404
         fake_uuid = str(uuid.uuid4())
         assert (await ac.get(f"/api/alunos/{fake_uuid}", headers=headers)).status_code == 404
         assert (await ac.put(f"/api/alunos/{fake_uuid}", json={}, headers=headers)).status_code == 404
-        assert (await ac.post(f"/api/alunos/{fake_uuid}/arquivar", headers=headers)).status_code == 400
-        assert (await ac.post(f"/api/alunos/{fake_uuid}/vinculos", json={"usuario_id":user_id, "tipo_papel":"prof_aee"}, headers=headers)).status_code == 400
-        assert (await ac.post(f"/api/alunos/{fake_uuid}/transferir", json={"nova_escola_id":sch_id}, headers=headers)).status_code == 400
+        assert (await ac.post(f"/api/alunos/{fake_uuid}/arquivar", headers=headers)).status_code == 404
+        assert (await ac.post(f"/api/alunos/{fake_uuid}/vinculos", json={"usuario_id":user_id, "tipo_papel":"prof_aee"}, headers=headers)).status_code == 404
+        assert (await ac.post(f"/api/alunos/{fake_uuid}/transferir", json={"nova_escola_id":sch_id}, headers=headers)).status_code == 404
         assert (await ac.get(f"/api/alunos/{fake_uuid}/dados-sensiveis?justificativa=abcdefghijk", headers=headers)).status_code == 404
 
         # List with status

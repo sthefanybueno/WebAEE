@@ -8,6 +8,7 @@ from app.application.ports.report_template_repository import (
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.report import Report, TipoRelatorio
 from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import AlunoNaoEncontradoError, PermissaoInsuficienteError
 
 
 @dataclass
@@ -49,14 +50,14 @@ class CreateReportUseCase:
             # 1. Validar se o aluno existe e pertence ao tenant
             student = await self.student_repo.get_by_id(input_dto.aluno_id)
             if not student or student.tenant_id != input_dto.tenant_id:
-                raise ValueError("Aluno não encontrado ou não pertence a este tenant.")
+                raise AlunoNaoEncontradoError(input_dto.aluno_id)
 
             # 2. Validar permissão (Mock: vamos assumir que apenas prof_aee ou equipe_gestora pode criar)
             if input_dto.papel_autor not in (
                 PapelUsuario.PROF_AEE,
                 PapelUsuario.COORDENACAO,
             ):
-                raise ValueError("Papel de usuário não permitido para este tipo de relatório.")
+                raise PermissaoInsuficienteError(acao="criar relatório")
 
             # 3. Validar se há um template ativo para esse tipo
             template = await self.template_repo.get_active_by_tipo(input_dto.tipo)

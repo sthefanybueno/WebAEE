@@ -5,6 +5,7 @@ from app.application.ports.report_repository import ReportRepository
 from app.domain.entities.report import Report
 from app.domain.entities.user import PapelUsuario
 from datetime import datetime, timezone
+from app.domain.exceptions import RelatorioNaoEncontradoError, PermissaoInsuficienteError
 
 @dataclass
 class AddCommentInput:
@@ -31,11 +32,11 @@ class AddCommentUseCase:
         """
         async with self.session.begin():
             if input_dto.executor_papel != PapelUsuario.COORDENACAO:
-                raise ValueError("Apenas usuários com papel de coordenação podem adicionar comentários.")
+                raise PermissaoInsuficienteError(acao="adicionar comentário", papel_requerido="COORDENACAO")
 
             report = await self.report_repo.get_by_id(input_dto.report_id)
             if not report:
-                raise ValueError("Relatório não encontrado.")
+                raise RelatorioNaoEncontradoError(input_dto.report_id)
 
             # Injeta nos campos do relatorio
             if not report.conteudo_json:
