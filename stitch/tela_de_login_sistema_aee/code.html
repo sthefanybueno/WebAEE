@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | AEE Digital</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&amp;family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary": "#ffffff",
+              "surface-dim": "#dadada",
+              "on-secondary-fixed": "#1a1a29",
+              "on-tertiary": "#ffffff",
+              "outline-variant": "#bfc9bf",
+              "inverse-surface": "#2f3131",
+              "tertiary-fixed-dim": "#afcdbe",
+              "on-surface": "#1a1c1c",
+              "surface-container-low": "#f3f3f3",
+              "surface-container-highest": "#e2e2e2",
+              "on-background": "#1a1c1c",
+              "tertiary-container": "#4b675b",
+              "secondary-container": "#e2e0f6",
+              "primary-fixed": "#a2f4bf",
+              "on-primary-fixed-variant": "#00522f",
+              "inverse-primary": "#87d7a4",
+              "surface-container-high": "#e8e8e8",
+              "surface": "#f9f9f9",
+              "outline": "#6f7a71",
+              "on-tertiary-fixed-variant": "#314c41",
+              "primary-fixed-dim": "#87d7a4",
+              "tertiary": "#344f43",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-fixed": "#042017",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "tertiary-fixed": "#cbeada",
+              "on-secondary-fixed-variant": "#454556",
+              "on-secondary-container": "#636375",
+              "on-primary": "#ffffff",
+              "on-error-container": "#93000a",
+              "secondary-fixed": "#e2e0f6",
+              "surface-container": "#eeeeee",
+              "secondary": "#5d5d6f",
+              "primary-container": "#1a6f45",
+              "on-tertiary-container": "#c5e4d4",
+              "on-primary-container": "#9defba",
+              "on-primary-fixed": "#002110",
+              "surface-variant": "#e2e2e2",
+              "primary": "#005531",
+              "inverse-on-surface": "#f1f1f1",
+              "on-surface-variant": "#3f4941",
+              "background": "#f9f9f9",
+              "surface-tint": "#156c42",
+              "error": "#ba1a1a",
+              "surface-bright": "#f9f9f9",
+              "secondary-fixed-dim": "#c6c4d9"
+            },
+            fontFamily: {
+              "headline": ["Lexend", "sans-serif"],
+              "body": ["Atkinson Hyperlegible", "sans-serif"],
+              "label": ["Atkinson Hyperlegible", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+        }
+        .editorial-shadow {
+            box-shadow: 0 8px 30px rgb(28,28,30,0.04);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-center p-6">
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl flex items-center justify-between px-6 py-4 w-full">
+<div class="text-xl font-bold text-primary tracking-tight font-headline">AEE Digital</div>
+<div class="hidden md:flex gap-6 text-sm font-medium Atkinson Hyperlegible">
+<span class="text-primary font-bold">Acesso</span>
+<span class="text-secondary/60">Ajuda</span>
+</div>
+</header>
+<main class="w-full max-w-md mt-16 mb-12">
+<div class="bg-surface-container-lowest editorial-shadow rounded-xl p-8 md:p-10 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center mb-8">
+<span class="text-on-primary-container font-headline font-bold text-xl tracking-widest">AEE</span>
+</div>
+<div class="text-center mb-8">
+<h2 class="font-headline font-bold text-2xl text-on-surface tracking-tight mb-2">Bem-vindo ao Sistema AEE</h2>
+<p class="font-headline text-secondary text-sm md:text-base">Acesse para gerenciar seus atendimentos.</p>
+</div>
+<form class="w-full space-y-6">
+<div class="space-y-2">
+<label class="block text-sm font-bold text-on-surface-variant font-label" for="email">E-mail</label>
+<input class="w-full h-[52px] px-4 bg-surface-container-low border-b-2 border-outline-variant focus:border-primary focus:bg-white transition-all duration-300 outline-none rounded-t-md font-body" id="email" placeholder="nome@exemplo.com" type="email"/>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block text-sm font-bold text-on-surface-variant font-label" for="password">Senha</label>
+<a class="text-sm font-bold text-primary hover:underline underline-offset-4 font-label" href="#">Esqueceu sua senha?</a>
+</div>
+<div class="relative">
+<input class="w-full h-[52px] px-4 bg-surface-container-low border-b-2 border-outline-variant focus:border-primary focus:bg-white transition-all duration-300 outline-none rounded-t-md font-body" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline" type="button">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+<button class="w-full h-[52px] bg-primary-container text-on-primary-container rounded-lg font-bold text-base hover:bg-primary transition-all duration-200 shadow-sm active:scale-95 flex items-center justify-center gap-2" type="submit">
+                    Entrar
+                    <span class="material-symbols-outlined text-[20px]" data-icon="login">login</span>
+</button>
+</form>
+<div class="mt-8 pt-8 w-full border-t border-surface-container">
+<p class="text-center text-xs text-on-surface-variant font-medium">
+                    Não tem uma conta? <a class="text-primary font-bold hover:underline" href="#">Solicite acesso ao administrador.</a>
+</p>
+</div>
+</div>
+</main>
+<footer class="w-full py-8 mt-auto border-t border-emerald-900/10 dark:border-emerald-100/10">
+<div class="flex flex-col md:flex-row justify-center items-center gap-4 px-8 w-full max-w-7xl mx-auto">
+<p class="text-sm font-medium Atkinson Hyperlegible text-slate-500">© 2024 Atendimento Educacional Especializado.</p>
+<div class="flex gap-4">
+<a class="text-sm font-medium Atkinson Hyperlegible text-slate-500 hover:text-primary transition-colors" href="#">Privacidade</a>
+<a class="text-sm font-medium Atkinson Hyperlegible text-slate-500 hover:text-primary transition-colors" href="#">Acessibilidade</a>
+<a class="text-sm font-medium Atkinson Hyperlegible text-slate-500 hover:text-primary transition-colors" href="#">Suporte</a>
+</div>
+</div>
+</footer>
+</body></html>

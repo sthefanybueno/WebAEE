@@ -52,6 +52,7 @@ def repo_audit() -> MockAuditLogRepository:
 async def test_archive_student_success(
     repo_student: MockStudentRepository, repo_audit: MockAuditLogRepository
 ) -> None:
+    # Given
     student_id = uuid.uuid4()
     tenant_id = uuid.uuid4()
     user_id = uuid.uuid4()
@@ -71,7 +72,10 @@ async def test_archive_student_success(
         user_id=user_id,
     )
 
+    # When
     updated_student = await use_case.execute(input_dto)
+
+    # Then
 
     assert updated_student.status == StatusAluno.ARQUIVADO
     assert updated_student.updated_by == user_id
@@ -86,11 +90,14 @@ async def test_archive_student_success(
 async def test_archive_student_not_found(
     repo_student: MockStudentRepository, repo_audit: MockAuditLogRepository
 ) -> None:
+    # Given
     use_case = ArchiveStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, audit_repo=repo_audit)
     input_dto = ArchiveStudentInput(
         student_id=uuid.uuid4(),
         tenant_id=uuid.uuid4(),
         user_id=uuid.uuid4(),
     )
+    
+    # When / Then
     with pytest.raises(AlunoNaoEncontradoError):
         await use_case.execute(input_dto)

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import uuid
 from app.application.ports.user_repository import UserRepository
+from app.application.ports.email_service import EmailService
+from app.infrastructure.security.tokens import create_invite_token
 from app.domain.entities.user import User, PapelUsuario
 
 @dataclass
@@ -26,9 +28,10 @@ class CreateUserUseCase:
     possam criar novos integrantes no sistema, respeitando as regras de 
     negócio de cada papel (Admin, Coordenação, Prof. AEE).
     """
-    def __init__(self, session: AsyncSession, user_repo: UserRepository):
+    def __init__(self, session: AsyncSession, user_repo: UserRepository, email_service: EmailService):
         self.session = session
         self.user_repo = user_repo
+        self.email_service = email_service
 
     async def execute(self, input_dto: CreateUserInput) -> User:
         """Cria um novo usuário no sistema dentro de uma transação.
@@ -57,9 +60,16 @@ class CreateUserUseCase:
             user = User(
                 tenant_id=input_dto.tenant_id,
                 email=input_dto.email,
-                hashed_password="senha_temporaria_hash_simulada",  # Em produção, bcrypt+salt
+                hashed_password="PENDING_INVITE",
                 nome=input_dto.nome,
                 papel=input_dto.papel,
-                ativo=True
+                ativo=False # Usuário fica inativo até aceitar o convite
             )
-            return await self.user_repo.save(user)
+            saved_user = await self.user_repo.save(user)
+            
+            # Gerar token e disparar e-mail fora da transação de banco se preferir, 
+            # mas aqui disparamos no fluxo
+            token = create_invite_token(saved_user.id)
+            await self.email_service.send_invite_email(to_email=saved_user.email, token=token)
+            
+            return saved_user

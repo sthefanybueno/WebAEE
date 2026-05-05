@@ -53,6 +53,7 @@ def repo_school() -> MockSchoolRepository:
 async def test_create_student_requires_lgpd_consent(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
+    # Given
     use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
@@ -65,6 +66,7 @@ async def test_create_student_requires_lgpd_consent(
         consentimento_lgpd=False,
     )
 
+    # When / Then
     with pytest.raises(ConsentimentoLGPDAusenteError):
         await use_case.execute(input_dto)
 
@@ -73,6 +75,7 @@ async def test_create_student_requires_lgpd_consent(
 async def test_create_student_school_not_found_or_invalid_tenant(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
+    # Given
     use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
@@ -86,14 +89,16 @@ async def test_create_student_school_not_found_or_invalid_tenant(
         consentimento_lgpd=True,
     )
 
+    # When / Then
     with pytest.raises(EscolaNaoEncontradaError):
         await use_case.execute(input_dto)
 
-    # Escola existe mas em outro tenant
+    # Given (Escola existe mas em outro tenant)
     repo_school.schools[escola_id] = School(
         id=escola_id, tenant_id=uuid.uuid4(), nome="Escola X"
     )
 
+    # When / Then
     with pytest.raises(TenantMismatchError):
         await use_case.execute(input_dto)
 
@@ -102,6 +107,7 @@ async def test_create_student_school_not_found_or_invalid_tenant(
 async def test_create_student_success(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
+    # Given
     use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
@@ -118,8 +124,10 @@ async def test_create_student_success(
         consentimento_lgpd=True,
     )
 
+    # When
     student = await use_case.execute(input_dto)
     
+    # Then
     assert student.id is not None
     assert student.nome == "Maria"
     assert student.consentimento_lgpd is True

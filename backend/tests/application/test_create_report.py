@@ -64,6 +64,7 @@ async def test_create_report_success(
     repo_template: MockReportTemplateRepository,
     repo_student: MockStudentRepository,
 ) -> None:
+    # Given
     student_id = uuid.uuid4()
     tenant_id = uuid.uuid4()
     autor_id = uuid.uuid4()
@@ -90,7 +91,10 @@ async def test_create_report_success(
         conteudo_json={"secao_1": "valor"},
     )
 
+    # When
     report = await use_case.execute(input_dto)
+    
+    # Then
     assert report.tipo == TipoRelatorio.AEE
     # Usa mode="json" para comparar UUIDs como strings
     assert report.template_snapshot == template.model_dump(mode="json")
@@ -103,6 +107,7 @@ async def test_create_report_invalid_role(
     repo_template: MockReportTemplateRepository,
     repo_student: MockStudentRepository,
 ) -> None:
+    # Given
     student_id = uuid.uuid4()
     tenant_id = uuid.uuid4()
     autor_id = uuid.uuid4()
@@ -128,5 +133,6 @@ async def test_create_report_invalid_role(
         conteudo_json={},
     )
 
+    # When / Then
     with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(input_dto)

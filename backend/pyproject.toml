@@ -13,6 +13,7 @@ dependencies = [
     "asyncpg>=0.29",          # driver async para PostgreSQL
     "python-jose[cryptography]>=3.3",  # JWT
     "passlib[bcrypt]>=1.7",   # hashing de senha
+    "bcrypt<4.0.0",           # Fix para passlib AttributeError: module 'bcrypt' has no attribute '__about__'
     "python-multipart>=0.0.9",
     "slowapi>=0.1.9",
 ]

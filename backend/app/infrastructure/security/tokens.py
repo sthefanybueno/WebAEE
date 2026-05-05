@@ -1,0 +1,40 @@
+import os
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from jose import jwt, JWTError
+
+# Em produção, essa chave deve vir de variável de ambiente (ex: pydantic-settings)
+# Estamos hardcoding um fallback por enquanto para manter o sistema rodando simples
+SECRET_KEY = os.getenv("SECRET_KEY", "b40a5a3b75f85e463a8d169c944ebba99e910ef88f1dc51d4576318e806ef664")
+ALGORITHM = "HS256"
+INVITE_TOKEN_EXPIRE_HOURS = 48
+
+def create_invite_token(user_id: uuid.UUID) -> str:
+    """Cria um JWT para convite de usuário."""
+    expire = datetime.now(timezone.utc) + timedelta(hours=INVITE_TOKEN_EXPIRE_HOURS)
+    to_encode = {
+        "sub": str(user_id),
+        "type": "invite",
+        "exp": expire
+    }
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def decode_invite_token(token: str) -> Optional[uuid.UUID]:
+    """Decodifica um JWT de convite de usuário e retorna o user_id. 
+    Retorna None se o token for inválido, expirado ou não for de convite."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        token_type = payload.get("type")
+        if token_type != "invite":
+            return None
+        
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
+            return None
+            
+        return uuid.UUID(user_id_str)
+    except (JWTError, ValueError):
+        return None

@@ -115,7 +115,8 @@ async def test_list_users() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:  # type: ignore[arg-type]
         res = await ac.get("/api/usuarios/", headers=headers)
     assert res.status_code == 200
-    assert isinstance(res.json(), list)
+    assert "items" in res.json()
+    assert isinstance(res.json()["items"], list)
 
 
 # ──────────────────────────────────────────────

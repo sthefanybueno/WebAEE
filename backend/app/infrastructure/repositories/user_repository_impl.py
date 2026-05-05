@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.ports.user_repository import UserRepository
@@ -33,7 +33,25 @@ class SQLModelUserRepository(UserRepository):
         await self.session.flush()
         return User(**orm.model_dump())
 
-    async def list_by_tenant(self, tenant_id: uuid.UUID) -> list[User]:
+    async def list_by_tenant(
+        self, 
+        tenant_id: uuid.UUID,
+        nome: Optional[str] = None,
+        papel: Optional[str] = None,
+        page: int = 1,
+        size: int = 50
+    ) -> tuple[list[User], int]:
         statement = select(UserORM).where(UserORM.tenant_id == tenant_id)
+        if nome:
+            statement = statement.where(UserORM.nome.ilike(f"%{nome}%"))
+        if papel:
+            statement = statement.where(UserORM.papel == papel)
+            
+        count_statement = select(func.count()).select_from(statement.subquery())
+        total = (await self.session.exec(count_statement)).one()
+        
+        statement = statement.offset((page - 1) * size).limit(size)
         result = await self.session.exec(statement)
-        return [User(**orm.model_dump()) for orm in result.all()]
+        items = [User(**orm.model_dump()) for orm in result.all()]
+        
+        return items, total
