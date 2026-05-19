@@ -22,8 +22,7 @@ from typing import Any, Optional, Dict, List
 
 from pydantic import BaseModel, Field
 
-import os
-# JSON fallback handled in ORM now.
+from app.domain.value_objects.sync_status import SyncStatus  # fonte única de verdade
 
 
 def _utcnow() -> datetime:
@@ -37,13 +36,6 @@ class TipoRelatorio(str, enum.Enum):
     ANUAL = "anual"
     TRIMESTRAL = "trimestral"
 
-
-class SyncStatus(str, enum.Enum):
-    """Estado de sincronização do relatório."""
-
-    LOCAL = "local"
-    SYNCED = "synced"
-    FAILED = "failed"
 
 
 class ReportTemplate(BaseModel):

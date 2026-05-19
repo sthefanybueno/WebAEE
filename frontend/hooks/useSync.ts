@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { db } from '@/lib/db'
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+import { apiClient, ApiError } from '@/lib/api/client'
 
 type SyncState = 'idle' | 'syncing' | 'error' | 'offline'
 
@@ -13,9 +12,16 @@ type SyncState = 'idle' | 'syncing' | 'error' | 'offline'
  * Fluxo:
  *   1. Detecta evento `online`
  *   2. Lê sync_queue ordenado por prioridade (1 = relatórios, 2 = fotos)
- *   3. Para cada item, faz POST/PATCH/DELETE na API
+ *   3. Para cada item, chama apiClient.post/patch/delete
  *   4. Se sucesso → remove da fila e marca entidade como `synced`
- *   5. Se falha → mantém na fila para próxima tentativa
+ *   5. Se 401    → interrompe sync (sessão expirada; apiClient redireciona)
+ *   6. Se outro erro → mantém na fila para próxima tentativa (falha transiente)
+ *
+ * Tratamento de erros:
+ *   - `ApiError` com status 401: para o loop imediatamente (credenciais inválidas).
+ *   - `ApiError` com outros status: log de aviso, item permanece na fila.
+ *   - Erros de rede inesperados: log de aviso, item permanece na fila.
+ *   Nunca silencia erros — todo erro fica visível no console para depuração.
  */
 export function useSync() {
   const [state, setState] = useState<SyncState>('idle')
@@ -31,54 +37,66 @@ export function useSync() {
   }, [])
 
   const runSync = useCallback(async () => {
-    if (!navigator.onLine) { setState('offline'); return }
+    if (!navigator.onLine) {
+      setState('offline')
+      return
+    }
 
-    const items = await db.sync_queue
-      .orderBy('prioridade')
-      .toArray()
+    const items = await db.sync_queue.orderBy('prioridade').toArray()
 
-    if (items.length === 0) { setState('idle'); return }
+    if (items.length === 0) {
+      setState('idle')
+      return
+    }
 
     setState('syncing')
 
     for (const item of items) {
       try {
-        const token = typeof window !== 'undefined'
-          ? localStorage.getItem('aee_token')
-          : null
+        const endpoint = `/api/${item.entidade}s`
 
-        const method = item.operacao === 'create' ? 'POST'
-          : item.operacao === 'update' ? 'PATCH' : 'DELETE'
-
-        const endpoint = `${API_BASE}/api/${item.entidade}s`
-
-        const res = await fetch(
-          item.operacao === 'delete'
-            ? `${endpoint}/${(item.payload as { server_id?: string }).server_id}`
-            : endpoint,
-          {
-            method,
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: method !== 'DELETE' ? JSON.stringify(item.payload) : undefined,
-          }
-        )
-
-        if (res.ok) {
-          // Remove da fila
-          await db.sync_queue.delete(item.id!)
-
-          // Marca entidade local como synced
-          if (item.entidade === 'aluno' && (item.payload as { local_id?: number }).local_id) {
-            await db.alunos.update((item.payload as { local_id: number }).local_id, {
-              sync_status: 'synced',
-            })
-          }
+        if (item.operacao === 'create') {
+          await apiClient.post(endpoint, item.payload)
+        } else if (item.operacao === 'update') {
+          const serverId = (item.payload as { server_id?: string }).server_id
+          await apiClient.put(`${endpoint}/${serverId}`, item.payload)
+        } else if (item.operacao === 'delete') {
+          const serverId = (item.payload as { server_id?: string }).server_id
+          await apiClient.delete(`${endpoint}/${serverId}`)
         }
-      } catch {
-        // Mantém na fila — será tentado na próxima vez
+
+        // Sucesso: remove da fila e marca como sincronizado
+        await db.sync_queue.delete(item.id!)
+
+        if (
+          item.entidade === 'aluno' &&
+          (item.payload as { local_id?: number }).local_id
+        ) {
+          await db.alunos.update(
+            (item.payload as { local_id: number }).local_id,
+            { sync_status: 'synced' },
+          )
+        }
+      } catch (err) {
+        if (err instanceof ApiError) {
+          if (err.statusCode === 401) {
+            // Sessão expirada: apiClient já redirecionou para /login
+            console.error('[Sync] Sessão expirada. Sincronização interrompida.')
+            setState('error')
+            return // Para o loop inteiramente
+          }
+
+          // Erro de servidor (4xx/5xx): mantém na fila para próxima tentativa
+          console.warn(
+            `[Sync] Falha no item ${item.id} (HTTP ${err.statusCode}): ${err.detail}. Será retentado.`,
+          )
+        } else {
+          // Erro de rede inesperado (offline, timeout, etc.)
+          console.warn(
+            `[Sync] Falha de rede no item ${item.id}. Será retentado.`,
+            err,
+          )
+        }
       }
     }
 

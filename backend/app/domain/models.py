@@ -29,6 +29,8 @@ from datetime import datetime, timezone
 from typing import Optional, Any
 from pydantic import BaseModel, Field, model_validator
 
+from app.domain.value_objects.sync_status import SyncStatus  # fonte única de verdade
+
 
 # ─────────────────────────────────────────────────────────
 # Enums de domínio
@@ -55,13 +57,6 @@ class TagPedagogica(str, enum.Enum):
     SOCIALIZACAO = "socializacao"
     OUTRO = "outro"
 
-
-class SyncStatus(str, enum.Enum):
-    """Estado de sincronização para entidades criadas offline."""
-
-    LOCAL = "local"
-    SYNCED = "synced"
-    FAILED = "failed"
 
 
 # ─────────────────────────────────────────────────────────

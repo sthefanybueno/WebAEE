@@ -16,6 +16,8 @@ from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
 from app.domain.entities.photo import Photo
 from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.audit_log import AuditLog, SENSITIVE_FIELDS
+from app.domain.value_objects.email import Email
+from app.domain.value_objects.sync_status import SyncStatus  # re-export canônico
 from app.domain.exceptions import (
     DomainException,
     AlunoNaoEncontradoError,
@@ -34,7 +36,6 @@ __all__ = [
     "Student",
     "StatusAluno",
     "TagPedagogica",
-    "SyncStatus",
     # entities/
     "Tenant",
     "PapelUsuario",
@@ -47,6 +48,9 @@ __all__ = [
     "ProfessorAssignment",
     "AuditLog",
     "SENSITIVE_FIELDS",
+    # value_objects/
+    "Email",
+    "SyncStatus",
     # exceptions/
     "DomainException",
     "AlunoNaoEncontradoError",

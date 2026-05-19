@@ -1,11 +1,23 @@
 """
-Sistema AEE — Entry point FastAPI
-==================================
-Stub mínimo para `docker compose up api` iniciar sem erro.
-As rotas serão adicionadas gradualmente a partir da Fase 3.
+Sistema AEE — Entry Point FastAPI
+===================================
+Responsabilidades deste arquivo:
+  1. Instanciar o app FastAPI com metadados.
+  2. Configurar middlewares (rate limiting).
+  3. Delegar o registro de routers ao api_router.py.
+  4. Expor o health check de infraestrutura.
+
+O que NÃO está aqui: imports de routers individuais.
+Toda a composição de rotas fica em app/interfaces/api_router.py.
 """
 
 from fastapi import FastAPI
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+
+from app.infrastructure.rate_limit import limiter
+from app.interfaces.api_router import register_routers
 
 app = FastAPI(
     title="Sistema AEE",
@@ -15,27 +27,16 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-from app.infrastructure.rate_limit import limiter
-
+# ── Middlewares ────────────────────────────────────────────────────────────
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-from app.interfaces.routers import students, schools, photos, reports, auth, users, dashboard, sync
-
-app.include_router(students.router)
-app.include_router(schools.router)
-app.include_router(photos.router)
-app.include_router(reports.router)
-app.include_router(auth.router)
-app.include_router(users.router)
-app.include_router(dashboard.router)
-app.include_router(sync.router)
+# ── Routers ────────────────────────────────────────────────────────────────
+register_routers(app)
 
 
+# ── Infra ──────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["infra"])
 async def health_check() -> dict[str, str]:
     """Health check — confirma que a API está no ar."""

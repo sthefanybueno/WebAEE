@@ -27,6 +27,10 @@ from app.application.use_cases.students.transfer_student import (
     TransferStudentInput,
     TransferStudentUseCase,
 )
+from app.application.use_cases.students.update_student import (
+    UpdateStudentInput,
+    UpdateStudentUseCase,
+)
 from app.infrastructure.database import get_session
 from app.infrastructure.repositories.audit_log_repository_impl import (
     SQLModelAuditLogRepository,
@@ -65,6 +69,7 @@ _DOMAIN_TO_HTTP: dict[type, int] = {
     TenantMismatchError: status.HTTP_403_FORBIDDEN,
     AlunoJaArquivadoError: status.HTTP_409_CONFLICT,
     JustificativaInsuficienteError: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    PermissaoInsuficienteError: status.HTTP_403_FORBIDDEN,
 }
 
 
@@ -252,33 +257,38 @@ async def get_student(
     return student  # type: ignore[return-value]
 
 
+def get_update_student_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> UpdateStudentUseCase:
+    return UpdateStudentUseCase(
+        session=session,
+        student_repo=SQLModelStudentRepository(session),
+    )
+
+
 @router.put("/{student_id}", response_model=StudentDetailResponse)
 async def update_student(
     student_id: uuid.UUID,
     request: UpdateStudentRequest,
     current_user: CurrentUser = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    use_case: UpdateStudentUseCase = Depends(get_update_student_use_case),
 ) -> StudentDetailResponse:
-    """Atualização básica (não-sensível) dos dados do aluno do tenant logado."""
-    repo = SQLModelStudentRepository(session)
-    student = await repo.get_by_id(student_id)
+    """Atualização básica (não-sensível) dos dados do aluno do tenant logado.
 
-    if not student or student.tenant_id != current_user.tenant_id:
-        raise HTTPException(status_code=404, detail="Estudante não encontrado")
-
-    # Usa método rico da entidade para validar estado antes de editar
-    if not student.pode_ser_editado():
-        raise HTTPException(status_code=409, detail="Aluno arquivado não pode ser editado")
-
-    if request.nome is not None:
-        student.nome = request.nome
-    if request.data_nascimento is not None:
-        student.data_nascimento = request.data_nascimento
-
-    student.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    student.updated_by = current_user.id
-    saved = await repo.save(student)
-    return saved  # type: ignore[return-value]
+    A lógica de negócio (validação de tenant, verificação de estado)
+    reside inteiramente no UpdateStudentUseCase — o Router apenas traduz HTTP.
+    """
+    try:
+        input_dto = UpdateStudentInput(
+            student_id=student_id,
+            tenant_id=current_user.tenant_id,
+            user_id=current_user.id,
+            nome=request.nome,
+            data_nascimento=request.data_nascimento,
+        )
+        return await use_case.execute(input_dto)  # type: ignore[return-value]
+    except DomainException as e:
+        raise _domain_to_http(e) from e
 
 
 from app.domain.entities.audit_log import AuditLog

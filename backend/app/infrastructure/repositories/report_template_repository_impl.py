@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -25,3 +25,9 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
         if orm:
             return ReportTemplate(**orm.model_dump())
         return None
+
+    async def list_all(self) -> List[ReportTemplate]:
+        """Retorna todos os templates do sistema (ativos e inativos)."""
+        statement = select(ReportTemplateORM)
+        result = await self.session.exec(statement)
+        return [ReportTemplate(**orm.model_dump()) for orm in result.all()]

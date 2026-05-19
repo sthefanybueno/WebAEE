@@ -7,6 +7,7 @@ from app.application.use_cases.reports.create_report import (
     CreateReportInput,
     CreateReportUseCase,
 )
+from app.application.use_cases.reports.list_templates import ListTemplatesUseCase
 from app.domain.entities.report import TipoRelatorio
 from app.infrastructure.database import get_session
 from app.infrastructure.repositories.report_repository_impl import (
@@ -95,17 +96,26 @@ async def list_reports_by_student(
 from datetime import datetime, timezone
 from app.domain.entities.report import ReportTemplate
 
+def get_list_templates_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> ListTemplatesUseCase:
+    return ListTemplatesUseCase(
+        session=session,
+        template_repo=SQLModelReportTemplateRepository(session),
+    )
+
+
 @router.get("/templates", response_model=List[ReportTemplateResponse])
 async def list_templates(
     current_user: CurrentUser = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session)
+    use_case: ListTemplatesUseCase = Depends(get_list_templates_use_case),
 ):
-    """Lista templates globais ativos do sistema ou do tenant."""
-    from sqlmodel import select
-    from app.infrastructure.orm_models.report_orm import ReportTemplateORM
-    statement = select(ReportTemplateORM)
-    result = await session.exec(statement)
-    return [ReportTemplate(**orm.model_dump()) for orm in result.all()]
+    """Lista templates globais ativos do sistema.
+
+    Templates são configurações globais (não isoladas por tenant).
+    O router delega ao ListTemplatesUseCase — nenhum ORM aqui.
+    """
+    return await use_case.execute()
 
 from app.application.use_cases.reports.get_report_detail import GetReportDetailUseCase, GetReportDetailInput
 
