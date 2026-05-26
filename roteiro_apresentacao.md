@@ -11,12 +11,12 @@
 |---|---|---|---|---|
 | **01** | Capa | **30s** | `00:30` | Apresentação pessoal e divisão arquitetural |
 | **02** | O Sistema WebAEE | **45s** | `01:15` | Dores das escolas (offline), fluxo e matriz RBAC |
-| **03** | Evolução Tecnológica | **45s** | `02:00` | Escolhas (Next.js/Tailwind v4/Dexie) e exemplos inferiores |
+| **03** | Evolução e Escolhas Tecnológicas | **45s** | `02:00` | Escolhas (Next.js/Tailwind v4/Dexie) e exemplos inferiores |
 | **04** | Camada de Domínio | **35s** | `02:35` | Entidades no topo e esquema/contratos na base |
 | **05** | Camada de Aplicação | **35s** | `03:10` | Reatividade no topo e código de leitura/escrita na base |
-| **06** | Infraestrutura HTTP | **35s** | `03:45` | Conformidade LGPD no topo e intercepção/queries na base |
+| **06** | Infraestrutura HTTP & Proteção LGPD | **35s** | `03:45` | Conformidade LGPD no topo e intercepção/queries na base |
 | **07** | Garantia de Qualidade | **35s** | `04:20` | Estratégia BDD no topo e mocks/asserções na base |
-| **08** | Conclusão & Roadmap | **40s** | `05:00` | Impacto social e cronograma de fases final |
+| **08** | Conclusão & Próximos Passos | **40s** | `05:00` | Impacto social e cronograma de fases final |
 
 ---
 
@@ -42,7 +42,7 @@
 
 ---
 
-## Slide 03 — Evolução Tecnológica & Decisões Críticas
+## Slide 03 — Evolução e Escolhas Tecnológicas
 * **Duração:** 45 segundos (`01:15` a `02:00`)  
 * **Ação na Tela:** Avance para o **Slide 3**. Explique brevemente as cards conceituais do topo e, em seguida, guie os olhos da banca para as **evidências de código posicionadas na parte inferior do slide**.
 
@@ -77,7 +77,7 @@
 
 ---
 
-## Slide 06 — Infraestrutura HTTP & Segurança LGPD
+## Slide 06 — Infraestrutura HTTP & Proteção LGPD
 * **Duração:** 35 segundos (`03:10` a `03:45`)  
 * **Ação na Tela:** Avance para o **Slide 6**. Comente os conceitos de barreira de acesso e auditoria no topo e guie os olhos da banca para a **intercepção HTTP e Query SQL de auditoria expostas embaixo**.
 
@@ -101,7 +101,7 @@
 
 ---
 
-## Slide 08 — Conclusão & Roadmap
+## Slide 08 — Conclusão & Próximos Passos
 * **Duração:** 40 segundos (`04:20` a `05:00`)  
 * **Ação na Tela:** Avance para o **Slide 8** (Último Slide). Destaque a entrega de impacto e guie a banca para o **Cronograma de Roadmap final no rodapé do slide**.
 
