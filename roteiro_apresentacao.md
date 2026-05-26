@@ -1,119 +1,133 @@
-# 🎤 Roteiro de Apresentação de 5 Minutos (Ajustado ao Layout) — Sistema WebAEE
+# 🎤 Roteiro de Apresentação de 10 Minutos (Ajustado ao Layout) — Sistema WebAEE
 > **Tema:** Frontend PWA com Clean Architecture, Sincronização Local-First e Conformidade com a LGPD.
 > **Apresentadora:** Sthefany Bueno  
-> **Tempo Estimado Total:** 5 minutos (300 segundos) — Ultra-objetivo e focado em engenharia.
+> **Tempo Estimado Total:** 10 minutos (600 segundos) — Técnico, aprofundado e focado em engenharia de software.
 
 ---
 
-## 🗺️ Cronômetro e Divisão de Tempo (300 segundos)
+## 🗺️ Cronômetro e Divisão de Tempo (600 segundos)
 
 | Slide | Título | Tempo Sugerido | Cronômetro Acumulado | Foco do Discurso |
 |---|---|---|---|---|
-| **01** | Capa | **30s** | `00:30` | Apresentação pessoal e divisão arquitetural |
-| **02** | O Sistema WebAEE | **45s** | `01:15` | Dores das escolas (offline), fluxo e matriz RBAC |
-| **03** | Evolução e Escolhas Tecnológicas | **45s** | `02:00` | Escolhas (Next.js/Tailwind v4/Dexie) e exemplos inferiores |
-| **04** | Camada de Domínio | **35s** | `02:35` | Entidades no topo e esquema/contratos na base |
-| **05** | Camada de Aplicação | **35s** | `03:10` | Reatividade no topo e código de leitura/escrita na base |
-| **06** | Infraestrutura HTTP & Proteção LGPD | **35s** | `03:45` | Conformidade LGPD no topo e intercepção/queries na base |
-| **07** | Garantia de Qualidade | **35s** | `04:20` | Estratégia BDD no topo e mocks/asserções na base |
-| **08** | Conclusão & Próximos Passos | **40s** | `05:00` | Impacto social e cronograma de fases final |
+| **01** | Capa | **60s** | `01:00` | Apresentação pessoal, objetivos e divisão arquitetural |
+| **02** | O Sistema WebAEE | **90s** | `02:30` | Dores das escolas (offline), fluxos pedagógicos e Matriz RBAC |
+| **03** | Evolução e Escolhas Tecnológicas | **90s** | `04:00` | Next.js 16, React 19, Tailwind v4 vs v3, Dexie.js e códigos da base |
+| **04** | Camada de Domínio | **70s** | `05:10` | DDD na Clean Architecture, persistência e schemas/tipos na base |
+| **05** | Camada de Aplicação | **70s** | `06:20` | Casos de uso, reatividade sem polling e leitura/escrita na base |
+| **06** | Infraestrutura HTTP & Proteção LGPD | **70s** | `07:30` | API FastAPI, barreira de acesso 401 e auditoria PostgreSQL na base |
+| **07** | Garantia de Qualidade | **70s** | `08:40` | Suite Vitest, Given-When-Then, mocks do useLiveQuery e asserções |
+| **08** | Conclusão & Próximos Passos | **80s** | `10:00` | Ganhos de engenharia, impacto público e cronograma de roadmap |
 
 ---
 
 ## Slide 01 — Capa
-* **Duração:** 30 segundos (`00:00` a `00:30`)  
-* **Ação na Tela:** Slide 1 aberto. Aponte brevemente para o **grid de divisão arquitetural posicionado no rodapé do slide**.
+* **Duração:** 60 segundos (`00:00` a `01:00`)  
+* **Ação na Tela:** Slide 1 ativo. Faça gestos abertos direcionando a atenção para o **grid de divisão arquitetural posicionado no rodapé do slide**.
 
 ### 🗣️ O que falar:
-> *"Bom dia aos membros da banca examinadora. Meu nome é **Sthefany Bueno** e apresento a defesa arquitetural do frontend do **Sistema AEE — Atendimento Educacional Especializado**.*
+> *"Bom dia à ilustre banca examinadora, professores e colegas presentes. Meu nome é **Sthefany Bueno** e tenho a honra de apresentar a defesa arquitetural do frontend do **Sistema AEE — Atendimento Educacional Especializado**.*
 >
-> *Nesta apresentação objetiva de 5 minutos, demonstrarei como projetamos uma aplicação PWA resiliente e altamente segura, dividida nas três camadas de Clean Architecture descritas no rodapé da tela: **Domain**, para persistência local transacional; **Application**, para orquestração reativa de dados; e **Infrastructure**, garantindo a conformidade rígida da LGPD."*
+> *Nesta apresentação de 10 minutos, demonstrarei como projetamos e desenvolvemos uma aplicação PWA moderna, resiliente e altamente segura, projetada para as salas de recursos do ensino público. Nosso foco de engenharia foi resolver a instabilidade de rede e garantir a privacidade rigorosa de dados sensíveis infantojuvenis.*
+>
+> *Como vocês podem observar no grid posicionado no rodapé da nossa capa, a nossa aplicação baseia-se nos princípios rígidos da **Clean Architecture**, dividida de forma limpa: a camada de **Domain & Core** isola nossas regras locais de IndexedDB; a camada de **Application Hooks** gerencia a reatividade da interface; e a camada de **Infrastructure** faz a ponte segura com o nosso backend, blindando o tráfego em conformidade estrita com a LGPD."*
 
 ---
 
-## Slide 02 — O Sistema WebAEE
-* **Duração:** 45 segundos (`00:30` a `01:15`)  
-* **Ação na Tela:** Avance para o **Slide 2**. Indique o diagrama de fluxo centralizado no topo e, em seguida, chame a atenção da banca para a **Tabela de Permissões Granulares (RBAC) na base**.
+## Slide 02 — O Sistema WebAEE & Regras de Negócio
+* **Duração:** 90 segundos (`01:00` a `02:30`)  
+* **Ação na Tela:** Avance para o **Slide 2**. Indique o diagrama de fluxo centralizado no topo e, em seguida, guie os olhos da banca com calma para a **Tabela de Permissões Granulares (RBAC) na base**.
 
 ### 🗣️ O que falar:
-> *"O WebAEE gerencia a rotina pedagógica de alunos com necessidades especiais. O maior desafio é a **precariedade de internet nas escolas públicas**. Se dependêssemos de conexão constante, o sistema seria inviabilizado. Por isso, definimos o fluxo superior: o professor anexa relatórios e fotos pedagógicas offline de forma instantânea, e a sincronização ocorre em lote quando há sinal.*
+> *"O WebAEE gerencia o fluxo pedagógico especializado de alunos com **Necessidades Educacionais Especiais (NEE)**. O nosso maior desafio técnico é o cenário real das salas de recursos das escolas públicas: **conexão à internet extremamente oscilante ou inexistente**. Se dependêssemos de requisições HTTP bloqueantes a cada clique, a aplicação seria inviabilizada.*
 >
-> *Como os relatórios contêm dados confidenciais de saúde infantojuvenil protegidos pela LGPD, implementamos a **Matriz de Permissões (RBAC)** que vocês veem na base do slide, garantindo que o acesso a laudos sensíveis permaneça estritamente restrito a professores vinculados e coordenadores, sob rígida auditoria de logs."*
+> *Projetamos o fluxo de quatro etapas exposto no topo: o professor cadastra o aluno com consentimento LGPD explícito, elabora o **Plano de Desenvolvimento Individualizado (PDI)**, registra o diário de atendimento e anexa fotos locais offline. A sincronização em lote ocorre sequencialmente e em segundo plano assim que a conexão é restaurada.*
+>
+> *Entretanto, laudos e históricos médicos de menores são classificados como **dados sensíveis** pela LGPD. Por isso, implementamos a **Matriz de Permissões Granulares (RBAC)** exibida na tabela inferior. O Administrador tem escrita total em inquilinos e escolas. O Coordenador gerencia os alunos da sua unidade. O Professor AEE possui escrita total restrita a alunos sob seu vínculo pedagógico. Já o Professor de Apoio tem apenas leitura de vínculo para diários, enquanto o Professor Regente possui acesso estritamente limitado à leitura básica. Mais importante: para visualizar laudos protegidos por lei, o Coordenador ou Professor AEE precisa clicar em 'Revelar', gerando instantaneamente um log imutável de auditoria no servidor."*
 
 ---
 
 ## Slide 03 — Evolução e Escolhas Tecnológicas
-* **Duração:** 45 segundos (`01:15` a `02:00`)  
-* **Ação na Tela:** Avance para o **Slide 3**. Explique brevemente as cards conceituais do topo e, em seguida, guie os olhos da banca para as **evidências de código posicionadas na parte inferior do slide**.
+* **Duração:** 90 segundos (`02:30` a `04:00`)  
+* **Ação na Tela:** Avance para o **Slide 3**. Comente com clareza as escolhas tecnológicas na coluna esquerda e as decisões de engenharia na direita. Aponte para os **dois painéis de código posicionados lado a lado no rodapé**.
 
 ### 🗣️ O que falar:
-> *"Operamos com **Next.js 16** e **React 19** para carregamento rápido. Um diferencial de estilo foi o uso inovador do **Tailwind CSS v4**. Ao contrário da v3, a nova versão é CSS-First, eliminando arquivos estáticos de configuração em JS. Como exemplificado no código à esquerda na base do slide, os tokens de estilo são compilados nativamente em Rust direto em `globals.css` como variáveis nativas de CSS, facilitando a acessibilidade em tempo de execução.*
+> *"Para suportar essa arquitetura resiliente, nossas decisões tecnológicas foram minuciosas. Operamos com o **Next.js 16** e **React 19** para hidratação eficiente e renderização de alta performance. *
 >
-> *Abaixo das cards explicativas, também expomos como o React 19 muta o estado local de forma otimista. Essa reatividade é suportada pelo **Dexie.js e IndexedDB**, que escolhemos em substituição ao LocalStorage. O IndexedDB roda de forma assíncrona, transacional (ACID) e com espaço livre de gigabytes, viabilizando o armazenamento de anexos de fotos pedagógicas pesadas locais."*
+> *Um diferencial de estilo moderno foi o uso inovador do **Tailwind CSS v4.0**. Ao contrário da v3, a v4 é CSS-First. Como vocês podem ver no código de evidência à esquerda na base do slide, a configuração ocorre diretamente em `globals.css` usando a declaração `@theme`. Isso elimina arquivos JS estáticos pesados de configuração e compila nativamente em Rust na pipeline de compilação, gerando um bundle extremamente leve para redes móveis lentas.*
+>
+> *Substituímos o LocalStorage convencional pelo **Dexie.js com IndexedDB**. O LocalStorage bloqueia a thread principal por ser síncrono e é limitado a apenas **5MB** de texto plano. O IndexedDB roda de forma assíncrona, oferece segurança transacional (ACID) e limite de gigabytes, o que nos permite guardar relatórios e blobs de imagens offline. Na base direita, exemplificamos como usamos o novo `useOptimistic` do React 19. A interface adiciona o aluno localmente no estado de forma instantânea e otimista, realizando a mutação assíncrona com o banco local e sincronização remota sem travar a experiência do professor."*
 
 ---
 
-## Slide 04 — Camada de Domínio
-* **Duração:** 35 segundos (`02:00` a `02:35`)  
-* **Ação na Tela:** Avance para o **Slide 4**. Destaque os conceitos de persistência no topo e indique os **dois blocos de código na base (Dexie Schema e Interfaces)**.
+## Slide 04 — Camada de Domínio & Modelos Locais
+* **Duração:** 70 segundos (`04:00` a `05:10`)  
+* **Ação na Tela:** Avance para o **Slide 4**. Aponte para os conceitos de domínio no topo e detalhe a definição exata das tabelas locais nos **dois blocos de código na base (Dexie Schema e Interfaces TypeScript)**.
 
 ### 🗣️ O que falar:
-> *"Respeitando os princípios da Arquitetura Limpa, a camada de **Domínio** no topo centraliza os modelos puros de negócio livres de dependências externas. *
+> *"Respeitando os princípios da Clean Architecture, a nossa camada de **Domínio** isola completamente os modelos de dados e as regras puras de negócio de dependências externas de infraestrutura ou frameworks.*
 >
-> *Se vocês olharem para a base do slide, verão a definição exata do nosso schema local e interfaces TypeScript. Criamos as entidades locais `AlunoLocal` e `FotoLocal`. O motor do domínio gerencia a fila de sincronização `sync_queue` aplicando a regra de negócio de **precedência de dados**: relatórios pedagógicos recebem prioridade '1' (urgência alta e leves), enquanto mídias e fotos recebem prioridade '2' (pesados). Isso otimiza e preserva a rede móvel das escolas."*
+> *Se olharmos para as evidências de código no rodapé do slide, vemos o coração da persistência local do aplicativo:*
+> * *À esquerda, a definição das tabelas IndexedDB na classe `AeeDatabase` do Dexie. Mapeamos as tabelas `alunos`, `relatorios`, `fotos` e a fila `sync_queue`.*
+> * *À direita, as interfaces TypeScript estritas. A entidade `AlunoLocal` gerencia metadados locais de sync, como `sync_status` e `updated_at`. A entidade `SyncQueueItem` encapsula operações pendentes com prioridades estritas.*
+>
+> *O motor do domínio aplica a regra de precedência de dados offline: diários e relatórios pedagógicos recebem Prioridade 1 (extrema urgência e leves), enquanto mídias binárias recebem Prioridade 2 (enviadas sequencialmente em segundo plano). Isso garante que registros críticos de atendimento cheguem primeiro ao servidor, economizando franquias limitadas de internet móvel das escolas públicas."*
 
 ---
 
-## Slide 05 — Camada de Aplicação
-* **Duração:** 35 segundos (`02:35` a `03:10`)  
-* **Ação na Tela:** Avance para o **Slide 5**. Comente a reatividade sem polling descrita no topo e mostre os **dois exemplos práticos de escrita e leitura de código na base**.
+## Slide 05 — Camada de Aplicação & Hooks Reativos
+* **Duração:** 70 segundos (`05:10` a `06:20`)  
+* **Ação na Tela:** Avance para o **Slide 5**. Explique a reatividade baseada em eventos locais no topo e guie a banca para as **duas peças de código integradas na base (Serviço de Escrita e Hook de Leitura)**.
 
 ### 🗣️ O que falar:
-> *"Na camada de **Aplicação**, orquestramos a reatividade da interface eliminando qualquer uso de polling periódico na UI. Usamos o hook `useLiveQuery` da biblioteca `dexie-react-hooks`.*
+> *"A camada de **Aplicação** é responsável por orquestrar os Casos de Uso pedagógicos por meio de hooks customizados, eliminando completamente consultas periódicas invasivas à CPU (*polling* na UI).*
 >
-> *Como demonstrado nas evidências práticas na parte inferior do slide, a lógica é dividida de forma limpa:*
-> * *À esquerda, o serviço de escrita `salvarAlunoLocal` persiste o dado em IndexedDB em estado pendente e enfileira o sync na fila local com prioridade 2.*
-> * *À direita, o hook customizado `useAlunos` extrai do banco local reativamente, aplicando filtros de busca e status diretamente na query. Quando a fila sincroniza em segundo plano, a interface atualiza o status de pendente para sincronizado instantaneamente."*
+> *Ao observar os exemplos de código prático no rodapé do slide, percebemos o ciclo reativo Local-First completo:*
+> * *À esquerda, o serviço de escrita `salvarAlunoLocal` persiste dados em IndexedDB com `sync_status: 'pending'` e, na mesma transação atômica, enfileira a operação na fila de sincronização local com prioridade 2.*
+> * *À direita, o hook customizado de leitura `useAlunos` assina a tabela IndexedDB por meio do hook `useLiveQuery`. Graças a essa assinatura de eventos de baixo nível do navegador, a interface é re-renderizada automaticamente no momento exato em que um aluno é salvo ou quando o sincronizador atualiza o status de pendente para sincronizado.*
+>
+> *Isso garante reatividade síncrona local com atualização assíncrona remota transparente."*
 
 ---
 
 ## Slide 06 — Infraestrutura HTTP & Proteção LGPD
-* **Duração:** 35 segundos (`03:10` a `03:45`)  
-* **Ação na Tela:** Avance para o **Slide 6**. Comente os conceitos de barreira de acesso e auditoria no topo e guie os olhos da banca para a **intercepção HTTP e Query SQL de auditoria expostas embaixo**.
+* **Duração:** 70 segundos (`06:20` a `07:30`)  
+* **Ação na Tela:** Avance para o **Slide 6**. Destaque os conceitos de controle de acesso e auditoria no topo e chame a atenção para o **interceptor HTTP e a Query SQL de auditoria de banco expostas na base**.
 
 ### 🗣️ O que falar:
-> *"Na camada de **Infraestrutura**, isolamos a rede no `apiClient`. Centralizamos as chamadas HTTP e implementamos uma barreira crítica de conformidade com a LGPD em computadores compartilhados de escolas.*
+> *"A camada de **Infraestrutura** lida diretamente com o ecossistema de rede e endpoints FastAPI do backend. Para garantir a barreira de acesso e conformidade LGPD em computadores compartilhados da escola, encapsulamos as requisições no `apiClient`.*
 >
-> *Como exposto no código à esquerda na base, se o servidor expirar a sessão e retornar status **401 Unauthorized**, o interceptor limpa instantaneamente o IndexedDB e localStorage de dados sensíveis na memória volátil e redireciona o browser para `/login` imediatamente.*
+> *À esquerda na base do slide, exibimos o nosso interceptor de sessão. Se o servidor retornar status **401 Unauthorized** (indicando expiração de sessão por inatividade), o interceptor é acionado imediatamente. Ele destrói instantaneamente o token de autorização JWT e limpa os dados sensíveis do aluno da memória volátil da aplicação e do localStorage, redirecionando o navegador para `/login` de forma automática, impedindo o vazamento de laudos por distração do professor.*
 >
-> *Além disso, os laudos médicos são auditados. À direita, exibimos a query SQL real que monitora os logs na nuvem. Qualquer clique do professor para revelar diagnósticos confidenciais registra de forma permanente quem acessou, de qual aluno e o horário exato."*
+> *Além disso, implementamos logs de auditoria imutáveis. À direita, exibimos a query SQL de auditoria rodando no PostgreSQL do backend. Toda leitura de laudo protegido gera um registro permanente com o ID de quem leu, qual aluno foi consultado, o campo específico lido e o timestamp exato, permitindo auditorias periódicas em conformidade total com as normas brasileiras."*
 
 ---
 
 ## Slide 07 — Garantia de Qualidade & Testes BDD
-* **Duração:** 35 segundos (`03:45` a `04:20`)  
-* **Ação na Tela:** Avance para o **Slide 7**. Destaque a estratégia de qualidade no topo e aponte para as **asserções e mocks do teste na base do slide**.
+* **Duração:** 70 segundos (`07:30` a `08:40`)  
+* **Ação na Tela:** Avance para o **Slide 7**. Detalhe as vantagens dos testes rápidos no topo e aponte para a **especificação do hook e o teste de persistência e fila na base**.
 
 ### 🗣️ O que falar:
-> *"Nossa suite de testes roda no **Vitest** sob o padrão BDD de **Given / When / Then**. O grande desafio ao testar fluxos offline-first com IndexedDB é que as transações assíncronas nativas do browser inviabilizariam testes rápidos na thread do Node.*
+> *"Uma arquitetura resiliente exige garantias rigorosas. Nossa suite de testes automatizados roda sob o **Vitest** e segue a metodologia **BDD (Given / When / Then)**. Testar aplicações Local-First traz um desafio de engenharia: as transações assíncronas nativas do IndexedDB do navegador não rodam facilmente em threads puras de Node, inviabilizando testes rápidos de integração.*
 >
-> *A nossa solução de engenharia, exposta no código à esquerda na base da tela, foi mockar o hook do `useLiveQuery` de forma síncrona nos testes de renderização. Isso isola o banco e nos permite validar em milissegundos a busca de nomes. À direita, também testamos com precisão se o serviço local persiste em IndexedDB e se o sync_queue é enfileirado com a prioridade estipulada pelo domínio, garantindo que o hook não vaze responsabilidades de negócio para a interface."*
+> *Nossa solução técnica está exposta nas especificações à esquerda na base da tela: mockamos síncronamente o hook `useLiveQuery` e o retorno do banco por meio de dublês de teste do Vitest. Isso nos permite validar em milissegundos o filtro de busca do hook `useAlunos` de forma isolada do browser.*
+>
+> *À direita na base, testamos a atomicidade do nosso serviço local. O teste garante que ao invocar `salvarAlunoLocal`, o registro é gravado com status pendente no IndexedDB e o item correspondente da fila de sincronização é enfileirado com a prioridade exata estipulada pelas regras do domínio. Isso blinda a integridade da fila de sincronização contra regressões."*
 
 ---
 
 ## Slide 08 — Conclusão & Próximos Passos
-* **Duração:** 40 segundos (`04:20` a `05:00`)  
-* **Ação na Tela:** Avance para o **Slide 8** (Último Slide). Destaque a entrega de impacto e guie a banca para o **Cronograma de Roadmap final no rodapé do slide**.
+* **Duração:** 80 segundos (`08:40` a `10:00`)  
+* **Ação na Tela:** Avance para o **Slide 8** (Último Slide). Destaque a entrega social no topo e guie com orgulho a banca para a **Tabela de Cronograma de Evolução Técnica do Roadmap no rodapé**.
 
 ### 🗣️ O que falar:
-> *"Em conclusão, o frontend do **Sistema AEE** prova que o desenvolvimento público inclusivo pode atingir a excelência técnica de nível internacional, equilibrando tolerância offline Local-First extrema com a privacidade por design exigida pela LGPD.*
+> *"Em conclusão, a arquitetura de frontend projetada para o **Sistema AEE** prova a plena viabilidade técnica de desenvolver soluções públicas inclusivas de alto nível de engenharia. Conseguimos conciliar tolerância extrema offline por meio de sincronização Local-First com proteção e privacidade de dados exigidas por lei.*
 >
-> *Para os próximos passos de evolução do nosso roadmap técnico — exposto na tabela final no rodapé do slide — planejamos:*
-> * *1. O pré-cacheamento total de fontes e dependências estáticas com Service Workers (Assets Caching);*
-> * *2. Interface visual para resolução manual de conflitos de edição baseada em LWW (Last Write Wins); e*
-> * *3. Dashboard analítico de logs de acesso LGPD para fins de fiscalização pela coordenação.*
+> *Como roadmap de evolução técnica exposto no rodapé, dividimos nossos próximos passos em três fases claras:*
+> * * **Fase 1 — Cache de Ativos:** Implementar Service Workers para cachear imagens, fontes e arquivos JS estáticos, garantindo carregamento inicial e navegação 100% offline da aplicação.*
+> * * **Fase 2 — Resolução Visual:** Desenvolver uma interface interativa de sincronização baseada na regra LWW (Last Write Wins) para que o professor resolva manualmente conflitos complexos de texto.*
+> * * **Fase 3 — Analítico LGPD:** Fornecer painéis de monitoramento visual de acessos sensíveis para auditoria simplificada por parte da coordenação e do encarregado de dados.*
 >
-> *Agradeço imensamente à banca e coloco-me agora à inteira disposição para a fase de arguição técnica. Muito obrigada."*
+> *Agradeço imensamente a atenção de todos os membros da banca examinadora e coloco-me agora à inteira disposição para responder a quaisquer questionamentos técnicos sobre a nossa arquitetura. Muito obrigada."*
 
 ---
 
