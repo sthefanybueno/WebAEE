@@ -8,22 +8,27 @@
   <meta name="description" content="Apresentação interativa sobre a arquitetura do Frontend do Sistema AEE">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
+    rel="stylesheet">
   <style>
     /* ================================================================
        DESIGN TOKENS — AEE Green/School Theme (Premium Layout)
        ================================================================ */
     :root {
       /* Core — Brand AEE Green */
-      --primary: #1A6F45;          /* School Green 700 */
-      --primary-hover: #155838;    /* School Green 800 */
+      --primary: #1A6F45;
+      /* School Green 700 */
+      --primary-hover: #155838;
+      /* School Green 800 */
       --primary-light: #D1F0E0;
       --primary-bg: #EDFAF4;
       --on-primary: #FFFFFF;
       --inverse-primary: #D1F0E0;
 
       /* Status Info / Sync */
-      --secondary: #3B82F6;        /* Info Blue */
+      --secondary: #3B82F6;
+      /* Info Blue */
       --secondary-light: #EFF6FF;
       --on-secondary: #FFFFFF;
 
@@ -40,12 +45,15 @@
       --warning-light: #FFFBF0;
 
       /* Surfaces — Clean Green-Gray light theme */
-      --background: #F4F7F5;       /* Very soft green-gray backdrop */
-      --on-background: #1A1D27;    /* Slate-charcoal */
+      --background: #F4F7F5;
+      /* Very soft green-gray backdrop */
+      --on-background: #1A1D27;
+      /* Slate-charcoal */
       --surface: #F4F7F5;
       --on-surface: #1A1D27;
       --on-surface-variant: #4A5468;
-      --surface-variant: #E6EBE7;  /* Muted green-gray card variant */
+      --surface-variant: #E6EBE7;
+      /* Muted green-gray card variant */
       --surface-dim: #DCE2DD;
       --surface-container: #EEF2EE;
       --surface-container-low: #F2F6F2;
@@ -89,7 +97,8 @@
     }
 
     html {
-      font-size: 19.5px; /* AMPLIADO PARA LETRAS MAIORES */
+      font-size: 19.5px;
+      /* AMPLIADO PARA LETRAS MAIORES */
       scroll-behavior: smooth;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -161,7 +170,8 @@
     }
 
     .brand-title {
-      font-size: 1.45rem; /* AMPLIADO */
+      font-size: 1.45rem;
+      /* AMPLIADO */
       font-weight: 900;
       letter-spacing: -0.04em;
       color: var(--on-background);
@@ -185,7 +195,8 @@
     }
 
     .nav-section-label {
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.18em;
@@ -198,7 +209,8 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 15px; /* AMPLIADO */
+      padding: 11px 15px;
+      /* AMPLIADO */
       margin: 4px 0;
       border-radius: var(--radius-xl);
       cursor: pointer;
@@ -227,13 +239,15 @@
     }
 
     .nav-number {
-      width: 30px; /* AMPLIADO */
+      width: 30px;
+      /* AMPLIADO */
       height: 30px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 700;
       flex-shrink: 0;
       transition: all var(--duration-fast) var(--ease-smooth);
@@ -250,7 +264,8 @@
     }
 
     .nav-label {
-      font-size: 0.9rem; /* AMPLIADO */
+      font-size: 0.9rem;
+      /* AMPLIADO */
       font-weight: 500;
       color: var(--on-surface-variant);
       line-height: 1.35;
@@ -273,7 +288,8 @@
     }
 
     .slide-counter {
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       font-weight: 600;
       color: var(--viaje-neutral);
       text-align: center;
@@ -350,7 +366,7 @@
       will-change: opacity, transform;
     }
 
-    .slide > * {
+    .slide>* {
       margin: auto;
     }
 
@@ -380,7 +396,8 @@
     }
 
     .cover-logo-wrapper {
-      width: 68px; /* AMPLIADO */
+      width: 68px;
+      /* AMPLIADO */
       height: 68px;
       background: linear-gradient(135deg, var(--primary), var(--primary-hover));
       border-radius: var(--radius-xl);
@@ -399,7 +416,8 @@
     }
 
     .cover-title {
-      font-size: 5rem; /* AMPLIADO PARA LETRAS MAIORES */
+      font-size: 5rem;
+      /* AMPLIADO PARA LETRAS MAIORES */
       font-weight: 900;
       letter-spacing: -0.04em;
       line-height: 1.05;
@@ -422,7 +440,8 @@
     }
 
     .cover-subtitle {
-      font-size: 1.45rem; /* AMPLIADO */
+      font-size: 1.45rem;
+      /* AMPLIADO */
       font-weight: 500;
       color: var(--on-surface-variant);
       line-height: 1.6;
@@ -495,7 +514,8 @@
     }
 
     .info-label {
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -504,7 +524,8 @@
     }
 
     .info-value {
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 700;
       color: var(--on-background);
       line-height: 1.25;
@@ -538,7 +559,8 @@
     }
 
     .cover-arch-title {
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 800;
       text-transform: uppercase;
       color: var(--primary-hover);
@@ -546,7 +568,8 @@
     }
 
     .cover-arch-desc {
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       color: var(--on-surface-variant);
       line-height: 1.4;
     }
@@ -558,7 +581,8 @@
       display: flex;
       flex-direction: column;
       width: 100%;
-      max-width: 1100px; /* AMPLIADO */
+      max-width: 1100px;
+      /* AMPLIADO */
       gap: 16px;
     }
 
@@ -569,7 +593,8 @@
     }
 
     .slide-header-icon {
-      width: 44px; /* AMPLIADO */
+      width: 44px;
+      /* AMPLIADO */
       height: 44px;
       border-radius: var(--radius-xl);
       display: flex;
@@ -589,7 +614,8 @@
     }
 
     .slide-title {
-      font-size: 2.2rem; /* AMPLIADO PARA LETRAS MAIORES */
+      font-size: 2.2rem;
+      /* AMPLIADO PARA LETRAS MAIORES */
       font-weight: 900;
       letter-spacing: -0.03em;
       color: var(--on-background);
@@ -670,14 +696,16 @@
     }
 
     .topic-card-title {
-      font-size: 1.15rem; /* AMPLIADO DE 0.95rem */
+      font-size: 1.15rem;
+      /* AMPLIADO DE 0.95rem */
       font-weight: 800;
       color: var(--on-background);
       letter-spacing: -0.01em;
     }
 
     .topic-card-text {
-      font-size: 1.05rem; /* AMPLIADO PARA LETRAS MAIORES */
+      font-size: 1.05rem;
+      /* AMPLIADO PARA LETRAS MAIORES */
       font-weight: 500;
       color: var(--on-surface-variant);
       line-height: 1.6;
@@ -735,13 +763,15 @@
     }
 
     .diagram-step-label {
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 800;
       color: var(--on-background);
     }
 
     .diagram-step-sub {
-      font-size: 0.8rem; /* AMPLIADO */
+      font-size: 0.8rem;
+      /* AMPLIADO */
       color: var(--on-surface-variant);
       font-weight: 500;
     }
@@ -797,13 +827,15 @@
     }
 
     .feature-name {
-      font-size: 1.05rem; /* AMPLIADO */
+      font-size: 1.05rem;
+      /* AMPLIADO */
       font-weight: 800;
       color: var(--on-background);
     }
 
     .feature-desc {
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 500;
       color: var(--on-surface-variant);
       line-height: 1.5;
@@ -826,7 +858,8 @@
     }
 
     .col-panel-label {
-      font-size: 0.8rem; /* AMPLIADO */
+      font-size: 0.8rem;
+      /* AMPLIADO */
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -892,13 +925,15 @@
     }
 
     .stack-name {
-      font-size: 1.05rem; /* AMPLIADO */
+      font-size: 1.05rem;
+      /* AMPLIADO */
       font-weight: 800;
       color: var(--on-background);
     }
 
     .stack-version {
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       font-weight: 600;
       color: var(--viaje-neutral);
     }
@@ -913,15 +948,16 @@
       border-radius: var(--radius-xl);
       border: 1px solid var(--outline-variant);
     }
-    
+
     .comparison-col {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-    
+
     .comparison-title {
-      font-size: 0.78rem; /* AMPLIADO */
+      font-size: 0.78rem;
+      /* AMPLIADO */
       font-weight: 800;
       text-transform: uppercase;
       color: var(--viaje-neutral);
@@ -929,7 +965,8 @@
     }
 
     .comparison-item {
-      font-size: 0.88rem; /* AMPLIADO */
+      font-size: 0.88rem;
+      /* AMPLIADO */
       background: var(--surface-container-lowest);
       padding: 6px 10px;
       border-radius: 8px;
@@ -1003,7 +1040,8 @@
     }
 
     .decision-card-title {
-      font-size: 1.05rem; /* AMPLIADO */
+      font-size: 1.05rem;
+      /* AMPLIADO */
       font-weight: 800;
       color: var(--on-background);
     }
@@ -1016,14 +1054,16 @@
       border-radius: 100px;
       background: var(--primary);
       color: var(--on-primary);
-      font-size: 0.65rem; /* AMPLIADO */
+      font-size: 0.65rem;
+      /* AMPLIADO */
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
 
     .decision-card-text {
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 500;
       color: var(--on-surface-variant);
       line-height: 1.5;
@@ -1038,32 +1078,39 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
       margin-top: 6px;
     }
+
     .custom-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 1rem; /* AMPLIADO PARA LETRAS MAIORES */
+      font-size: 1rem;
+      /* AMPLIADO PARA LETRAS MAIORES */
       text-align: left;
       background: var(--surface-container-lowest);
     }
+
     .custom-table th {
       background: var(--surface-variant);
       color: var(--primary);
       font-weight: 800;
       padding: 12px 16px;
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       text-transform: uppercase;
       letter-spacing: 0.05em;
       border-bottom: 1px solid var(--outline-variant);
     }
+
     .custom-table td {
       padding: 12px 16px;
       color: var(--on-surface-variant);
       border-bottom: 1px solid var(--outline-variant);
       font-weight: 600;
     }
+
     .custom-table tr:last-child td {
       border-bottom: none;
     }
+
     .custom-table tr:hover td {
       background: rgba(26, 111, 69, 0.02);
     }
@@ -1076,26 +1123,31 @@
       gap: 6px;
       padding: 4px 12px;
       border-radius: 100px;
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.03em;
     }
+
     .badge-success {
       background: var(--tertiary-container);
       color: #065f46;
       border: 1px solid rgba(22, 163, 74, 0.25);
     }
+
     .badge-warning {
       background: var(--warning-light);
       color: #9a3412;
       border: 1px solid rgba(221, 107, 32, 0.25);
     }
+
     .badge-error {
       background: var(--error-light);
       color: #991b1b;
       border: 1px solid rgba(186, 26, 26, 0.2);
     }
+
     .badge-info {
       background: var(--secondary-light);
       color: #1e40af;
@@ -1108,18 +1160,19 @@
       background: var(--surface-container);
       padding: 12px 16px;
       border-radius: 0 var(--radius) var(--radius) 0;
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 500;
       line-height: 1.5;
       color: var(--on-surface-variant);
     }
-    
+
     .alert-box.alert-warning {
       border-left-color: var(--error);
       background: var(--error-light);
       color: #8c1010;
     }
-    
+
     .alert-box.alert-important {
       border-left-color: var(--warning);
       background: var(--warning-light);
@@ -1128,7 +1181,8 @@
 
     .alert-title {
       font-weight: 800;
-      font-size: 1rem; /* AMPLIADO */
+      font-size: 1rem;
+      /* AMPLIADO */
       margin-bottom: 4px;
       display: flex;
       align-items: center;
@@ -1147,7 +1201,8 @@
     }
 
     .evidence-label {
-      font-size: 0.8rem; /* AMPLIADO */
+      font-size: 0.8rem;
+      /* AMPLIADO */
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.12em;
@@ -1163,7 +1218,8 @@
     }
 
     .code-card {
-      background: #1E1F29; /* Dark neutral card for high contrast */
+      background: #1E1F29;
+      /* Dark neutral card for high contrast */
       border-radius: var(--radius-xl);
       border: 1px solid rgba(122, 138, 128, 0.2);
       overflow: hidden;
@@ -1189,7 +1245,8 @@
     }
 
     .code-card-title {
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       font-weight: 800;
       color: var(--primary-light);
       display: flex;
@@ -1198,7 +1255,8 @@
     }
 
     .code-card-path {
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 600;
       color: rgba(255, 255, 255, 0.45);
       font-family: 'Fira Code', 'Courier New', Consolas, monospace;
@@ -1212,7 +1270,8 @@
     .code-card-body pre {
       margin: 0;
       font-family: 'Fira Code', 'Courier New', Consolas, monospace;
-      font-size: 0.88rem; /* AMPLIADO PARA LETRAS MAIORES EM CÓDIGO */
+      font-size: 0.88rem;
+      /* AMPLIADO PARA LETRAS MAIORES EM CÓDIGO */
       line-height: 1.55;
       color: #E2E8F0;
       white-space: pre;
@@ -1220,14 +1279,47 @@
     }
 
     /* Syntax Highlighting */
-    .syn-key { color: #F472B6; } /* Keywords / Property names */
-    .syn-str { color: #34D399; } /* Strings */
-    .syn-num { color: #FB923C; } /* Numbers */
-    .syn-type { color: #60A5FA; }/* Types / Interfaces */
-    .syn-fn { color: #FBBF24; }  /* Functions */
-    .syn-cmt { color: #64748B; font-style: italic; } /* Comments */
-    .syn-imp { color: #A78BFA; } /* Imports */
-    .syn-punc { color: #94A3B8; }/* Operators / Punctuation */
+    .syn-key {
+      color: #F472B6;
+    }
+
+    /* Keywords / Property names */
+    .syn-str {
+      color: #34D399;
+    }
+
+    /* Strings */
+    .syn-num {
+      color: #FB923C;
+    }
+
+    /* Numbers */
+    .syn-type {
+      color: #60A5FA;
+    }
+
+    /* Types / Interfaces */
+    .syn-fn {
+      color: #FBBF24;
+    }
+
+    /* Functions */
+    .syn-cmt {
+      color: #64748B;
+      font-style: italic;
+    }
+
+    /* Comments */
+    .syn-imp {
+      color: #A78BFA;
+    }
+
+    /* Imports */
+    .syn-punc {
+      color: #94A3B8;
+    }
+
+    /* Operators / Punctuation */
 
     /* ================================================================
        NAVIGATION BAR — Bottom
@@ -1244,7 +1336,8 @@
     }
 
     .nav-hint {
-      font-size: 0.85rem; /* AMPLIADO */
+      font-size: 0.85rem;
+      /* AMPLIADO */
       font-weight: 500;
       color: var(--viaje-neutral);
       display: flex;
@@ -1262,7 +1355,8 @@
       border-radius: 6px;
       background: var(--surface-container-lowest);
       border: 1px solid var(--outline-variant);
-      font-size: 0.75rem; /* AMPLIADO */
+      font-size: 0.75rem;
+      /* AMPLIADO */
       font-weight: 700;
       font-family: 'Montserrat', sans-serif;
       color: var(--on-surface-variant);
@@ -1278,11 +1372,13 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px; /* AMPLIADO */
+      padding: 12px 24px;
+      /* AMPLIADO */
       border-radius: var(--radius-xl);
       border: none;
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.95rem; /* AMPLIADO */
+      font-size: 0.95rem;
+      /* AMPLIADO */
       font-weight: 800;
       cursor: pointer;
       transition: all var(--duration-fast) var(--ease-smooth);
@@ -1324,7 +1420,8 @@
     }
 
     .nav-btn .arrow {
-      font-size: 1.15rem; /* AMPLIADO */
+      font-size: 1.15rem;
+      /* AMPLIADO */
       line-height: 1;
     }
 
@@ -1336,6 +1433,7 @@
         opacity: 0;
         transform: translateY(20px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -1347,6 +1445,7 @@
         opacity: 0;
         transform: translateY(-14px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -1357,6 +1456,7 @@
       from {
         transform: scaleX(0);
       }
+
       to {
         transform: scaleX(1);
       }
@@ -1414,14 +1514,17 @@
       <!-- Brand — Logo do Chapéu de Formatura Acessibilidade -->
       <div class="sidebar-brand">
         <div class="brand-logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" style="width:100%;height:100%;">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
           </svg>
         </div>
         <div style="display: flex; flex-direction: column;">
           <span class="brand-title">Sistema AEE</span>
-          <span style="font-size: 0.58rem; font-weight: 700; color: var(--viaje-neutral); letter-spacing: 0.05em; margin-top: 2px;">DEFESA ARQUITETURAL</span>
+          <span
+            style="font-size: 0.58rem; font-weight: 700; color: var(--viaje-neutral); letter-spacing: 0.05em; margin-top: 2px;">DEFESA
+            ARQUITETURAL</span>
         </div>
       </div>
 
@@ -1496,9 +1599,10 @@
           <div class="cover-content">
 
             <div class="cover-logo-wrapper">
-              <svg class="cover-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+              <svg class="cover-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
               </svg>
             </div>
 
@@ -1509,7 +1613,8 @@
             <div class="cover-divider"></div>
 
             <p class="cover-subtitle">
-              <strong>Frontend PWA Altamente Seguro:</strong> Clean Architecture, Sincronização Local-First e Conformidade Rigorosa com a LGPD
+              <strong>Frontend PWA Altamente Seguro:</strong> Clean Architecture, Sincronização Local-First e
+              Conformidade Rigorosa com a LGPD
             </p>
 
             <div class="cover-info-row">
@@ -1537,23 +1642,6 @@
                 </div>
               </div>
             </div>
-
-            <!-- Architectural Division Overview -->
-            <div class="cover-arch-grid">
-              <div class="cover-arch-item">
-                <span class="cover-arch-title">Domain & Core</span>
-                <span class="cover-arch-desc">Persistência local relacional em IndexedDB com Dexie.js transacional.</span>
-              </div>
-              <div class="cover-arch-item">
-                <span class="cover-arch-title">Application Hooks</span>
-                <span class="cover-arch-desc">Orquestradores reativos com useLiveQuery re-renderizando sob eventos.</span>
-              </div>
-              <div class="cover-arch-item">
-                <span class="cover-arch-title">Infrastructure API</span>
-                <span class="cover-arch-desc">Segurança integrada contra vazamento de laudos sensíveis (LGPD).</span>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -1565,9 +1653,10 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
                 </svg>
               </div>
               <h2 class="slide-title">O Sistema WebAEE</h2>
@@ -1604,14 +1693,19 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Propósito Educacional & Social</span>
                 </div>
                 <p class="topic-card-text">
-                  O **Sistema AEE** destina-se a gerenciar com total segurança os registros do **Atendimento Educacional Especializado (AEE)**. Ele atua como um facilitador pedagógico para organizar o **Plano de Desenvolvimento Individualizado (PDI)** e relatórios especializados de alunos com **Necessidades Educacionais Especiais (NEE)** em escolas.
+                  O <b>Sistema AEE</b> destina-se a gerenciar com total segurança os registros do <b>Atendimento
+                    Educacional
+                    Especializado (AEE)</b>. Ele atua como um facilitador pedagógico para organizar o <b>Plano de
+                    Desenvolvimento Individualizado (PDI)</b> e relatórios especializados de alunos com <b>Necessidades
+                    Educacionais Especiais (NEE)</b> em escolas.
                 </p>
               </div>
 
@@ -1619,15 +1713,19 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Privacidade por Design (LGPD)</span>
                 </div>
                 <p class="topic-card-text">
-                  Dado que laudos e diagnósticos de menores são considerados **dados pessoais sensíveis**, o sistema oculta a visualização por padrão na interface. Para que um professor autorizado consulte dados confidenciais, ele deve clicar explicitamente em "Revelar", o que gera um **log imutável de auditoria** no backend de forma imediata.
+                  Dado que laudos e diagnósticos de menores são considerados <b>dados pessoais sensíveis</b>, o sistema
+                  oculta a visualização por padrão na interface. Para que um professor autorizado consulte dados
+                  confidenciais, ele deve clicar explicitamente em "Revelar", o que gera um <b>log imutável de
+                    auditoria</b> no backend de forma imediata.
                 </p>
               </div>
 
@@ -1636,8 +1734,9 @@
             <!-- RBAC Roles & Permissions Matrix Table -->
             <div class="topic-row">
               <div class="topic-card full-width" style="padding: 14px 20px;">
-                <span class="topic-card-title" style="margin-bottom: 8px; display:block;">Matriz de Permissões Granulares (RBAC) & Controle de Segurança</span>
-                
+                <span class="topic-card-title" style="margin-bottom: 8px; display:block;">Matriz de Permissões
+                  Granulares (RBAC) & Controle de Segurança</span>
+
                 <div class="table-container">
                   <table class="custom-table">
                     <thead>
@@ -1702,10 +1801,11 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                  <polyline points="2 17 12 22 22 17"/>
-                  <polyline points="2 12 12 17 22 12"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                  <polyline points="2 17 12 22 22 17" />
+                  <polyline points="2 12 12 17 22 12" />
                 </svg>
               </div>
               <h2 class="slide-title">Evolução e Escolhas Tecnológicas</h2>
@@ -1721,9 +1821,10 @@
                 <!-- Next.js -->
                 <div class="stack-item">
                   <div class="stack-icon si-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="16 18 22 12 16 6"/>
-                      <polyline points="8 6 2 12 8 18"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
                     </svg>
                   </div>
                   <div class="stack-info">
@@ -1735,8 +1836,10 @@
                 <!-- Tailwind CSS v4 -->
                 <div class="stack-item">
                   <div class="stack-icon si-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                     </svg>
                   </div>
                   <div class="stack-info">
@@ -1748,10 +1851,11 @@
                 <!-- Dexie.js -->
                 <div class="stack-item">
                   <div class="stack-icon si-tertiary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                      <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <ellipse cx="12" cy="5" rx="9" ry="3" />
+                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                      <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" />
                     </svg>
                   </div>
                   <div class="stack-info">
@@ -1764,13 +1868,19 @@
                 <div class="comparison-grid">
                   <div class="comparison-col">
                     <span class="comparison-title">Tailwind CSS v3 (Legado)</span>
-                    <div class="comparison-item" style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">tailwind.config.js estático</div>
-                    <div class="comparison-item" style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">Compilação pesada em JS</div>
+                    <div class="comparison-item"
+                      style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">tailwind.config.js
+                      estático</div>
+                    <div class="comparison-item"
+                      style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">Compilação pesada em
+                      JS</div>
                   </div>
                   <div class="comparison-col">
                     <span class="comparison-title">Tailwind CSS v4 (WebAEE)</span>
-                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">CSS-First declarativo via @theme</div>
-                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">Tokens convertidos em variáveis CSS</div>
+                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">CSS-First declarativo
+                      via @theme</div>
+                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">Tokens convertidos em
+                      variáveis CSS</div>
                   </div>
                 </div>
               </div>
@@ -1783,15 +1893,19 @@
                 <div class="decision-card">
                   <div class="decision-card-header">
                     <div class="decision-icon di-primary">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                        <path d="m9 12 2 2 4-4"/>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                        <path d="m9 12 2 2 4-4" />
                       </svg>
                     </div>
                     <span class="decision-card-title">Estratégia Local-First com Reação Síncrona</span>
                   </div>
                   <p class="decision-card-text">
-                    As salas de recursos escolares das redes públicas sofrem com sinal de rede muito oscilante. Se a aplicação dependesse diretamente de conexões HTTP constantes, os professores teriam o fluxo de trabalho interrompido de forma recorrente. Adotamos o IndexedDB local como **banco de dados primário e única fonte de verdade** da UI para garantir resiliência absoluta.
+                    As salas de recursos escolares das redes públicas sofrem com sinal de rede muito oscilante. Se a
+                    aplicação dependesse diretamente de conexões HTTP constantes, os professores teriam o fluxo de
+                    trabalho interrompido de forma recorrente. Adotamos o IndexedDB local como **banco de dados primário
+                    e única fonte de verdade** da UI para garantir resiliência absoluta.
                   </p>
                 </div>
 
@@ -1799,15 +1913,20 @@
                 <div class="decision-card highlight">
                   <div class="decision-card-header">
                     <div class="decision-icon di-secondary">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                       </svg>
                     </div>
                     <span class="decision-card-title">IndexedDB Reativo vs LocalStorage Convencional</span>
                     <span class="decision-badge">IndexedDB</span>
                   </div>
                   <p class="decision-card-text">
-                    Em vez de persistência simples em LocalStorage (bloqueante, limitada a **5MB** e restrita a cadeias de texto plano), o WebAEE opera de forma assíncrona, não-bloqueante e transacional através do IndexedDB. Isso nos permite armazenar **grandes arquivos binários de fotos pedagógicas** diretamente como dados de blob locais para posterior envio.
+                    Em vez de persistência simples em LocalStorage (bloqueante, limitada a **5MB** e restrita a cadeias
+                    de texto plano), o WebAEE opera de forma assíncrona, não-bloqueante e transacional através do
+                    IndexedDB. Isso nos permite armazenar **grandes arquivos binários de fotos pedagógicas** diretamente
+                    como dados de blob locais para posterior envio.
                   </p>
                 </div>
 
@@ -1819,7 +1938,7 @@
             <div class="evidence-section">
               <span class="evidence-label">Exemplos Técnicos de Configuração e Interface</span>
               <div class="code-cards-grid">
-                
+
                 <!-- Tailwind v4 Theme Example -->
                 <div class="code-card">
                   <div class="code-card-header">
@@ -1827,7 +1946,7 @@
                     <span class="code-card-path">frontend/app/globals.css</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-imp">@import</span> <span class="syn-str">"tailwindcss"</span>;
 
 <span class="syn-imp">@theme</span> {
@@ -1848,7 +1967,7 @@
                     <span class="code-card-path">Exemplo de Mutação Reativa de UX</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">const</span> [optimisticAlunos, setOptimisticAlunos] = <span class="syn-fn">useOptimistic</span>(
   alunos,
   (state, <span class="syn-type">novoAluno</span>) => [...state, novoAluno]
@@ -1873,10 +1992,11 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                  <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                  <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" />
                 </svg>
               </div>
               <h2 class="slide-title">Camada de Domínio & Modelos Locais</h2>
@@ -1889,16 +2009,20 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="9" y1="9" x2="15" y2="9"/>
-                      <line x1="9" y1="13" x2="15" y2="13"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <line x1="9" y1="9" x2="15" y2="9" />
+                      <line x1="9" y1="13" x2="15" y2="13" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Pureza do Domínio na Clean Architecture</span>
                 </div>
                 <p class="topic-card-text">
-                  Na arquitetura do frontend, a camada de **Domínio** isola completamente as regras de negócio puras e modelos de dados do ecossistema de rede e endpoints HTTP. Ela define os contratos estruturais das tabelas locais do navegador, regras de validação pré-cadastro e a lógica de priorização transacional offline.
+                  Na arquitetura do frontend, a camada de **Domínio** isola completamente as regras de negócio puras e
+                  modelos de dados do ecossistema de rede e endpoints HTTP. Ela define os contratos estruturais das
+                  tabelas locais do navegador, regras de validação pré-cadastro e a lógica de priorização transacional
+                  offline.
                 </p>
               </div>
 
@@ -1906,14 +2030,18 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Fila de Sincronização Transacional com Precedência</span>
                 </div>
                 <p class="topic-card-text">
-                  Para otimizar conexões lentas em salas de recursos, a fila local de sync (`sync_queue`) classifica operações em prioridades estritas: **Prioridade 1** para relatórios e diários (críticos e extremamente leves em banda), e **Prioridade 2** para dados de alunos e mídias binárias pesadas (enviados sequencialmente em segundo plano).
+                  Para otimizar conexões lentas em salas de recursos, a fila local de sync (`sync_queue`) classifica
+                  operações em prioridades estritas: **Prioridade 1** para relatórios e diários (críticos e extremamente
+                  leves em banda), e **Prioridade 2** para dados de alunos e mídias binárias pesadas (enviados
+                  sequencialmente em segundo plano).
                 </p>
               </div>
 
@@ -1923,7 +2051,7 @@
             <div class="evidence-section">
               <span class="evidence-label">Evidências do Esquema IndexedDB e Contratos de Tipo do Domínio</span>
               <div class="code-cards-grid">
-                
+
                 <!-- db.ts Schema Definition -->
                 <div class="code-card">
                   <div class="code-card-header">
@@ -1931,7 +2059,7 @@
                     <span class="code-card-path">frontend/lib/db.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">class</span> <span class="syn-type">AeeDatabase</span> <span class="syn-key">extends</span> <span class="syn-type">Dexie</span> {
   alunos!: <span class="syn-type">Table</span>&lt;<span class="syn-type">AlunoLocal</span>&gt;
   relatorios!: <span class="syn-type">Table</span>&lt;<span class="syn-type">RelatorioLocal</span>&gt;
@@ -1959,7 +2087,7 @@
                     <span class="code-card-path">frontend/lib/db.ts (Interfaces)</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">export type</span> <span class="syn-type">SyncStatus</span> = <span class="syn-str">'synced'</span> | <span class="syn-str">'pending'</span>
 
 <span class="syn-key">export interface</span> <span class="syn-type">AlunoLocal</span> {
@@ -2000,10 +2128,12 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                  <line x1="12" y1="22.08" x2="12" y2="12"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  <line x1="12" y1="22.08" x2="12" y2="12" />
                 </svg>
               </div>
               <h2 class="slide-title">Camada de Aplicação & Hooks Reativos</h2>
@@ -2016,16 +2146,20 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                      <polyline points="2 17 12 22 22 17"/>
-                      <polyline points="2 12 12 17 22 12"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                      <polyline points="2 17 12 22 22 17" />
+                      <polyline points="2 12 12 17 22 12" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Casos de Uso Customizados e Reativos</span>
                 </div>
                 <p class="topic-card-text">
-                  A camada de **Aplicação** orquestra o fluxo de dados, implementando os Casos de Uso pedagógicos em hooks reativos customizados. O hook `useAlunos` extrai do banco local aplicando filtros e buscas de forma isolada, enquanto o `useSync` gerencia a drenagem em lote e o tratamento de re-tentativa transparente na fila transacional.
+                  A camada de **Aplicação** orquestra o fluxo de dados, implementando os Casos de Uso pedagógicos em
+                  hooks reativos customizados. O hook `useAlunos` extrai do banco local aplicando filtros e buscas de
+                  forma isolada, enquanto o `useSync` gerencia a drenagem em lote e o tratamento de re-tentativa
+                  transparente na fila transacional.
                 </p>
               </div>
 
@@ -2033,14 +2167,18 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Controle Reativo Local com useLiveQuery</span>
                 </div>
                 <p class="topic-card-text">
-                  Substituímos técnicas ultrapassadas de consulta periódica (*polling* por intervalos) pela reatividade nativa do `useLiveQuery` da biblioteca `dexie-react-hooks`. A interface assina as tabelas do IndexedDB e re-renderiza componentes de forma instantânea quando ocorre persistência local ou sincronizações automáticas em segundo plano.
+                  Substituímos técnicas ultrapassadas de consulta periódica (*polling* por intervalos) pela reatividade
+                  nativa do `useLiveQuery` da biblioteca `dexie-react-hooks`. A interface assina as tabelas do IndexedDB
+                  e re-renderiza componentes de forma instantânea quando ocorre persistência local ou sincronizações
+                  automáticas em segundo plano.
                 </p>
               </div>
 
@@ -2050,7 +2188,7 @@
             <div class="evidence-section">
               <span class="evidence-label">Evidência Prática (Escrita de Serviço & Leitura de Hook Customizado)</span>
               <div class="code-cards-grid">
-                
+
                 <!-- Local Service (Writing) -->
                 <div class="code-card">
                   <div class="code-card-header">
@@ -2058,7 +2196,7 @@
                     <span class="code-card-path">frontend/lib/services/alunoLocalService.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">export async function</span> <span class="syn-fn">salvarAlunoLocal</span>(
   dados: <span class="syn-type">Omit</span>&lt;<span class="syn-type">AlunoLocal</span>, <span class="syn-str">'id'</span> | <span class="syn-str">'sync_status'</span> | <span class="syn-str">'updated_at'</span>&gt;
 ): <span class="syn-type">Promise</span>&lt;<span class="syn-type">number</span>&gt; {
@@ -2087,7 +2225,7 @@
                     <span class="code-card-path">frontend/hooks/useAlunos.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">export function</span> <span class="syn-fn">useAlunos</span>(
   filtroStatus?: <span class="syn-str">'ativo'</span> | <span class="syn-str">'arquivado'</span>,
   filtroBusca?: <span class="syn-type">string</span>
@@ -2127,11 +2265,12 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-                  <line x1="6" y1="6" x2="6.01" y2="6"/>
-                  <line x1="6" y1="18" x2="6.01" y2="18"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                  <line x1="6" y1="6" x2="6.01" y2="6" />
+                  <line x1="6" y1="18" x2="6.01" y2="18" />
                 </svg>
               </div>
               <h2 class="slide-title">Infraestrutura HTTP & Proteção LGPD</h2>
@@ -2144,15 +2283,18 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Centralização de Rede e Barreira de Acesso</span>
                 </div>
                 <p class="topic-card-text">
-                  A camada de **Infraestrutura** implementa a interface concreta com a API backend FastAPI do Sistema AEE. Proibimos chamadas brutas de `fetch` nas views, direcionando todo o tráfego pelo `apiClient` encapsulado, o que centraliza a injeção do token JWT Bearer e o controle de segurança global.
+                  A camada de **Infraestrutura** implementa a interface concreta com a API backend FastAPI do Sistema
+                  AEE. Proibimos chamadas brutas de `fetch` nas views, direcionando todo o tráfego pelo `apiClient`
+                  encapsulado, o que centraliza a injeção do token JWT Bearer e o controle de segurança global.
                 </p>
               </div>
 
@@ -2160,16 +2302,21 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                      <line x1="12" y1="9" x2="12" y2="13"/>
-                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Intercepção Crítica 401 e Auditoria PG</span>
                 </div>
                 <p class="topic-card-text">
-                  Para garantir total conformidade com a LGPD em máquinas públicas escolares compartilhadas, se a chamada à API falhar com **401 Unauthorized** (sessão expirada), o cliente destrói imediatamente o token local e os dados sensíveis do aluno carregados e redireciona para `/login`. A leitura de laudos é encriptada e registra logs de auditoria imutáveis no PostgreSQL.
+                  Para garantir total conformidade com a LGPD em máquinas públicas escolares compartilhadas, se a
+                  chamada à API falhar com **401 Unauthorized** (sessão expirada), o cliente destrói imediatamente o
+                  token local e os dados sensíveis do aluno carregados e redireciona para `/login`. A leitura de laudos
+                  é encriptada e registra logs de auditoria imutáveis no PostgreSQL.
                 </p>
               </div>
 
@@ -2177,9 +2324,10 @@
 
             <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
             <div class="evidence-section">
-              <span class="evidence-label">Evidências de Infraestrutura: Cliente HTTP e Consulta de Auditoria (pgAdmin)</span>
+              <span class="evidence-label">Evidências de Infraestrutura: Cliente HTTP e Consulta de Auditoria
+                (pgAdmin)</span>
               <div class="code-cards-grid">
-                
+
                 <!-- apiClient Interceptor -->
                 <div class="code-card">
                   <div class="code-card-header">
@@ -2187,7 +2335,7 @@
                     <span class="code-card-path">frontend/lib/api/client.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-key">async function</span> <span class="syn-fn">request</span>&lt;<span class="syn-type">T</span>&gt;(path: <span class="syn-type">string</span>, options: <span class="syn-type">RequestInit</span> = {}): <span class="syn-type">Promise</span>&lt;<span class="syn-type">T</span>&gt; {
   <span class="syn-key">const</span> token = localStorage.<span class="syn-fn">getItem</span>(<span class="syn-str">'aee_token'</span>)
   <span class="syn-key">const</span> res = <span class="syn-key">await</span> <span class="syn-fn">fetch</span>(<span class="syn-str">`<span class="syn-punc">${</span>API_BASE<span class="syn-punc">}</span><span class="syn-punc">${</span>path<span class="syn-punc">}</span>`</span>, {
@@ -2219,7 +2367,7 @@
                     <span class="code-card-path"> pgAdmin / Queries de Controle</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-cmt">-- Query rodada em produção para fiscalizar acessos sensíveis</span>
 <span class="syn-key">SELECT</span> 
   user_id, 
@@ -2256,8 +2404,10 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                 </svg>
               </div>
               <h2 class="slide-title">Garantia de Qualidade & Testes BDD</h2>
@@ -2270,15 +2420,19 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Especificação de Testes no Padrão BDD</span>
                 </div>
                 <p class="topic-card-text">
-                  A robustez das operações de sincronização offline e persistência local é assegurada por testes unitários e de integração escritos no **Vitest** sob as diretrizes rigorosas do padrão **BDD (Given / When / Then)**. Isso assegura que novas atualizações não gerem quebras ou regressões nas regras transacionais.
+                  A robustez das operações de sincronização offline e persistência local é assegurada por testes
+                  unitários e de integração escritos no **Vitest** sob as diretrizes rigorosas do padrão **BDD (Given /
+                  When / Then)**. Isso assegura que novas atualizações não gerem quebras ou regressões nas regras
+                  transacionais.
                 </p>
               </div>
 
@@ -2286,23 +2440,27 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
-                      <rect x="9" y="9" width="6" height="6"/>
-                      <line x1="9" y1="1" x2="9" y2="4"/>
-                      <line x1="15" y1="1" x2="15" y2="4"/>
-                      <line x1="9" y1="20" x2="9" y2="23"/>
-                      <line x1="15" y1="20" x2="15" y2="23"/>
-                      <line x1="20" y1="9" x2="23" y2="9"/>
-                      <line x1="20" y1="15" x2="23" y2="15"/>
-                      <line x1="1" y1="9" x2="4" y2="9"/>
-                      <line x1="1" y1="15" x2="4" y2="15"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                      <rect x="9" y="9" width="6" height="6" />
+                      <line x1="9" y1="1" x2="9" y2="4" />
+                      <line x1="15" y1="1" x2="15" y2="4" />
+                      <line x1="9" y1="20" x2="9" y2="23" />
+                      <line x1="15" y1="20" x2="15" y2="23" />
+                      <line x1="20" y1="9" x2="23" y2="9" />
+                      <line x1="20" y1="15" x2="23" y2="15" />
+                      <line x1="1" y1="9" x2="4" y2="9" />
+                      <line x1="1" y1="15" x2="4" y2="15" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Mocking Estruturado e Isolamento de Loop</span>
                 </div>
                 <p class="topic-card-text">
-                  O hook assíncrono `useLiveQuery` depende do IndexedDB real e de transações assíncronas do browser. Para simplificar a execução e isolar a fila de sincronização pedagógica local nos testes, mockamos o `useLiveQuery` de forma **síncrona** nos arquivos de especificação técnica, permitindo asserções instantâneas.
+                  O hook assíncrono `useLiveQuery` depende do IndexedDB real e de transações assíncronas do browser.
+                  Para simplificar a execução e isolar a fila de sincronização pedagógica local nos testes, mockamos o
+                  `useLiveQuery` de forma **síncrona** nos arquivos de especificação técnica, permitindo asserções
+                  instantâneas.
                 </p>
               </div>
 
@@ -2312,7 +2470,7 @@
             <div class="evidence-section">
               <span class="evidence-label">Evidências de Teste Unitário Automatizado (Vitest BDD)</span>
               <div class="code-cards-grid">
-                
+
                 <!-- Hook Filter Test -->
                 <div class="code-card">
                   <div class="code-card-header">
@@ -2320,7 +2478,7 @@
                     <span class="code-card-path">frontend/hooks/__tests__/useAlunos.test.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-fn">describe</span>(<span class="syn-str">'useAlunos'</span>, () => {
   <span class="syn-fn">it</span>(<span class="syn-str">'deve filtrar por busca de nome no hook (não no componente)'</span>, <span class="syn-key">async</span> () => {
     <span class="syn-cmt">// Given: mock com dois alunos carregados em IndexedDB</span>
@@ -2350,7 +2508,7 @@
                     <span class="code-card-path">frontend/hooks/__tests__/useAlunos.test.ts</span>
                   </div>
                   <div class="code-card-body">
-<pre>
+                    <pre>
 <span class="syn-fn">describe</span>(<span class="syn-str">'salvarAlunoLocal'</span>, () => {
   <span class="syn-fn">it</span>(<span class="syn-str">'deve salvar aluno localmente e enfileirar sync com prioridade correta'</span>, <span class="syn-key">async</span> () => {
     <span class="syn-cmt">// Given: Dados estruturados de um aluno</span>
@@ -2390,9 +2548,10 @@
 
             <div class="slide-header">
               <div class="slide-header-icon bg-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
               <h2 class="slide-title">Conclusão & Próximos Passos</h2>
@@ -2405,14 +2564,18 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Ganhos de Engenharia</span>
                 </div>
                 <div class="topic-card-text">
-                  A arquitetura clean implementada no frontend do **Sistema AEE** prova a plena viabilidade de conciliar **independência total de rede (offline-first)** com **privacidade rígida exigida por lei (LGPD)**, gerando um ecossistema seguro e tolerante a falhas nas escolas públicas.
+                  A arquitetura clean implementada no frontend do **Sistema AEE** prova a plena viabilidade de conciliar
+                  **independência total de rede (offline-first)** com **privacidade rígida exigida por lei (LGPD)**,
+                  gerando um ecossistema seguro e tolerante a falhas nas escolas públicas.
                 </div>
               </div>
 
@@ -2420,14 +2583,17 @@
               <div class="topic-card">
                 <div class="topic-card-header">
                   <div class="topic-icon t-secondary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="9 18 15 12 9 6"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </div>
                   <span class="topic-card-title">Próximos Passos e Melhorias</span>
                 </div>
                 <div class="topic-card-text">
-                  Como roadmap futuro, focamos em implementar pré-cacheamento estático completo com Service Workers (Assets caching), telas dedicadas para resolução visual manual de conflitos de edição e painéis de conformidade para auditoria em conformidade total.
+                  Como roadmap futuro, focamos em implementar pré-cacheamento estático completo com Service Workers
+                  (Assets caching), telas dedicadas para resolução visual manual de conflitos de edição e painéis de
+                  conformidade para auditoria em conformidade total.
                 </div>
               </div>
 
@@ -2436,8 +2602,9 @@
             <!-- Detailed structural roadmap table -->
             <div class="topic-row">
               <div class="topic-card full-width" style="padding: 14px 20px;">
-                <span class="topic-card-title" style="margin-bottom: 8px; display:block;">Cronograma de Evolução Técnica do Roadmap</span>
-                
+                <span class="topic-card-title" style="margin-bottom: 8px; display:block;">Cronograma de Evolução Técnica
+                  do Roadmap</span>
+
                 <div class="table-container">
                   <table class="custom-table">
                     <thead>
@@ -2452,19 +2619,25 @@
                       <tr>
                         <td style="font-weight:800; color:var(--on-background);">Fase 1 — Cache de Ativos</td>
                         <td>Service Worker Caching completo</td>
-                        <td style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">public/, Service Worker APIs</td>
+                        <td
+                          style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">
+                          public/, Service Worker APIs</td>
                         <td><span class="badge badge-success">✔ Offline Completo</span></td>
                       </tr>
                       <tr>
                         <td style="font-weight:800; color:var(--on-background);">Fase 2 — Resolução Visual</td>
                         <td>Painel de Fusão Visual de Conflitos (LWW)</td>
-                        <td style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">components/ui/sync/, lib/db.ts</td>
+                        <td
+                          style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">
+                          components/ui/sync/, lib/db.ts</td>
                         <td><span class="badge badge-success">✔ Sem Sobrescrita</span></td>
                       </tr>
                       <tr>
                         <td style="font-weight:800; color:var(--on-background);">Fase 3 — Analítico LGPD</td>
                         <td>Painel de Auditoria Visual de Histórico</td>
-                        <td style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">app/admin/auditoria/, db logs</td>
+                        <td
+                          style="font-family:'Fira Code','Courier New',monospace; font-size:0.7rem; color:var(--on-surface-variant);">
+                          app/admin/auditoria/, db logs</td>
                         <td><span class="badge badge-success">✔ Relatórios DPO</span></td>
                       </tr>
                     </tbody>
@@ -2482,7 +2655,7 @@
            NAVIGATION CONTROLS — Bottom Bar
            ============================================================ -->
       <footer class="nav-bar">
-        
+
         <div class="nav-hint">
           <span>Navegue usando as setas do teclado</span>
           <span class="kbd">←</span>
@@ -2495,7 +2668,7 @@
           <button class="nav-btn btn-prev" id="btnPrev" onclick="prevSlide()" disabled>
             <span class="arrow">←</span> Anterior
           </button>
-          
+
           <button class="nav-btn btn-next" id="btnNext" onclick="nextSlide()">
             Próximo <span class="arrow">→</span>
           </button>
@@ -2518,7 +2691,7 @@
     const navItems = document.querySelectorAll('.nav-item');
     const progressFill = document.getElementById('progressFill');
     const currentSlideNum = document.getElementById('currentSlideNum');
-    
+
     const btnPrev = document.getElementById('btnPrev');
     const btnNext = document.getElementById('btnNext');
 
@@ -2560,7 +2733,7 @@
 
       // Update Button Disabled States
       btnPrev.disabled = currentSlide === 0;
-      
+
       if (currentSlide === totalSlides - 1) {
         btnNext.innerHTML = 'Fim <span class="arrow">✓</span>';
         btnNext.disabled = true;
@@ -2591,7 +2764,7 @@
         // Prevent default spacebar page scrolling
         if (event.keyCode === 32) event.preventDefault();
         nextSlide();
-      } 
+      }
       // 37 is ArrowLeft
       else if (event.keyCode === 37) {
         prevSlide();
