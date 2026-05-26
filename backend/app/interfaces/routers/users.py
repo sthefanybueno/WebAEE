@@ -9,6 +9,7 @@ from app.application.use_cases.users.create_user import (
 )
 from app.application.use_cases.users.accept_invite import AcceptInviteUseCase, AcceptInviteInput
 from app.infrastructure.database import get_session
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.user_repository_impl import (
     SQLModelUserRepository,
 )
@@ -50,13 +51,13 @@ def _handle_domain_exception(e: DomainException) -> None:
 
 def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> CreateUserUseCase:
     return CreateUserUseCase(
-        session=session, 
+        uow=SQLAlchemyUnitOfWork(session),
         user_repo=SQLModelUserRepository(session),
         email_service=ConsoleEmailService()
     )
 
 def get_accept_invite_use_case(session: AsyncSession = Depends(get_session)) -> AcceptInviteUseCase:
-    return AcceptInviteUseCase(session=session, user_repo=SQLModelUserRepository(session))
+    return AcceptInviteUseCase(uow=SQLAlchemyUnitOfWork(session), user_repo=SQLModelUserRepository(session))
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(

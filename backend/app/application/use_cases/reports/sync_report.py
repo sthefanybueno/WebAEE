@@ -26,7 +26,7 @@ class SyncReportInput:
     conteudo_json: dict
     updated_at_local: datetime
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 class SyncReportUseCase:
     """Caso de uso para sincronização offline-first de relatórios (Resiliência Distribuída).
@@ -44,18 +44,18 @@ class SyncReportUseCase:
     """
     def __init__(
         self, 
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         report_repo: ReportRepository, 
         student_repo: StudentRepository
     ):
-        self.session = session
+        self.uow = uow
         self.report_repo = report_repo
         self.student_repo = student_repo
 
     async def execute(self, inputs: List[SyncReportInput]) -> List[Report]:
         """Sincroniza uma lista de relatórios vindos do cliente sob uma transação atômica.
         """
-        async with self.session.begin():
+        async with self.uow.transaction():
             synced = []
             for input_dto in inputs:
                 student = await self.student_repo.get_by_id(input_dto.aluno_id)

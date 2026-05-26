@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
@@ -25,16 +25,16 @@ class UpdateReportUseCase:
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         report_repo: ReportRepository,
         student_repo: StudentRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.report_repo = report_repo
         self.student_repo = student_repo
 
     async def execute(self, input_dto: UpdateReportInput) -> Report:
-        async with self.session.begin():
+        async with self.uow.transaction():
             report = await self.report_repo.get_by_id(input_dto.report_id)
             if not report:
                 raise RelatorioNaoEncontradoError(input_dto.report_id)

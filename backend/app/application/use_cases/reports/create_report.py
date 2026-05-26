@@ -21,7 +21,7 @@ class CreateReportInput:
     conteudo_json: dict
 
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 class CreateReportUseCase:
     """Caso de uso para criação de relatórios pedagógicos (PEI, Plano de AEE, etc).
@@ -33,12 +33,12 @@ class CreateReportUseCase:
     """
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         report_repo: ReportRepository,
         template_repo: ReportTemplateRepository,
         student_repo: StudentRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.report_repo = report_repo
         self.template_repo = template_repo
         self.student_repo = student_repo
@@ -46,7 +46,7 @@ class CreateReportUseCase:
     async def execute(self, input_dto: CreateReportInput) -> Report:
         """Cria um novo relatório para um aluno dentro de uma transação.
         """
-        async with self.session.begin():
+        async with self.uow.transaction():
             # 1. Validar se o aluno existe e pertence ao tenant
             student = await self.student_repo.get_by_id(input_dto.aluno_id)
             if not student or student.tenant_id != input_dto.tenant_id:

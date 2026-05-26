@@ -3,9 +3,7 @@ Use Case: Atualizar Aluno
 =========================
 Orquestra a atualização dos dados básicos (não-sensíveis) de um aluno.
 
-Mudança arquitetural: este use case existia embutido no endpoint PUT do router,
-o que configurava um vazamento de lógica de negócio para a camada de interface.
-Extraindo para cá, o Router volta a ser apenas um tradutor HTTP.
+[Clean Architecture v3] Usa AbstractUnitOfWork em vez de AsyncSession.
 """
 
 import uuid
@@ -13,8 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.student_repository import StudentRepository
 from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError
 from app.domain.models import Student
@@ -34,26 +31,19 @@ class UpdateStudentUseCase:
 
     Aplica apenas campos não-sensíveis (nome, data_nascimento).
     Dados sensíveis (diagnóstico, laudo) têm endpoint e use case próprios.
-
-    Regras de negócio encapsuladas aqui:
-    - O aluno deve pertencer ao tenant do executor.
-    - Alunos arquivados são imutáveis (pode_ser_editado → False).
-
-    Note: A injeção da AsyncSession será substituída por um UnitOfWork
-    abstrato em fase futura; por ora garante isolamento da lógica de negócio.
     """
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         student_repo: StudentRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.student_repo = student_repo
 
     async def execute(self, input_dto: UpdateStudentInput) -> Student:
         """Executa a atualização dentro de uma transação."""
-        async with self.session.begin():
+        async with self.uow.transaction():
             student = await self.student_repo.get_by_id(input_dto.student_id)
 
             if not student or student.tenant_id != input_dto.tenant_id:

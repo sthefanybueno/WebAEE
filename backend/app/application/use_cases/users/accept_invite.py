@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.user_repository import UserRepository
 from app.domain.entities.user import User
@@ -22,8 +22,8 @@ class AcceptInviteInput(BaseModel):
 class AcceptInviteUseCase:
     """Caso de uso para usuário recém-criado definir sua senha via link mágico."""
     
-    def __init__(self, session: AsyncSession, user_repo: UserRepository):
-        self.session = session
+    def __init__(self, uow: AbstractUnitOfWork, user_repo: UserRepository):
+        self.uow = uow
         self.user_repo = user_repo
         
     async def execute(self, input_dto: AcceptInviteInput) -> User:
@@ -31,7 +31,7 @@ class AcceptInviteUseCase:
         if not user_id:
             raise InvalidInviteTokenError()
             
-        async with self.session.begin():
+        async with self.uow.transaction():
             user = await self.user_repo.get_by_id(user_id)
             if not user:
                 raise InvalidInviteTokenError()

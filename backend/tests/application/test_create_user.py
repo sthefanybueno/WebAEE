@@ -9,6 +9,8 @@ import pytest
 from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase, EmailJaEmUsoError
 from app.domain.entities.user import User, PapelUsuario
 from app.domain.exceptions import PermissaoInsuficienteError
+from tests.application.conftest import MockUnitOfWork
+
 
 class MockEmailService:
     def __init__(self):
@@ -17,10 +19,6 @@ class MockEmailService:
     async def send_invite_email(self, to_email: str, token: str) -> None:
         self.sent_emails.append({"to": to_email, "token": token})
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
 
 
 
@@ -61,7 +59,7 @@ def make_input(
 
 @pytest.mark.asyncio
 async def test_criar_usuario_coordenacao_sucesso(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE)
     user = await use_case.execute(inp)
     assert user.email == "novo@escola.edu.br"
@@ -74,7 +72,7 @@ async def test_criar_usuario_coordenacao_sucesso(repo: MockUserRepository, email
 
 @pytest.mark.asyncio
 async def test_criar_admin_requer_executor_admin(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.ADMIN)
     with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
@@ -82,7 +80,7 @@ async def test_criar_admin_requer_executor_admin(repo: MockUserRepository, email
 
 @pytest.mark.asyncio
 async def test_prof_aee_so_pode_criar_prof_apoio(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_AEE)
     with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
@@ -90,7 +88,7 @@ async def test_prof_aee_so_pode_criar_prof_apoio(repo: MockUserRepository, email
 
 @pytest.mark.asyncio
 async def test_prof_apoio_nao_pode_criar_usuario(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.PROF_APOIO, PapelUsuario.PROF_APOIO)
     with pytest.raises(PermissaoInsuficienteError):
         await use_case.execute(inp)
@@ -98,7 +96,7 @@ async def test_prof_apoio_nao_pode_criar_usuario(repo: MockUserRepository, email
 
 @pytest.mark.asyncio
 async def test_email_duplicado_levanta_erro(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE, email="dup@escola.edu.br")
     await use_case.execute(inp)  # primeira criação
     with pytest.raises(EmailJaEmUsoError):
@@ -107,7 +105,7 @@ async def test_email_duplicado_levanta_erro(repo: MockUserRepository, email_serv
 
 @pytest.mark.asyncio
 async def test_admin_cria_outro_admin(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.ADMIN, PapelUsuario.ADMIN)
     user = await use_case.execute(inp)
     assert user.papel == PapelUsuario.ADMIN
@@ -115,7 +113,7 @@ async def test_admin_cria_outro_admin(repo: MockUserRepository, email_service: M
 
 @pytest.mark.asyncio
 async def test_prof_aee_cria_prof_apoio_sucesso(repo: MockUserRepository, email_service: MockEmailService) -> None:
-    use_case = CreateUserUseCase(session=MockAsyncSession(), user_repo=repo, email_service=email_service)
+    use_case = CreateUserUseCase(uow=MockUnitOfWork(), user_repo=repo, email_service=email_service)
     inp = make_input(PapelUsuario.PROF_AEE, PapelUsuario.PROF_APOIO)
     user = await use_case.execute(inp)
     assert user.papel == PapelUsuario.PROF_APOIO

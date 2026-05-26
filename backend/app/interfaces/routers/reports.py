@@ -13,6 +13,7 @@ from app.infrastructure.database import get_session
 from app.infrastructure.repositories.report_repository_impl import (
     SQLModelReportRepository,
 )
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.report_template_repository_impl import (
     SQLModelReportTemplateRepository,
 )
@@ -49,7 +50,7 @@ def _handle_domain_exception(e: DomainException) -> None:
 
 def get_create_report_use_case(session: AsyncSession = Depends(get_session)) -> CreateReportUseCase:
     return CreateReportUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         report_repo=SQLModelReportRepository(session),
         template_repo=SQLModelReportTemplateRepository(session),
         student_repo=SQLModelStudentRepository(session),
@@ -100,7 +101,7 @@ def get_list_templates_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> ListTemplatesUseCase:
     return ListTemplatesUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         template_repo=SQLModelReportTemplateRepository(session),
     )
 
@@ -121,7 +122,7 @@ from app.application.use_cases.reports.get_report_detail import GetReportDetailU
 
 def get_report_detail_use_case(session: AsyncSession = Depends(get_session)) -> GetReportDetailUseCase:
     return GetReportDetailUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         report_repo=SQLModelReportRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -146,7 +147,7 @@ from app.application.use_cases.reports.update_report import UpdateReportUseCase,
 
 def get_update_report_use_case(session: AsyncSession = Depends(get_session)) -> UpdateReportUseCase:
     return UpdateReportUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         report_repo=SQLModelReportRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -177,7 +178,7 @@ from app.application.use_cases.reports.add_comment import AddCommentUseCase, Add
 
 def get_sync_report_use_case(session: AsyncSession = Depends(get_session)) -> SyncReportUseCase:
     return SyncReportUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         report_repo=SQLModelReportRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -212,7 +213,7 @@ async def sync_reports(
 
 def get_add_comment_use_case(session: AsyncSession = Depends(get_session)) -> AddCommentUseCase:
     return AddCommentUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         report_repo=SQLModelReportRepository(session)
     )
 

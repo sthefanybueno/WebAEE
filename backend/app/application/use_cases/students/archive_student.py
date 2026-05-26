@@ -3,16 +3,17 @@ Use Case: Arquivar Aluno
 ========================
 Orquestra o soft-delete de alunos com auditoria LGPD obrigatória.
 
-Mudança DDD (v2): usa exceções de domínio e chama student.arquivar()
+[DDD v2] Usa exceções de domínio e chama student.arquivar()
 em vez de manipular status/updated_at diretamente.
+
+[Clean Architecture v3] Usa AbstractUnitOfWork em vez de AsyncSession.
 """
 
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.audit_log_repository import AuditLogRepository
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.audit_log import AuditLog
@@ -32,32 +33,23 @@ class ArchiveStudentInput:
 
 
 class ArchiveStudentUseCase:
-    """Caso de uso para arquivamento (soft-delete) de alunos.
-
-    Este processo altera o status do aluno para 'arquivado' e registra
-    um log de auditoria conforme exigido pela LGPD, visto que o
-    arquivamento é uma operação que impacta a visibilidade de dados sensíveis.
-
-    [DDD v2] Chama student.arquivar(user_id) em vez de manipular campos
-    diretamente — a regra de validação de estado reside na entidade.
-    """
+    """Caso de uso para arquivamento (soft-delete) de alunos."""
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         student_repo: StudentRepository,
         audit_repo: AuditLogRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.student_repo = student_repo
         self.audit_repo = audit_repo
 
     async def execute(self, input_dto: ArchiveStudentInput) -> Student:
         """Executa o arquivamento do aluno dentro de uma transação."""
-        async with self.session.begin():
+        async with self.uow.transaction():
             student = await self.student_repo.get_by_id(input_dto.student_id)
 
-            # Exceções tipadas de domínio em vez de ValueError genérico
             if student is None:
                 raise AlunoNaoEncontradoError(input_dto.student_id)
             if student.tenant_id != input_dto.tenant_id:

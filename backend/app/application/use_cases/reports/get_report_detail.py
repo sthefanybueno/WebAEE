@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
@@ -23,11 +23,11 @@ class GetReportDetailUseCase:
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         report_repo: ReportRepository,
         student_repo: StudentRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.report_repo = report_repo
         self.student_repo = student_repo
 

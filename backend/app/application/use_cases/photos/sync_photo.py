@@ -19,24 +19,24 @@ class SyncPhotoInput:
     sync_status: SyncStatus
 
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 class SyncPhotoUseCase:
     """Caso de uso para sincronizar fotos enviadas via PWA offline"""
 
     def __init__(
         self, 
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         photo_repo: PhotoRepository, 
         student_repo: StudentRepository
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.photo_repo = photo_repo
         self.student_repo = student_repo
 
     async def execute(self, inputs: List[SyncPhotoInput]) -> List[Photo]:
         synced_photos = []
-        async with self.session.begin():
+        async with self.uow.transaction():
             for input_dto in inputs:
                 student = await self.student_repo.get_by_id(input_dto.aluno_id)
                 if not student or student.tenant_id != input_dto.tenant_id:

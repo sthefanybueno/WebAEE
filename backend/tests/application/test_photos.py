@@ -8,11 +8,9 @@ from app.application.use_cases.photos.create_photo import CreatePhotoUseCase, Cr
 from app.application.use_cases.photos.sync_photo import SyncPhotoUseCase, SyncPhotoInput
 from app.domain.entities.photo import Photo
 from app.domain.models import TagPedagogica, SyncStatus, Student
+from tests.application.conftest import MockUnitOfWork
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
+
 
 
 
@@ -42,7 +40,7 @@ class MockStudentRepository:
 async def test_create_photo_student_not_found() -> None:
     photo_repo = MockPhotoRepository()
     student_repo = MockStudentRepository(student=None)
-    use_case = CreatePhotoUseCase(session=MockAsyncSession(), photo_repo=photo_repo, student_repo=student_repo)
+    use_case = CreatePhotoUseCase(uow=MockUnitOfWork(), photo_repo=photo_repo, student_repo=student_repo)
 
     inp = CreatePhotoInput(
         aluno_id=uuid.uuid4(),
@@ -62,7 +60,7 @@ async def test_create_photo_success() -> None:
     student = Student(id=aluno_id, tenant_id=tenant_id, nome="Aluno")
     photo_repo = MockPhotoRepository()
     student_repo = MockStudentRepository(student=student)
-    use_case = CreatePhotoUseCase(session=MockAsyncSession(), photo_repo=photo_repo, student_repo=student_repo)
+    use_case = CreatePhotoUseCase(uow=MockUnitOfWork(), photo_repo=photo_repo, student_repo=student_repo)
 
     inp = CreatePhotoInput(
         aluno_id=aluno_id,
@@ -82,7 +80,7 @@ async def test_sync_photo_skip_invalid_student() -> None:
     student = Student(id=uuid.uuid4(), tenant_id=uuid.uuid4(), nome="Aluno") # Different tenant
     photo_repo = MockPhotoRepository()
     student_repo = MockStudentRepository(student=student)
-    use_case = SyncPhotoUseCase(session=MockAsyncSession(), photo_repo=photo_repo, student_repo=student_repo)
+    use_case = SyncPhotoUseCase(uow=MockUnitOfWork(), photo_repo=photo_repo, student_repo=student_repo)
 
     inp = SyncPhotoInput(
         id=uuid.uuid4(),
@@ -106,7 +104,7 @@ async def test_sync_photo_skip_existing() -> None:
     existing = Photo(id=photo_id, aluno_id=aluno_id, autor_id=uuid.uuid4(), url="url", tag=TagPedagogica.MOTOR_FINO)
     photo_repo = MockPhotoRepository(existing_photo=existing)
     student_repo = MockStudentRepository(student=student)
-    use_case = SyncPhotoUseCase(session=MockAsyncSession(), photo_repo=photo_repo, student_repo=student_repo)
+    use_case = SyncPhotoUseCase(uow=MockUnitOfWork(), photo_repo=photo_repo, student_repo=student_repo)
 
     inp = SyncPhotoInput(
         id=photo_id,
@@ -128,7 +126,7 @@ async def test_sync_photo_success() -> None:
     student = Student(id=aluno_id, tenant_id=tenant_id, nome="Aluno")
     photo_repo = MockPhotoRepository()
     student_repo = MockStudentRepository(student=student)
-    use_case = SyncPhotoUseCase(session=MockAsyncSession(), photo_repo=photo_repo, student_repo=student_repo)
+    use_case = SyncPhotoUseCase(uow=MockUnitOfWork(), photo_repo=photo_repo, student_repo=student_repo)
 
     inp = SyncPhotoInput(
         id=uuid.uuid4(),

@@ -10,10 +10,16 @@ from app.domain.exceptions import ConsentimentoLGPDAusenteError, EscolaNaoEncont
 from app.domain.models import Student
 from app.domain.entities.school import School
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+
+
+class MockUnitOfWork(AbstractUnitOfWork):
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[None]:
+        yield
 
 
 class MockStudentRepository:
@@ -54,7 +60,7 @@ async def test_create_student_requires_lgpd_consent(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
     # Given
-    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(uow=MockUnitOfWork(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()
@@ -76,7 +82,7 @@ async def test_create_student_school_not_found_or_invalid_tenant(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
     # Given
-    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(uow=MockUnitOfWork(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()
@@ -108,7 +114,7 @@ async def test_create_student_success(
     repo_student: MockStudentRepository, repo_school: MockSchoolRepository
 ) -> None:
     # Given
-    use_case = CreateStudentUseCase(session=MockAsyncSession(), student_repo=repo_student, school_repo=repo_school)
+    use_case = CreateStudentUseCase(uow=MockUnitOfWork(), student_repo=repo_student, school_repo=repo_school)
     
     tenant_id = uuid.uuid4()
     escola_id = uuid.uuid4()

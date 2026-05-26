@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.report_template_repository import ReportTemplateRepository
 from app.domain.entities.report import ReportTemplate
@@ -33,10 +33,10 @@ class ListTemplatesUseCase:
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         template_repo: ReportTemplateRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.template_repo = template_repo
 
     async def execute(self) -> List[ReportTemplate]:

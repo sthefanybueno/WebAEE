@@ -1,45 +1,47 @@
 /**
  * hooks/__tests__/useAlunos.test.ts
  * ===================================
- * Testes unitários do hook useAlunos com Vitest + mocks do Dexie.
+ * Testes unitários do hook useAlunos com Vitest + renderHook.
  *
- * Padrão BDD (Given / When / Then) aplicado em todos os testes.
+ * Usa @testing-library/react para fornecer o contexto React necessário
+ * para useMemo e outros hooks internos.
  *
- * O Dexie (IndexedDB) é mockado completamente — nenhum banco real é
- * acessado, tornando os testes rápidos e determinísticos.
- *
- * Como rodar:
- *   cd frontend
- *   npx vitest run hooks/__tests__/useAlunos.test.ts
+ * Padrão BDD (Given / When / Then) em todos os testes.
  */
 
+import { renderHook } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { AlunoLocal } from '@/lib/db'
 
-// ── Mock do módulo db (Dexie) ──────────────────────────────────────────────
-// Precisa ser declarado antes de qualquer import do hook.
-
+// ── Mocks do Dexie ───────────────────────────────────────────────────────────
+// IMPORTANTE: useLiveQuery no mock é SÍNCRONO (chama a fn diretamente).
+// Os mocks de db devem retornar valores síncronos (mockReturnValue),
+// não Promises (mockResolvedValue), para evitar erros de "filter is not a function".
 const mockToArray = vi.fn()
 const mockEquals = vi.fn(() => ({ toArray: mockToArray }))
 const mockWhere = vi.fn(() => ({ equals: mockEquals }))
+const mockAdd = vi.fn().mockResolvedValue(1)     // add() é async — ok como Promise
+const mockSyncQueueCount = vi.fn().mockReturnValue(0)
+const mockEnqueue = vi.fn().mockResolvedValue(undefined)
 
 vi.mock('@/lib/db', () => ({
   db: {
     alunos: {
       toArray: mockToArray,
       where: mockWhere,
+      add: mockAdd,
     },
     sync_queue: {
-      count: vi.fn().mockResolvedValue(0),
+      count: mockSyncQueueCount,
     },
   },
+  enqueue: mockEnqueue,
 }))
 
-// ── Mock do dexie-react-hooks ──────────────────────────────────────────────
-// useLiveQuery é substituído por uma versão síncrona para testes.
+// ── Mock do dexie-react-hooks ─────────────────────────────────────────────────
+// useLiveQuery substituto síncrono — retorna o resultado da função diretamente.
 vi.mock('dexie-react-hooks', () => ({
   useLiveQuery: (fn: () => unknown) => {
-    // Executa a query factory e retorna o resultado (simulando estado resolvido)
     try {
       return fn()
     } catch {
@@ -48,7 +50,7 @@ vi.mock('dexie-react-hooks', () => ({
   },
 }))
 
-// ── Fixtures ────────────────────────────────────────────────────────────────
+// ── Fixture ───────────────────────────────────────────────────────────────────
 
 function makeAluno(overrides: Partial<AlunoLocal> = {}): AlunoLocal {
   return {
@@ -64,7 +66,7 @@ function makeAluno(overrides: Partial<AlunoLocal> = {}): AlunoLocal {
   }
 }
 
-// ── Testes ──────────────────────────────────────────────────────────────────
+// ── Testes: useAlunos ─────────────────────────────────────────────────────────
 
 describe('useAlunos', () => {
   beforeEach(() => {
@@ -73,93 +75,117 @@ describe('useAlunos', () => {
 
   it('deve retornar lista vazia quando não há alunos no banco local', async () => {
     // Given: banco local sem alunos
-    mockToArray.mockResolvedValue([])
+    // mockReturnValue (síncrono!) — useLiveQuery mock chama a fn diretamente
+    mockToArray.mockReturnValue([])
 
-    // When: hook é chamado sem filtro de status
+    // When: hook renderizado via renderHook (fornece contexto React correto)
     const { useAlunos } = await import('@/hooks/useAlunos')
-    const result = useAlunos()
+    const { result } = renderHook(() => useAlunos())
 
-    // Then: lista deve ser vazia e loading deve ser false
-    expect(result.alunos).toEqual([])
-    expect(result.loading).toBe(false)
+    // Then
+    expect(result.current.alunos).toEqual([])
+    expect(result.current.loading).toBe(false)
   })
 
   it('deve retornar alunos quando existem registros no banco local', async () => {
     // Given: banco local com dois alunos
     const alunos = [makeAluno({ nome: 'Ana Silva' }), makeAluno({ id: 2, nome: 'Pedro Lima' })]
-    mockToArray.mockResolvedValue(alunos)
+    mockToArray.mockReturnValue(alunos)
 
-    // When: hook é chamado sem filtro
+    // When
     const { useAlunos } = await import('@/hooks/useAlunos')
-    const result = useAlunos()
+    const { result } = renderHook(() => useAlunos())
 
-    // Then: deve retornar os dois alunos
-    expect(result.alunos).toHaveLength(2)
-    expect(result.alunos[0].nome).toBe('Ana Silva')
-    expect(result.loading).toBe(false)
+    // Then
+    expect(result.current.alunos).toHaveLength(2)
+    expect(result.current.alunos[0].nome).toBe('Ana Silva')
+    expect(result.current.loading).toBe(false)
   })
 
   it('deve filtrar alunos por status quando filtroStatus é fornecido', async () => {
-    // Given: banco local com alunos ativos
+    // Given
     const alunosAtivos = [makeAluno({ status: 'ativo' })]
-    mockToArray.mockResolvedValue(alunosAtivos)
+    mockToArray.mockReturnValue(alunosAtivos)
 
-    // When: hook é chamado com filtro 'ativo'
+    // When
     const { useAlunos } = await import('@/hooks/useAlunos')
-    useAlunos('ativo')
+    renderHook(() => useAlunos('ativo'))
 
-    // Then: deve chamar db.alunos.where('status').equals('ativo')
+    // Then: o filtro de IndexedDB é aplicado pelo hook, não pelo componente
     expect(mockWhere).toHaveBeenCalledWith('status')
     expect(mockEquals).toHaveBeenCalledWith('ativo')
   })
 
-  it('deve retornar loading=true quando alunos são undefined (carregando)', async () => {
-    // Given: useLiveQuery retorna undefined (estado carregando)
-    mockToArray.mockResolvedValue(undefined)
+  it('deve filtrar por busca de nome no hook (não no componente)', async () => {
+    // Given: banco com dois alunos
+    const alunos = [makeAluno({ nome: 'Ana Silva' }), makeAluno({ id: 2, nome: 'Pedro Lima' })]
+    mockToArray.mockReturnValue(alunos)
 
-    // When: hook é invocado com resultado pendente
-    // Simulamos o estado de loading substituindo o mock temporariamente
-    vi.doMock('dexie-react-hooks', () => ({
-      useLiveQuery: () => undefined, // undefined = carregando
-    }))
+    // When: filtroBusca='Ana' passado ao hook
+    const { useAlunos } = await import('@/hooks/useAlunos')
+    const { result } = renderHook(() => useAlunos(undefined, 'Ana'))
 
-    // Reimporta o hook para pegar o novo mock
+    // Then: apenas Ana retornada — filtro aplicado internamente no hook
+    expect(result.current.alunos).toHaveLength(1)
+    expect(result.current.alunos[0].nome).toBe('Ana Silva')
+  })
+
+  it('deve filtrar pendentes de sync no hook (não no componente)', async () => {
+    // Given: alunos com estados de sync distintos
+    const alunos = [
+      makeAluno({ nome: 'Ana', sync_status: 'pending' }),
+      makeAluno({ id: 2, nome: 'Pedro', sync_status: 'synced' }),
+    ]
+    mockToArray.mockReturnValue(alunos)
+
+    // When: filtroSync='pendente'
+    const { useAlunos } = await import('@/hooks/useAlunos')
+    const { result } = renderHook(() => useAlunos(undefined, undefined, 'pendente'))
+
+    // Then: apenas Ana (pending) retornada
+    expect(result.current.alunos).toHaveLength(1)
+    expect(result.current.alunos[0].nome).toBe('Ana')
+  })
+
+  it('deve retornar loading=true e alunos=[] quando useLiveQuery retorna undefined', async () => {
+    // Given: useLiveQuery retorna undefined (estado inicial de carregamento)
     vi.resetModules()
     vi.doMock('@/lib/db', () => ({
       db: {
-        alunos: { toArray: mockToArray, where: mockWhere },
-        sync_queue: { count: vi.fn().mockResolvedValue(0) },
+        alunos: { toArray: vi.fn(), where: mockWhere },
+        sync_queue: { count: mockSyncQueueCount },
       },
+      enqueue: mockEnqueue,
     }))
     vi.doMock('dexie-react-hooks', () => ({
-      useLiveQuery: () => undefined,
+      useLiveQuery: () => undefined, // undefined = ainda carregando
     }))
 
-    const { useAlunos: useAlunosLoading } = await import('@/hooks/useAlunos')
-    const result = useAlunosLoading()
+    const { useAlunos } = await import('@/hooks/useAlunos')
+    const { result } = renderHook(() => useAlunos())
 
-    // Then: loading deve ser true, alunos deve ser array vazio (não undefined)
-    expect(result.loading).toBe(true)
-    expect(result.alunos).toEqual([])
+    // Then: loading=true, alunos=[] (nunca undefined exposto ao componente)
+    expect(result.current.loading).toBe(true)
+    expect(result.current.alunos).toEqual([])
   })
 })
 
-describe('salvarAlunoLocal', () => {
-  const mockAdd = vi.fn().mockResolvedValue(1)
-  const mockSyncQueueAdd = vi.fn().mockResolvedValue(1)
+// ── Testes: salvarAlunoLocal ──────────────────────────────────────────────────
 
+describe('salvarAlunoLocal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.resetModules()
     vi.doMock('@/lib/db', () => ({
       db: {
         alunos: { add: mockAdd, where: mockWhere, toArray: mockToArray },
-        sync_queue: { add: mockSyncQueueAdd, count: vi.fn().mockResolvedValue(1) },
+        sync_queue: { count: mockSyncQueueCount },
       },
+      enqueue: mockEnqueue,
     }))
-    vi.resetModules()
   })
 
-  it('deve salvar aluno localmente e enfileirar sync', async () => {
+  it('deve salvar aluno localmente e enfileirar sync via enqueue() com prioridade correta', async () => {
     // Given: dados de um novo aluno
     const dadosAluno = {
       nome: 'Beatriz Santos',
@@ -168,11 +194,11 @@ describe('salvarAlunoLocal', () => {
       status: 'ativo' as const,
     }
 
-    // When: salvarAlunoLocal é chamado
-    const { salvarAlunoLocal } = await import('@/hooks/useAlunos')
-    await salvarAlunoLocal(dadosAluno)
+    // When: salvarAlunoLocal chamado via serviço (não direto no hook)
+    const { salvarAlunoLocal } = await import('@/lib/services/alunoLocalService')
+    const id = await salvarAlunoLocal(dadosAluno)
 
-    // Then: aluno deve ser adicionado ao banco local
+    // Then: aluno adicionado ao IndexedDB com sync_status='pending'
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({
         nome: 'Beatriz Santos',
@@ -180,13 +206,38 @@ describe('salvarAlunoLocal', () => {
       }),
     )
 
-    // Then: item deve ser enfileirado para sync
-    expect(mockSyncQueueAdd).toHaveBeenCalledWith(
+    // Then: enqueue() chamado (ele aplica prioridade=2 para 'aluno', não 1)
+    // prioridade 1 = relatórios (maior urgência), prioridade 2 = alunos/fotos
+    expect(mockEnqueue).toHaveBeenCalledWith(
+      'aluno',
+      'create',
       expect.objectContaining({
-        entidade: 'aluno',
-        operacao: 'create',
-        prioridade: 1,
+        nome: 'Beatriz Santos',
+        local_id: 1, // ID retornado pelo mockAdd
       }),
     )
+
+    // Then: retorna o ID gerado pelo Dexie
+    expect(id).toBe(1)
+  })
+
+  it('NÃO deve chamar sync_queue.add() diretamente (responsabilidade do enqueue)', async () => {
+    // Given: mock que confirma que sync_queue.add não é chamado diretamente
+    const mockSyncQueueAdd = vi.fn()
+    vi.doMock('@/lib/db', () => ({
+      db: {
+        alunos: { add: mockAdd },
+        sync_queue: { add: mockSyncQueueAdd, count: mockSyncQueueCount },
+      },
+      enqueue: mockEnqueue,
+    }))
+
+    // When
+    const { salvarAlunoLocal } = await import('@/lib/services/alunoLocalService')
+    await salvarAlunoLocal({ nome: 'Teste', status: 'ativo' as const, escola_atual: 'X' })
+
+    // Then: enqueue() é chamado, não sync_queue.add() diretamente
+    expect(mockEnqueue).toHaveBeenCalled()
+    expect(mockSyncQueueAdd).not.toHaveBeenCalled()
   })
 })

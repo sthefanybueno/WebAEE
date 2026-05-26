@@ -1,27 +1,61 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { db, type AlunoLocal, type SyncStatus } from '@/lib/db'
+import { db, type AlunoLocal } from '@/lib/db'
+
+// Re-export do serviço para conveniência dos consumidores que importam daqui
+export { salvarAlunoLocal } from '@/lib/services/alunoLocalService'
+
+type FiltroSync = 'todos' | 'pendente' | 'feito'
 
 /**
  * useAlunos — hook reativo que lê do IndexedDB via Dexie.
- * Retorna dados em tempo real; a UI atualiza automaticamente quando
- * o banco local muda (ex: após sync com o servidor).
+ *
+ * Responsabilidades (Controller/Adapter):
+ *  - Busca reativa via useLiveQuery (atualiza quando IndexedDB muda).
+ *  - Filtragem por status de cadastro (ativo/arquivado).
+ *  - Filtragem por busca de nome e por status de sync.
+ *
+ * NUNCA coloque lógica de filtro nos componentes — passe os parâmetros
+ * aqui e deixe o hook aplicar as regras de negócio.
  */
-export function useAlunos(filtroStatus?: 'ativo' | 'arquivado') {
+export function useAlunos(
+  filtroStatus?: 'ativo' | 'arquivado',
+  filtroBusca?: string,
+  filtroSync?: FiltroSync,
+) {
   const alunos = useLiveQuery(
-    () => filtroStatus
-      ? db.alunos.where('status').equals(filtroStatus).toArray()
-      : db.alunos.toArray(),
-    [filtroStatus]
+    () =>
+      filtroStatus
+        ? db.alunos.where('status').equals(filtroStatus).toArray()
+        : db.alunos.toArray(),
+    [filtroStatus],
   )
 
+  // Regra de filtro encapsulada no Hook — não no componente de página
+  const alunosFiltrados = useMemo(() => {
+    if (!alunos) return []
+    return alunos.filter((a) => {
+      const matchBusca =
+        !filtroBusca || a.nome.toLowerCase().includes(filtroBusca.toLowerCase())
+      const matchSync =
+        !filtroSync ||
+        filtroSync === 'todos' ||
+        (filtroSync === 'pendente'
+          ? a.sync_status === 'pending'
+          : a.sync_status !== 'pending')
+      return matchBusca && matchSync
+    })
+  }, [alunos, filtroBusca, filtroSync])
+
   return {
-    alunos: alunos ?? [],
+    alunos: alunosFiltrados,
     loading: alunos === undefined,
   }
 }
 
+/** useAluno — retorna um aluno específico por ID local ou server_id. */
 export function useAluno(id: string) {
   const aluno = useLiveQuery(
     async () => {
@@ -34,34 +68,13 @@ export function useAluno(id: string) {
       // Se não encontrar, tenta server_id
       return await db.alunos.where('server_id').equals(id).first()
     },
-    [id]
+    [id],
   )
   return { aluno, loading: aluno === undefined }
 }
 
-/** usePendingCount — conta relatórios + fotos não sincronizados */
+/** usePendingCount — conta itens não sincronizados reativamente via Dexie. */
 export function usePendingCount() {
-  const count = useLiveQuery(
-    () => db.sync_queue.count(),
-    []
-  )
+  const count = useLiveQuery(() => db.sync_queue.count(), [])
   return count ?? 0
-}
-
-/** Salva ou atualiza um aluno localmente e enfileira sync */
-export async function salvarAlunoLocal(dados: Omit<AlunoLocal, 'id' | 'sync_status' | 'updated_at'>) {
-  const agora = new Date().toISOString()
-  const id = await db.alunos.add({
-    ...dados,
-    sync_status: 'pending' as SyncStatus,
-    updated_at: agora,
-  })
-  await db.sync_queue.add({
-    entidade: 'aluno',
-    operacao: 'create',
-    payload: { ...dados, local_id: id },
-    prioridade: 1,
-    criado_em: agora,
-  })
-  return id
 }

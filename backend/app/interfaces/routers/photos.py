@@ -8,6 +8,7 @@ from app.application.use_cases.photos.create_photo import (
     CreatePhotoUseCase,
 )
 from app.infrastructure.database import get_session
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.photo_repository_impl import (
     SQLModelPhotoRepository,
 )
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/api/fotos", tags=["fotos"])
 
 def get_create_photo_use_case(session: AsyncSession = Depends(get_session)) -> CreatePhotoUseCase:
     return CreatePhotoUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         photo_repo=SQLModelPhotoRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )
@@ -66,7 +67,7 @@ from app.interfaces.schemas.photo import SyncPhotoRequest
 
 def get_sync_photo_use_case(session: AsyncSession = Depends(get_session)) -> SyncPhotoUseCase:
     return SyncPhotoUseCase(
-        session=session,
+        uow=SQLAlchemyUnitOfWork(session),
         photo_repo=SQLModelPhotoRepository(session),
         student_repo=SQLModelStudentRepository(session),
     )

@@ -18,7 +18,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional, Dict, List
+from typing import Any, Optional, Dict, List, Union
 
 from pydantic import BaseModel, Field
 
@@ -49,7 +49,7 @@ class ReportTemplate(BaseModel):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     tipo: TipoRelatorio = Field(description="Tipo de relatório que este template descreve.")
-    secoes: Optional[List[Dict[str, Any]]] = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
+    secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
     versao: int = Field(default=1, description="Versão do template. Incrementa a cada alteração estrutural.")
     ativo: bool = Field(default=True)
     created_at: datetime = Field(default_factory=_utcnow)

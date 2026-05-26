@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema AEE — Defesa da Arquitetura Frontend</title>
+  <meta name="description" content="Apresentação interativa sobre a arquitetura do Frontend do Sistema AEE">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ================================================================
+       DESIGN TOKENS — Identidade Visual Real do Sistema AEE
+       Extraído de globals.css — Verde Escolar, Escrita Sobriedade e Slate
+       ================================================================ */
+    :root {
+      /* Core — Brand AEE */
+      --primary: #1A6F45;          /* Green 700 - Cor Principal */
+      --primary-hover: #155838;    /* Green 800 */
+      --primary-light: #D1F0E0;    /* Green 100 */
+      --primary-bg: #EDFAF4;       /* Green 50 */
+      --on-primary: #FFFFFF;
+      --inverse-primary: #D1F0E0;
+
+      /* Status */
+      --secondary: #3B82F6;        /* Blue - Info / Sincronizado */
+      --secondary-light: #EFF6FF;
+      --on-secondary: #FFFFFF;
+
+      --tertiary: #16A34A;         /* Green - Sucesso */
+      --tertiary-container: #ECFDF5;
+
+      --error: #E53E3E;            /* Red - Erro / Perigo */
+      --error-light: #FEF2F2;
+      --on-error: #FFFFFF;
+
+      --warning: #DD6B20;          /* Orange - Pendente */
+      --warning-light: #FFFBF0;
+
+      /* Neutrals */
+      --background: #F7F9FB;       /* Gray 50 - Fundo Geral */
+      --on-background: #1A1D27;    /* Gray 900 - Texto Principal */
+      --surface: #FFFFFF;          /* Branco - Cards */
+      --on-surface: #1A1D27;       /* Gray 900 */
+      --on-surface-variant: #5C6478;/* Gray 600 - Texto Secundário */
+      --surface-variant: #EEF1F5;  /* Gray 100 */
+      --surface-dim: #DDE3EC;      /* Gray 200 */
+      --surface-container: #F7F9FB;
+      --surface-container-low: #FFFFFF;
+      --surface-container-high: #EEF1F5;
+      --surface-container-highest: #DDE3EC;
+      --surface-container-lowest: #FFFFFF;
+
+      /* Outlines */
+      --outline: #9AA5B8;          /* Gray 400 */
+      --outline-variant: #DDE3EC;  /* Gray 200 */
+
+      /* Layout */
+      --sidebar-width: 290px;
+      --nav-height: 64px;
+
+      /* Border radius — Coerente com as cards de 14px do projeto */
+      --radius: 8px;               /* Inputs / Badges */
+      --radius-lg: 10px;           /* Botões / Links */
+      --radius-xl: 14px;           /* Cards principais */
+
+      /* Transitions */
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-normal: 350ms;
+      --duration-fast: 200ms;
+    }
+
+    /* ================================================================
+       RESET & BASE
+       ================================================================ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 15px;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--background);
+      color: var(--on-background);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    ::selection {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    /* ================================================================
+       LAYOUT SHELL
+       ================================================================ */
+    .presentation-shell {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ================================================================
+       SIDEBAR — Fiel à identidade visual real do App (Green Sidebar)
+       ================================================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      height: 100vh;
+      background: linear-gradient(160deg, #1e7c4e 0%, #1A6F45 50%, #155838 100%);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 10;
+      color: white;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+    }
+
+    /* Sidebar — Brand */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 22px;
+      height: 80px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-logo-icon {
+      width: 34px;
+      height: 34px;
+      color: white;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 6px;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      color: white;
+      line-height: 1.1;
+    }
+
+    /* Sidebar — Nav */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+      width: 0px; /* Hide scrollbar for nav */
+    }
+
+    .nav-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.45);
+      padding: 6px 12px 4px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      margin: 4px 0;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-smooth);
+      border: 1px solid transparent;
+      position: relative;
+      text-decoration: none;
+      user-select: none;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-item:hover:not(.disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+      border-left: 3px solid white;
+    }
+
+    .nav-item.disabled {
+      cursor: default;
+      opacity: 0.4;
+    }
+
+    .nav-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .nav-item.active .nav-number {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .nav-item.active .nav-label {
+      font-weight: 700;
+    }
+
+    /* Sidebar — Footer */
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .slide-counter {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+    }
+
+    .slide-counter strong {
+      color: white;
+      font-weight: 800;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FFFFFF, #D1F0E0);
+      border-radius: 10px;
+      transition: width var(--duration-normal) var(--ease-smooth);
+    }
+
+    /* ================================================================
+       MAIN STAGE — Premium layout and subtle radial gradients
+       ================================================================ */
+    .main-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--background);
+      position: relative;
+    }
+
+    /* Radial glow background decoration matches the original design's aesthetic */
+    .main-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 20%, rgba(26, 111, 69, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ================================================================
+       SLIDE VIEWPORT
+       ================================================================ */
+    .slide-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 36px 48px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(50px);
+      transition: all 0.4s var(--ease-smooth);
+      will-change: opacity, transform;
+    }
+
+    .slide > * {
+      margin: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    .slide.exit-left {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-50px);
+    }
+
+    /* ================================================================
+       SLIDE 1 — Capa (Capa da Apresentação)
+       ================================================================ */
+    .cover-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .cover-logo-wrapper {
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, #1e7c4e, #1A6F45);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(26, 111, 69, 0.2);
+      animation: fadeInDown 0.7s var(--ease-smooth) 0.15s both;
+    }
+
+    .cover-logo-icon {
+      width: 32px;
+      height: 32px;
+      color: white;
+    }
+
+    .cover-title {
+      font-size: 3.6rem;
+      font-weight: 850;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      color: var(--on-background);
+      margin-bottom: 4px;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.25s both;
+    }
+
+    .cover-title .accent {
+      background: linear-gradient(135deg, var(--primary) 30%, #2a945d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-divider {
+      width: 64px;
+      height: 4px;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--primary), #2a945d);
+      margin: 14px auto 18px;
+      animation: scaleInX 0.6s var(--ease-smooth) 0.5s both;
+    }
+
+    .cover-subtitle {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.55;
+      max-width: 750px;
+      margin-bottom: 30px;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.45s both;
+    }
+
+    .cover-subtitle strong {
+      color: var(--on-background);
+      font-weight: 750;
+    }
+
+    .cover-info-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.65s both;
+    }
+
+    .cover-info-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--outline-variant);
+      box-shadow: 0 4px 12px rgba(26, 111, 69, 0.02);
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .cover-info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(26, 111, 69, 0.05);
+      border-color: rgba(26, 111, 69, 0.2);
+    }
+
+    .info-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .info-icon.icon-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .info-icon.icon-secondary {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .info-icon.icon-tertiary {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+
+    .info-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .info-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--on-surface-variant);
+      margin-bottom: 1px;
+    }
+
+    .info-value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--on-background);
+      line-height: 1.25;
+    }
+
+    /* Architectural grid at cover bottom */
+    .cover-arch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%;
+      margin-top: 32px;
+      max-width: 780px;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.75s both;
+    }
+
+    .cover-arch-item {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px dashed var(--outline);
+      border-radius: var(--radius-lg);
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .cover-arch-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .cover-arch-desc {
+      font-size: 0.72rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* ================================================================
+       SLIDE CONTENT (Detalhamento Geral)
+       ================================================================ */
+    .slide-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 1040px;
+      gap: 14px;
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slide-header-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .slide-header-icon.bg-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .slide-header-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .slide-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--on-background);
+    }
+
+    .slide-title-divider {
+      width: 44px;
+      height: 3px;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      margin-bottom: 2px;
+    }
+
+    /* Topic Cards Grids */
+    .topic-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .topic-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--outline-variant);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .topic-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(26, 111, 69, 0.04);
+      border-color: rgba(26, 111, 69, 0.15);
+    }
+
+    .topic-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .topic-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topic-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .topic-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .topic-icon.t-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .topic-icon.t-secondary {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .topic-icon.t-tertiary {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+
+    .topic-card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--on-background);
+      letter-spacing: -0.01em;
+    }
+
+    .topic-card-text {
+      font-size: 0.88rem;      /* TEXTOS MAIORES Conforme Pedido */
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.55;
+    }
+
+    .topic-card-text strong {
+      color: var(--on-background);
+      font-weight: 700;
+    }
+
+    /* Diagram Block UI */
+    .diagram-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--surface-variant);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--outline-variant);
+      margin: 2px 0;
+    }
+
+    .diagram-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+
+    .diagram-step:not(:last-child)::after {
+      content: '➔';
+      position: absolute;
+      right: -10%;
+      top: 25%;
+      font-size: 0.8rem;
+      color: var(--primary);
+      opacity: 0.4;
+    }
+
+    .diagram-step-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .diagram-step-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--on-background);
+    }
+
+    .diagram-step-sub {
+      font-size: 0.62rem;
+      color: var(--on-surface-variant);
+    }
+
+    /* Feature Lists */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feature-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .feature-icon.f-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .feature-icon.f-secondary {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .feature-icon.f-tertiary {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+
+    .feature-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .feature-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--on-background);
+    }
+
+    .feature-desc {
+      font-size: 0.82rem;      /* TEXTOS MAIORES Conforme Pedido */
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.45;
+    }
+
+    /* ================================================================
+       TWO COLUMN LAYOUT
+       ================================================================ */
+    .two-col-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .col-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .col-panel-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--on-surface-variant);
+      padding-bottom: 2px;
+      border-bottom: 1px solid var(--outline-variant);
+    }
+
+    /* Stack Tech Items */
+    .stack-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 4px 12px rgba(26, 111, 69, 0.01);
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .stack-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(26, 111, 69, 0.03);
+      border-color: rgba(26, 111, 69, 0.12);
+    }
+
+    .stack-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+    }
+
+    .stack-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .stack-icon.si-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .stack-icon.si-secondary {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .stack-icon.si-tertiary {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+
+    .stack-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .stack-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--on-background);
+    }
+
+    .stack-version {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--on-surface-variant);
+    }
+
+    /* Comparison Grid UI */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: var(--surface-variant);
+      padding: 8px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--outline-variant);
+    }
+    
+    .comparison-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .comparison-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-bottom: 2px;
+    }
+
+    .comparison-item {
+      font-size: 0.72rem;
+      background: var(--surface);
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--outline-variant);
+      font-weight: 600;
+    }
+
+    /* Decision Cards */
+    .decision-card {
+      padding: 14px 16px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 4px 12px rgba(26, 111, 69, 0.01);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .decision-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(26, 111, 69, 0.03);
+      border-color: rgba(26, 111, 69, 0.12);
+    }
+
+    .decision-card.highlight {
+      background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(59, 130, 246, 0.01) 100%);
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 16px rgba(26, 111, 69, 0.05);
+    }
+
+    .decision-card.highlight:hover {
+      box-shadow: 0 8px 24px rgba(26, 111, 69, 0.08);
+    }
+
+    .decision-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .decision-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .decision-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .decision-icon.di-primary {
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    .decision-icon.di-secondary {
+      background: var(--secondary-light);
+      color: var(--secondary);
+    }
+
+    .decision-icon.di-tertiary {
+      background: var(--tertiary-container);
+      color: var(--tertiary);
+    }
+
+    .decision-card-title {
+      font-size: 0.82rem;
+      font-weight: 750;
+      color: var(--on-background);
+    }
+
+    .decision-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--primary);
+      color: var(--on-primary);
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .decision-card-text {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.45;
+    }
+
+    /* Alert Boxes (GitHub style) */
+    .alert-box {
+      border-left: 4px solid var(--primary);
+      background: var(--surface-variant);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.78rem;
+      font-weight: 500;
+      line-height: 1.45;
+      color: var(--on-surface-variant);
+    }
+    
+    .alert-box.alert-warning {
+      border-left-color: var(--error);
+      background: var(--error-light);
+      color: #991b1b;
+    }
+    
+    .alert-box.alert-important {
+      border-left-color: var(--warning);
+      background: var(--warning-light);
+      color: #7c2d12;
+    }
+
+    .alert-title {
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ================================================================
+       CODE EVIDENCE SECTION — Redesigned for bottom positioning (Exemplos Embaixo)
+       ================================================================ */
+    .evidence-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .evidence-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--on-surface-variant);
+      margin-bottom: 4px;
+    }
+
+    .code-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Double Column on wide displays */
+      gap: 14px;
+      width: 100%;
+    }
+
+    @media (max-width: 1100px) {
+      .code-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .code-card {
+      background: #1A1D27;        /* WebAEE Neutral Gray 900 */
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(26, 29, 39, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .code-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #11131a;        /* Deeper slate header */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .code-card-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #D1F0E0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .code-card-path {
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.35);
+      font-family: 'Fira Code', 'Courier New', Consolas, monospace;
+    }
+
+    .code-card-body {
+      padding: 10px 14px;
+      overflow-x: auto;
+    }
+
+    .code-card-body pre {
+      margin: 0;
+      font-family: 'Fira Code', 'Courier New', Consolas, monospace;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: #E2E8F0;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    /* Syntax Highlighting matches high contrast IDE formats */
+    .syn-key { color: #F472B6; } /* Keywords / Property names */
+    .syn-str { color: #34D399; } /* Strings */
+    .syn-num { color: #FB923C; } /* Numbers */
+    .syn-type { color: #60A5FA; }/* Types / Interfaces */
+    .syn-fn { color: #FBBF24; }  /* Functions */
+    .syn-cmt { color: #64748B; font-style: italic; } /* Comments */
+    .syn-imp { color: #A78BFA; } /* Imports */
+    .syn-punc { color: #94A3B8; }/* Operators / Punctuation */
+
+    /* ================================================================
+       NAVIGATION BAR — Bottom
+       ================================================================ */
+    .nav-bar {
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: var(--background);
+      border-top: 1px solid var(--outline-variant);
+      z-index: 5;
+    }
+
+    .nav-hint {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 5px;
+      border-radius: 6px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      color: var(--on-surface);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: var(--radius-lg);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-smooth);
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* "Anterior" — Outline style */
+    .nav-btn.btn-prev {
+      background: var(--surface-container-lowest);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .nav-btn.btn-prev:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-bg);
+    }
+
+    /* "Próximo" — Brand Green style */
+    .nav-btn.btn-next {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 2px 8px rgba(26, 111, 69, 0.2);
+    }
+
+    .nav-btn.btn-next:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(26, 111, 69, 0.3);
+    }
+
+    .nav-btn .arrow {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    /* ================================================================
+       ANIMATIONS
+       ================================================================ */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleInX {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    /* ================================================================
+       RESPONSIVE
+       ================================================================ */
+    @media (max-width: 1024px) {
+      :root {
+        --sidebar-width: 250px;
+      }
+
+      .cover-title {
+        font-size: 3.2rem;
+      }
+
+      .slide {
+        padding: 24px 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .cover-title {
+        font-size: 2.4rem;
+      }
+
+      .cover-info-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .slide {
+        padding: 16px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="presentation-shell">
+
+    <!-- ============================================================
+         SIDEBAR — Identidade Visual de Verde Escolar do WebAEE
+         ============================================================ -->
+    <aside class="sidebar">
+
+      <!-- Brand — Logo do Chapéu de Formatura Acessibilidade -->
+      <div class="sidebar-brand">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+          </svg>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <span class="brand-title">Sistema AEE</span>
+          <span style="font-size: 0.58rem; font-weight: 700; color: rgba(255, 255, 255, 0.45); letter-spacing: 0.05em; margin-top: 2px;">DEFESA ARQUITETURAL</span>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Sumário</div>
+
+        <div class="nav-item active" data-slide="0" onclick="goToSlide(0)">
+          <div class="nav-number">01</div>
+          <div class="nav-label">Capa</div>
+        </div>
+
+        <div class="nav-item" data-slide="1" onclick="goToSlide(1)">
+          <div class="nav-number">02</div>
+          <div class="nav-label">O Sistema WebAEE</div>
+        </div>
+
+        <div class="nav-item" data-slide="2" onclick="goToSlide(2)">
+          <div class="nav-number">03</div>
+          <div class="nav-label">Evolução Tecnológica</div>
+        </div>
+
+        <div class="nav-item" data-slide="3" onclick="goToSlide(3)">
+          <div class="nav-number">04</div>
+          <div class="nav-label">Camada de Domínio</div>
+        </div>
+
+        <div class="nav-item" data-slide="4" onclick="goToSlide(4)">
+          <div class="nav-number">05</div>
+          <div class="nav-label">Camada de Aplicação</div>
+        </div>
+
+        <div class="nav-item" data-slide="5" onclick="goToSlide(5)">
+          <div class="nav-number">06</div>
+          <div class="nav-label">Infraestrutura HTTP</div>
+        </div>
+
+        <div class="nav-item" data-slide="6" onclick="goToSlide(6)">
+          <div class="nav-number">07</div>
+          <div class="nav-label">Garantia & Testes BDD</div>
+        </div>
+
+        <div class="nav-item" data-slide="7" onclick="goToSlide(7)">
+          <div class="nav-number">08</div>
+          <div class="nav-label">Próximos Passos</div>
+        </div>
+      </nav>
+
+      <!-- Progress Tracking in Sidebar -->
+      <div class="sidebar-footer">
+        <div class="slide-counter">
+          Slide <strong id="currentSlideNum">1</strong> de <strong>8</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ============================================================
+         MAIN STAGE — Dynamic Sliding Viewport
+         ============================================================ -->
+    <div class="main-stage">
+
+      <div class="slide-viewport">
+
+        <!-- ============================================================
+             SLIDE 1 — Capa
+             ============================================================ -->
+        <div class="slide active" id="slide-0">
+          <div class="cover-content">
+
+            <div class="cover-logo-wrapper">
+              <svg class="cover-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+              </svg>
+            </div>
+
+            <h1 class="cover-title">
+              Sistema <span class="accent">AEE</span>
+            </h1>
+
+            <div class="cover-divider"></div>
+
+            <p class="cover-subtitle">
+              <strong>Frontend PWA Altamente Seguro:</strong> Clean Architecture, Sincronização Local-First e Conformidade Rigorosa com a LGPD
+            </p>
+
+            <div class="cover-info-row">
+              <div class="cover-info-card">
+                <div class="info-icon icon-primary">📖</div>
+                <div class="info-text">
+                  <span class="info-label">Disciplina</span>
+                  <span class="info-value">Laboratório de Prog. Web</span>
+                </div>
+              </div>
+
+              <div class="cover-info-card">
+                <div class="info-icon icon-secondary">👤</div>
+                <div class="info-text">
+                  <span class="info-label">Aluna</span>
+                  <span class="info-value">Sthefany Bueno</span>
+                </div>
+              </div>
+
+              <div class="cover-info-card">
+                <div class="info-icon icon-tertiary">📅</div>
+                <div class="info-text">
+                  <span class="info-label">Semestre</span>
+                  <span class="info-value">2026.1</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Architectural Division Overview -->
+            <div class="cover-arch-grid">
+              <div class="cover-arch-item">
+                <span class="cover-arch-title">Domain & Core</span>
+                <span class="cover-arch-desc">Persistência local relacional em IndexedDB com Dexie.js transacional.</span>
+              </div>
+              <div class="cover-arch-item">
+                <span class="cover-arch-title">Application Hooks</span>
+                <span class="cover-arch-desc">Orquestradores reativos com useLiveQuery re-renderizando sob eventos.</span>
+              </div>
+              <div class="cover-arch-item">
+                <span class="cover-arch-title">Infrastructure API</span>
+                <span class="cover-arch-desc">Segurança integrada contra vazamento de laudos sensíveis (LGPD).</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 2 — O Sistema WebAEE & Regras de Negócio
+             ============================================================ -->
+        <div class="slide" id="slide-1">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">O Sistema WebAEE</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Fluxo de Acompanhamento no AEE -->
+            <div class="diagram-container">
+              <div class="diagram-step">
+                <div class="diagram-step-circle">1</div>
+                <span class="diagram-step-label">Triagem & Cadastro</span>
+                <span class="diagram-step-sub">Termo LGPD Requerido</span>
+              </div>
+              <div class="diagram-step">
+                <div class="diagram-step-circle">2</div>
+                <span class="diagram-step-label">Plano PDI</span>
+                <span class="diagram-step-sub">Metas Pedagógicas</span>
+              </div>
+              <div class="diagram-step">
+                <div class="diagram-step-circle">3</div>
+                <span class="diagram-step-label">Registro Offline</span>
+                <span class="diagram-step-sub">Relatórios e Fotos</span>
+              </div>
+              <div class="diagram-step">
+                <div class="diagram-step-circle">4</div>
+                <span class="diagram-step-label">Sync Automático</span>
+                <span class="diagram-step-sub">Fila com Precedência</span>
+              </div>
+            </div>
+
+            <div class="topic-row">
+
+              <!-- Detalhamento de Negócio -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Propósito Educacional & Social</span>
+                </div>
+                <p class="topic-card-text">
+                  O **Sistema AEE** destina-se a gerenciar com total segurança os registros do **Atendimento Educacional Especializado (AEE)**. Ele atua como um facilitador pedagógico para organizar o **Plano de Desenvolvimento Individualizado (PDI)** e relatórios especializados de alunos com **Necessidades Educacionais Especiais (NEE)** em escolas.
+                </p>
+              </div>
+
+              <!-- Segurança e LGPD -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Privacidade por Design (LGPD)</span>
+                </div>
+                <p class="topic-card-text">
+                  Dado que laudos e diagnósticos de menores são considerados **dados pessoais sensíveis**, o sistema oculta a visualização por padrão na interface. Para que um professor autorizado consulte dados confidenciais, ele deve clicar explicitamente em "Revelar", o que gera um **log imutável de auditoria** no backend de forma imediata.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- RBAC Roles & Permissions Matrix Table -->
+            <div class="topic-row">
+              <div class="topic-card full-width" style="padding: 12px 18px;">
+                <span class="topic-card-title" style="margin-bottom: 6px; display:block;">Matriz de Permissões Granulares (RBAC) & Controle de Segurança</span>
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+                  <thead>
+                    <tr style="background: var(--surface-variant); border-bottom: 1px solid var(--outline-variant);">
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Papel de Acesso</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Inquilinos / Escolas</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Alunos NEE / PDI</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Fotos / Relatórios</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Laudo Sensível (LGPD)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Administrador</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Total</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Total</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Total</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Permissão Total</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Coordenador</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Escola</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Total</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Total</td>
+                      <td style="padding: 6px 10px; color:var(--warning);">⚠ Leitura (Auditada)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Professor AEE</td>
+                      <td style="padding: 6px 10px; color:var(--error);">✘ Sem Acesso</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Vínculo</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Vínculo</td>
+                      <td style="padding: 6px 10px; color:var(--warning);">⚠ Leitura (Auditada)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Professor Apoio</td>
+                      <td style="padding: 6px 10px; color:var(--error);">✘ Sem Acesso</td>
+                      <td style="padding: 6px 10px; color:var(--secondary);">✔ Leitura Vínculo</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">✔ Escrita Atividade</td>
+                      <td style="padding: 6px 10px; color:var(--error);">✘ Sem Acesso</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 10px; font-weight:700;">Professor Regente</td>
+                      <td style="padding: 6px 10px; color:var(--error);">✘ Sem Acesso</td>
+                      <td style="padding: 6px 10px; color:var(--secondary);">✔ Leitura Vínculo</td>
+                      <td style="padding: 6px 10px; color:var(--secondary);">✔ Leitura Vínculo</td>
+                      <td style="padding: 6px 10px; color:var(--error);">✘ Sem Acesso</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 3 — Evolução Tecnológica & Decisões Críticas
+             ============================================================ -->
+        <div class="slide" id="slide-2">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                  <polyline points="2 17 12 22 22 17"/>
+                  <polyline points="2 12 12 17 22 12"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Evolução e Escolhas Tecnológicas</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="two-col-layout">
+
+              <!-- LEFT PANEL — Stack -->
+              <div class="col-panel">
+                <div class="col-panel-label">Stack de Altíssima Performance</div>
+
+                <!-- Next.js -->
+                <div class="stack-item">
+                  <div class="stack-icon si-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="16 18 22 12 16 6"/>
+                      <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Next.js 16.2.4 (React 19.2.4)</span>
+                    <span class="stack-version">App Router & Hydration Avançada</span>
+                  </div>
+                </div>
+
+                <!-- Tailwind CSS v4 -->
+                <div class="stack-item">
+                  <div class="stack-icon si-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Tailwind CSS v4.0</span>
+                    <span class="stack-version">Compilação PostCSS Integrada em globals.css</span>
+                  </div>
+                </div>
+
+                <!-- Dexie.js -->
+                <div class="stack-item">
+                  <div class="stack-icon si-tertiary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                      <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Dexie.js + IndexedDB</span>
+                    <span class="stack-version">Estratégia Local-First & Reação síncrona</span>
+                  </div>
+                </div>
+
+                <!-- Comparison Grid UI -->
+                <div class="comparison-grid">
+                  <div class="comparison-col">
+                    <span class="comparison-title">Tailwind CSS v3 (Legado)</span>
+                    <div class="comparison-item" style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">tailwind.config.js estático</div>
+                    <div class="comparison-item" style="color:var(--error); text-decoration:line-through; font-size:0.65rem;">Compilação pesada em JS</div>
+                  </div>
+                  <div class="comparison-col">
+                    <span class="comparison-title">Tailwind CSS v4 (WebAEE)</span>
+                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">CSS-First declarativo via @theme</div>
+                    <div class="comparison-item" style="color:var(--tertiary); font-size:0.65rem;">Tokens convertidos em variáveis CSS</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT PANEL — Decisões de Engenharia -->
+              <div class="col-panel">
+                <div class="col-panel-label">Decisões Críticas de Arquitetura</div>
+
+                <!-- Decision 1 -->
+                <div class="decision-card">
+                  <div class="decision-card-header">
+                    <div class="decision-icon di-primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                      </svg>
+                    </div>
+                    <span class="decision-card-title">Estratégia Local-First com Reação Síncrona</span>
+                  </div>
+                  <p class="decision-card-text">
+                    As salas de recursos escolares das redes públicas sofrem com sinal de rede muito oscilante. Se a aplicação dependesse diretamente de conexões HTTP constantes, os professores teriam o fluxo de trabalho interrompido de forma recorrente. Adotamos o IndexedDB local como **banco de dados primário e única fonte de verdade** da UI para garantir resiliência absoluta.
+                  </p>
+                </div>
+
+                <!-- Decision 2 — HIGHLIGHT -->
+                <div class="decision-card highlight">
+                  <div class="decision-card-header">
+                    <div class="decision-icon di-secondary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                      </svg>
+                    </div>
+                    <span class="decision-card-title">IndexedDB Reativo vs LocalStorage Convencional</span>
+                    <span class="decision-badge">IndexedDB</span>
+                  </div>
+                  <p class="decision-card-text">
+                    Em vez de persistência simples em LocalStorage (bloqueante, limitada a **5MB** e restrita a cadeias de texto plano), o WebAEE opera de forma assíncrona, não-bloqueante e transacional através do IndexedDB. Isso nos permite armazenar **grandes arquivos binários de fotos pedagógicas** diretamente como dados de blob locais para posterior envio.
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
+            <div class="evidence-section">
+              <span class="evidence-label">Exemplos Técnicos de Configuração e Interface</span>
+              <div class="code-cards-grid">
+                
+                <!-- Tailwind v4 Theme Example -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Configuração CSS-First (Tailwind v4)</span>
+                    <span class="code-card-path">frontend/app/globals.css</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-imp">@import</span> <span class="syn-str">"tailwindcss"</span>;
+
+<span class="syn-imp">@theme</span> {
+  <span class="syn-cmt">/* Customização nativa direto no CSS, sem arquivos de configuração JS */</span>
+  --color-brand-primary: <span class="syn-num">#1A6F45</span>;
+  --color-brand-hover: <span class="syn-num">#155838</span>;
+  --font-sans: <span class="syn-str">'Inter'</span>, system-ui, sans-serif;
+  --radius-xl: <span class="syn-str">'14px'</span>;
+}
+</pre>
+                  </div>
+                </div>
+
+                <!-- React 19 / Next 16 Optimistic State Example -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">React 19 / Next 16 Optimistic UI (Ações Locais)</span>
+                    <span class="code-card-path">Exemplo de Mutação Reativa de UX</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">const</span> [optimisticAlunos, setOptimisticAlunos] = <span class="syn-fn">useOptimistic</span>(
+  alunos,
+  (state, <span class="syn-type">novoAluno</span>) => [...state, novoAluno]
+);
+<span class="syn-cmt">// O componente renderiza a alteração de forma imediata e assíncrona,</span>
+<span class="syn-cmt">// realizando o sync com a API no backend sem bloquear a interação do usuário.</span>
+</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 4 — Camada de Domínio (Clean Architecture & Dexie Schemas)
+             ============================================================ -->
+        <div class="slide" id="slide-3">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                  <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Camada de Domínio & Modelos Locais</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="topic-row">
+
+              <!-- Detalhamento de Negócio -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <line x1="9" y1="9" x2="15" y2="9"/>
+                      <line x1="9" y1="13" x2="15" y2="13"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Pureza do Domínio na Clean Architecture</span>
+                </div>
+                <p class="topic-card-text">
+                  Na arquitetura do frontend, a camada de **Domínio** isola completamente as regras de negócio puras e modelos de dados do ecossistema de rede e endpoints HTTP. Ela define os contratos estruturais das tabelas locais do navegador, regras de validação pré-cadastro e a lógica de priorização transacional offline.
+                </p>
+              </div>
+
+              <!-- Detalhamento da Fila de Sincronização -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Fila de Sincronização Transacional com Precedência</span>
+                </div>
+                <p class="topic-card-text">
+                  Para otimizar conexões lentas em salas de recursos, a fila local de sync (`sync_queue`) classifica operações em prioridades estritas: **Prioridade 1** para relatórios e diários (críticos e extremamente leves em banda), e **Prioridade 2** para dados de alunos e mídias binárias pesadas (enviados sequencialmente em segundo plano).
+                </p>
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
+            <div class="evidence-section">
+              <span class="evidence-label">Evidências do Esquema IndexedDB e Contratos de Tipo do Domínio</span>
+              <div class="code-cards-grid">
+                
+                <!-- db.ts Schema Definition -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Versionamento e Schema IndexedDB (Dexie)</span>
+                    <span class="code-card-path">frontend/lib/db.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">class</span> <span class="syn-type">AeeDatabase</span> <span class="syn-key">extends</span> <span class="syn-type">Dexie</span> {
+  alunos!: <span class="syn-type">Table</span>&lt;<span class="syn-type">AlunoLocal</span>&gt;
+  relatorios!: <span class="syn-type">Table</span>&lt;<span class="syn-type">RelatorioLocal</span>&gt;
+  fotos!: <span class="syn-type">Table</span>&lt;<span class="syn-type">FotoLocal</span>&gt;
+  sync_queue!: <span class="syn-type">Table</span>&lt;<span class="syn-type">SyncQueueItem</span>&gt;
+
+  <span class="syn-key">constructor</span>() {
+    <span class="syn-key">super</span>(<span class="syn-str">'aee_db'</span>)
+    <span class="syn-key">this</span>.<span class="syn-fn">version</span>(<span class="syn-num">1</span>).<span class="syn-fn">stores</span>({
+      alunos:     <span class="syn-str">'++id, server_id, nome, status, sync_status, updated_at'</span>,
+      relatorios: <span class="syn-str">'++id, server_id, aluno_id, tipo, sync_status, updated_at'</span>,
+      fotos:      <span class="syn-str">'++id, server_id, aluno_id, tag_pedagogica, sync_status, created_at'</span>,
+      sync_queue: <span class="syn-str">'++id, entidade, prioridade, criado_em'</span>,
+    })
+  }
+}
+</pre>
+                  </div>
+                </div>
+
+                <!-- Type Contracts Definition -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Tipos e Contratos Estritos (TypeScript)</span>
+                    <span class="code-card-path">frontend/lib/db.ts (Interfaces)</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">export type</span> <span class="syn-type">SyncStatus</span> = <span class="syn-str">'synced'</span> | <span class="syn-str">'pending'</span>
+
+<span class="syn-key">export interface</span> <span class="syn-type">AlunoLocal</span> {
+  id?: <span class="syn-type">number</span>
+  server_id?: <span class="syn-type">string</span>
+  nome: <span class="syn-type">string</span>
+  data_nascimento: <span class="syn-type">string</span>
+  escola_atual: <span class="syn-type">string</span>
+  diagnostico?: <span class="syn-type">string</span>
+  status: <span class="syn-str">'ativo'</span> | <span class="syn-str">'arquivado'</span>
+  sync_status: <span class="syn-type">SyncStatus</span>
+  updated_at: <span class="syn-type">string</span>
+}
+
+<span class="syn-key">export interface</span> <span class="syn-type">SyncQueueItem</span> {
+  id?: <span class="syn-type">number</span>
+  entidade: <span class="syn-str">'aluno'</span> | <span class="syn-str">'relatorio'</span> | <span class="syn-str">'foto'</span>
+  operacao: <span class="syn-str">'create'</span> | <span class="syn-str">'update'</span> | <span class="syn-str">'delete'</span>
+  payload: <span class="syn-type">Record</span>&lt;<span class="syn-type">string</span>, <span class="syn-type">unknown</span>&gt;
+  prioridade: <span class="syn-num">1</span> | <span class="syn-num">2</span>
+  criado_em: <span class="syn-type">string</span>
+}
+</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 5 — Camada de Aplicação (Use Cases & Hooks Customizados)
+             ============================================================ -->
+        <div class="slide" id="slide-4">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                  <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Camada de Aplicação & Hooks Reativos</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="topic-row">
+
+              <!-- Detalhamento de Negócio -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                      <polyline points="2 17 12 22 22 17"/>
+                      <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Casos de Uso Customizados e Reativos</span>
+                </div>
+                <p class="topic-card-text">
+                  A camada de **Aplicação** orquestra o fluxo de dados, implementando os Casos de Uso pedagógicos em hooks reativos customizados. O hook `useAlunos` extrai do banco local aplicando filtros e buscas de forma isolada, enquanto o `useSync` gerencia a drenagem em lote e o tratamento de re-tentativa transparente na fila transacional.
+                </p>
+              </div>
+
+              <!-- Reatividade sem Polling -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Controle Reativo Local com useLiveQuery</span>
+                </div>
+                <p class="topic-card-text">
+                  Substituímos técnicas ultrapassadas de consulta periódica (*polling* por intervalos) pela reatividade nativa do `useLiveQuery` da biblioteca `dexie-react-hooks`. A interface assina as tabelas do IndexedDB e re-renderiza componentes de forma instantânea quando ocorre persistência local ou sincronizações automáticas em segundo plano.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
+            <div class="evidence-section">
+              <span class="evidence-label">Evidência Prática (Escrita de Serviço & Leitura de Hook Customizado)</span>
+              <div class="code-cards-grid">
+                
+                <!-- Local Service (Writing) -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Serviço de Persistência Local (Escrita)</span>
+                    <span class="code-card-path">frontend/lib/services/alunoLocalService.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">export async function</span> <span class="syn-fn">salvarAlunoLocal</span>(
+  dados: <span class="syn-type">Omit</span>&lt;<span class="syn-type">AlunoLocal</span>, <span class="syn-str">'id'</span> | <span class="syn-str">'sync_status'</span> | <span class="syn-str">'updated_at'</span>&gt;
+): <span class="syn-type">Promise</span>&lt;<span class="syn-type">number</span>&gt; {
+  <span class="syn-key">const</span> agora = <span class="syn-key">new</span> <span class="syn-type">Date</span>().<span class="syn-fn">toISOString</span>()
+
+  <span class="syn-cmt">// Persiste no IndexedDB local com status pendente</span>
+  <span class="syn-key">const</span> id = <span class="syn-key">await</span> db.alunos.<span class="syn-fn">add</span>({
+    ...dados,
+    sync_status: <span class="syn-str">'pending'</span>,
+    updated_at: agora,
+  })
+
+  <span class="syn-cmt">// Enfileira o sync (aplica prioridade 2 para Alunos)</span>
+  <span class="syn-key">await</span> <span class="syn-fn">enqueue</span>(<span class="syn-str">'aluno'</span>, <span class="syn-str">'create'</span>, { ...dados, local_id: id })
+
+  <span class="syn-key">return</span> id <span class="syn-key">as</span> <span class="syn-type">number</span>
+}
+</pre>
+                  </div>
+                </div>
+
+                <!-- Custom Hook (Reading) -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Hook Customizado Reativo (Leitura)</span>
+                    <span class="code-card-path">frontend/hooks/useAlunos.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">export function</span> <span class="syn-fn">useAlunos</span>(
+  filtroStatus?: <span class="syn-str">'ativo'</span> | <span class="syn-str">'arquivado'</span>,
+  filtroBusca?: <span class="syn-type">string</span>
+) {
+  <span class="syn-cmt">// useLiveQuery reage imediatamente a alterações no DB</span>
+  <span class="syn-key">const</span> alunos = <span class="syn-fn">useLiveQuery</span>(
+    () => filtroStatus
+        ? db.alunos.<span class="syn-fn">where</span>(<span class="syn-str">'status'</span>).<span class="syn-fn">equals</span>(filtroStatus).<span class="syn-fn">toArray</span>()
+        : db.alunos.<span class="syn-fn">toArray</span>(),
+    [filtroStatus]
+  )
+
+  <span class="syn-key">const</span> filtrados = <span class="syn-fn">useMemo</span>(() => {
+    <span class="syn-key">if</span> (!alunos) <span class="syn-key">return</span> []
+    <span class="syn-key">return</span> alunos.<span class="syn-fn">filter</span>((a) => 
+      !filtroBusca || a.nome.<span class="syn-fn">toLowerCase</span>().<span class="syn-fn">includes</span>(filtroBusca.<span class="syn-fn">toLowerCase</span>())
+    )
+  }, [alunos, filtroBusca])
+
+  <span class="syn-key">return</span> { alunos: filtrados, loading: alunos === <span class="syn-type">undefined</span> }
+}
+</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 6 — Camada de Infraestrutura (Adaptação API & Interceptação JWT)
+             ============================================================ -->
+        <div class="slide" id="slide-5">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                  <line x1="6" y1="6" x2="6.01" y2="6"/>
+                  <line x1="6" y1="18" x2="6.01" y2="18"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Infraestrutura HTTP & Proteção LGPD</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="topic-row">
+
+              <!-- Detalhamento de Negócio -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Centralização de Rede e Barreira de Acesso</span>
+                </div>
+                <p class="topic-card-text">
+                  A camada de **Infraestrutura** implementa a interface concreta com a API backend FastAPI do Sistema AEE. Proibimos chamadas brutas de `fetch` nas views, direcionando todo o tráfego pelo `apiClient` encapsulado, o que centraliza a injeção do token JWT Bearer e o controle de segurança global.
+                </p>
+              </div>
+
+              <!-- Interceptação de Sessão Expirada -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Intercepção Crítica 401 e Auditoria PG</span>
+                </div>
+                <p class="topic-card-text">
+                  Para garantir total conformidade com a LGPD em máquinas públicas escolares compartilhadas, se a chamada à API falhar com **401 Unauthorized** (sessão expirada), o cliente destrói imediatamente o token local e os dados sensíveis do aluno carregados e redireciona para `/login`. A leitura de laudos é encriptada e registra logs de auditoria imutáveis no PostgreSQL.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
+            <div class="evidence-section">
+              <span class="evidence-label">Evidências de Infraestrutura: Cliente HTTP e Consulta de Auditoria (pgAdmin)</span>
+              <div class="code-cards-grid">
+                
+                <!-- apiClient Interceptor -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Interceptor 401 & JWT automatizado</span>
+                    <span class="code-card-path">frontend/lib/api/client.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-key">async function</span> <span class="syn-fn">request</span>&lt;<span class="syn-type">T</span>&gt;(path: <span class="syn-type">string</span>, options: <span class="syn-type">RequestInit</span> = {}): <span class="syn-type">Promise</span>&lt;<span class="syn-type">T</span>&gt; {
+  <span class="syn-key">const</span> token = localStorage.<span class="syn-fn">getItem</span>(<span class="syn-str">'aee_token'</span>)
+  <span class="syn-key">const</span> res = <span class="syn-key">await</span> <span class="syn-fn">fetch</span>(<span class="syn-str">`<span class="syn-punc">${</span>API_BASE<span class="syn-punc">}</span><span class="syn-punc">${</span>path<span class="syn-punc">}</span>`</span>, {
+    ...options,
+    headers: {
+      <span class="syn-str">'Content-Type'</span>: <span class="syn-str">'application/json'</span>,
+      ...(token ? { <span class="syn-str">'Authorization'</span>: <span class="syn-str">`Bearer <span class="syn-punc">${</span>token<span class="syn-punc">}</span>`</span> } : {}),
+      ...options.headers,
+    },
+  })
+
+  <span class="syn-cmt">// Expiração de Sessão: limpa credenciais imediatamente</span>
+  <span class="syn-key">if</span> (res.status === <span class="syn-num">401</span>) {
+    localStorage.<span class="syn-fn">removeItem</span>(<span class="syn-str">'aee_token'</span>)
+    window.location.href = <span class="syn-str">'/login'</span>
+    <span class="syn-key">throw new</span> <span class="syn-type">ApiError</span>(<span class="syn-num">401</span>, <span class="syn-str">'Sessão expirada.'</span>)
+  }
+  <span class="syn-key">if</span> (!res.ok) <span class="syn-key">throw new</span> <span class="syn-type">ApiError</span>(res.status, <span class="syn-str">'Erro na API'</span>)
+  <span class="syn-key">return</span> res.<span class="syn-fn">json</span>()
+}
+</pre>
+                  </div>
+                </div>
+
+                <!-- Postgres Audit SQL Query -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Consulta de Auditoria LGPD no Banco</span>
+                    <span class="code-card-path"> pgAdmin / Queries de Controle</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-cmt">-- Query rodada em produção para fiscalizar acessos sensíveis</span>
+<span class="syn-key">SELECT</span> 
+  user_id, 
+  student_id, 
+  field_accessed, 
+  accessed_at 
+<span class="syn-key">FROM</span> 
+  audit_log 
+<span class="syn-key">ORDER BY</span> 
+  accessed_at <span class="syn-key">DESC</span>;
+
+<span class="syn-cmt">/* 
+  Resultado registra:
+  - ID do usuário (quem consultou)
+  - ID do aluno consultado
+  - Campo sensível lido ('diagnostico' ou 'laudo')
+  - Timestamp milimétrico de acesso
+*/</span>
+</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 7 — Garantia de Qualidade e Testes BDD
+             ============================================================ -->
+        <div class="slide" id="slide-6">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Garantia de Qualidade & Testes BDD</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="topic-row">
+
+              <!-- Detalhamento de Negócio -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Especificação de Testes no Padrão BDD</span>
+                </div>
+                <p class="topic-card-text">
+                  A robustez das operações de sincronização offline e persistência local é assegurada por testes unitários e de integração escritos no **Vitest** sob as diretrizes rigorosas do padrão **BDD (Given / When / Then)**. Isso assegura que novas atualizações não gerem quebras ou regressões nas regras transacionais.
+                </p>
+              </div>
+
+              <!-- Isolamento do IndexedDB nos Testes -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+                      <rect x="9" y="9" width="6" height="6"/>
+                      <line x1="9" y1="1" x2="9" y2="4"/>
+                      <line x1="15" y1="1" x2="15" y2="4"/>
+                      <line x1="9" y1="20" x2="9" y2="23"/>
+                      <line x1="15" y1="20" x2="15" y2="23"/>
+                      <line x1="20" y1="9" x2="23" y2="9"/>
+                      <line x1="20" y1="15" x2="23" y2="15"/>
+                      <line x1="1" y1="9" x2="4" y2="9"/>
+                      <line x1="1" y1="15" x2="4" y2="15"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Mocking Estruturado e Isolamento de Loop</span>
+                </div>
+                <p class="topic-card-text">
+                  O hook assíncrono `useLiveQuery` depende do IndexedDB real e de transações assíncronas do browser. Para simplificar a execução e isolar a fila de sincronização pedagógica local nos testes, mockamos o `useLiveQuery` de forma **síncrona** nos arquivos de especificação técnica, permitindo asserções instantâneas.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- EVIDENCE SECTION AT THE BOTTOM (Exemplos Embaixo) -->
+            <div class="evidence-section">
+              <span class="evidence-label">Evidências de Teste Unitário Automatizado (Vitest BDD)</span>
+              <div class="code-cards-grid">
+                
+                <!-- Hook Filter Test -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Especificação de Teste do Hook useAlunos</span>
+                    <span class="code-card-path">frontend/hooks/__tests__/useAlunos.test.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-fn">describe</span>(<span class="syn-str">'useAlunos'</span>, () => {
+  <span class="syn-fn">it</span>(<span class="syn-str">'deve filtrar por busca de nome no hook (não no componente)'</span>, <span class="syn-key">async</span> () => {
+    <span class="syn-cmt">// Given: mock com dois alunos carregados em IndexedDB</span>
+    <span class="syn-key">const</span> alunos = [
+      <span class="syn-fn">makeAluno</span>({ nome: <span class="syn-str">'Ana Silva'</span> }),
+      <span class="syn-fn">makeAluno</span>({ id: <span class="syn-num">2</span>, nome: <span class="syn-str">'Pedro Lima'</span> }),
+    ]
+    mockToArray.<span class="syn-fn">mockReturnValue</span>(alunos)
+
+    <span class="syn-cmt">// When: renderHook com busca 'Ana'</span>
+    <span class="syn-key">const</span> { useAlunos } = <span class="syn-key">await</span> <span class="syn-imp">import</span>(<span class="syn-str">'@/hooks/useAlunos'</span>)
+    <span class="syn-key">const</span> { result } = <span class="syn-fn">renderHook</span>(() => <span class="syn-fn">useAlunos</span>(<span class="syn-type">undefined</span>, <span class="syn-str">'Ana'</span>))
+
+    <span class="syn-cmt">// Then: Apenas Ana retornada</span>
+    <span class="syn-fn">expect</span>(result.current.alunos).<span class="syn-fn">toHaveLength</span>(<span class="syn-num">1</span>)
+    <span class="syn-fn">expect</span>(result.current.alunos[<span class="syn-num">0</span>].nome).<span class="syn-fn">toBe</span>(<span class="syn-str">'Ana Silva'</span>)
+  })
+})
+</pre>
+                  </div>
+                </div>
+
+                <!-- Persistence and Sync Queue Test -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Especificação de Persistência & Sync Queue</span>
+                    <span class="code-card-path">frontend/hooks/__tests__/useAlunos.test.ts</span>
+                  </div>
+                  <div class="code-card-body">
+<pre>
+<span class="syn-fn">describe</span>(<span class="syn-str">'salvarAlunoLocal'</span>, () => {
+  <span class="syn-fn">it</span>(<span class="syn-str">'deve salvar aluno localmente e enfileirar sync com prioridade correta'</span>, <span class="syn-key">async</span> () => {
+    <span class="syn-cmt">// Given: Dados estruturados de um aluno</span>
+    <span class="syn-key">const</span> dadosAluno = {
+      nome: <span class="syn-str">'Beatriz Santos'</span>,
+      escola_atual: <span class="syn-str">'EMEF Flores'</span>,
+      status: <span class="syn-str">'ativo'</span> <span class="syn-key">as const</span>,
+    }
+
+    <span class="syn-cmt">// When: Salva o registro</span>
+    <span class="syn-key">const</span> { salvarAlunoLocal } = <span class="syn-key">await</span> <span class="syn-imp">import</span>(<span class="syn-str">'@/lib/services/alunoLocalService'</span>)
+    <span class="syn-key">const</span> id = <span class="syn-key">await</span> <span class="syn-fn">salvarAlunoLocal</span>(dadosAluno)
+
+    <span class="syn-cmt">// Then: Salvo localmente em IndexedDB</span>
+    <span class="syn-fn">expect</span>(mockAdd).<span class="syn-fn">toHaveBeenCalledWith</span>(
+      expect.<span class="syn-fn">objectContaining</span>({ nome: <span class="syn-str">'Beatriz Santos'</span>, sync_status: <span class="syn-str">'pending'</span> })
+    )
+    <span class="syn-cmt">// Then: Enfileirado para sync com prioridade 2</span>
+    <span class="syn-fn">expect</span>(mockEnqueue).<span class="syn-fn">toHaveBeenCalledWith</span>(<span class="syn-str">'aluno'</span>, <span class="syn-str">'create'</span>, expect.<span class="syn-type">any</span>(Object))
+  })
+})
+</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ============================================================
+             SLIDE 8 — Conclusão & Próximos Passos
+             ============================================================ -->
+        <div class="slide" id="slide-7">
+          <div class="slide-content">
+
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <h2 class="slide-title">Conclusão & Próximos Passos</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <div class="topic-row">
+
+              <!-- Conclusões -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Ganhos de Engenharia</span>
+                </div>
+                <div class="topic-card-text">
+                  A arquitetura clean implementada no frontend do **Sistema AEE** prova a plena viabilidade de conciliar **independência total de rede (offline-first)** com **privacidade rígida exigida por lei (LGPD)**, gerando um ecossistema seguro e tolerante a falhas nas escolas públicas.
+                </div>
+              </div>
+
+              <!-- Próximos Passos -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Próximos Passos e Melhorias</span>
+                </div>
+                <div class="topic-card-text">
+                  Como roadmap futuro, focamos em implementar pré-cacheamento estático completo com Service Workers (Assets caching), telas dedicadas para resolução visual manual de conflitos de edição e painéis de conformidade para auditoria em conformidade total.
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Detailed structural roadmap table -->
+            <div class="topic-row">
+              <div class="topic-card full-width" style="padding: 10px 18px;">
+                <span class="topic-card-title" style="margin-bottom: 6px; display:block;">Cronograma de Evolução Técnica do Roadmap</span>
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left;">
+                  <thead>
+                    <tr style="background: var(--surface-variant); border-bottom: 1px solid var(--outline-variant);">
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Fase de Evolução</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Meta Principal</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Componentes Impactados</th>
+                      <th style="padding: 6px 10px; font-weight:800; color:var(--primary); font-size:0.75rem;">Critério de Sucesso</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Fase 1 — Cache de Ativos</td>
+                      <td style="padding: 6px 10px;">Service Worker Caching completo</td>
+                      <td style="padding: 6px 10px; color:var(--aee-neutral);">`public/`, Service Workers APIs</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">Carregamento inicial completo offline</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--outline-variant);">
+                      <td style="padding: 6px 10px; font-weight:700;">Fase 2 — Resolução Visual</td>
+                      <td style="padding: 6px 10px;">Painel de Fusão Visual de Conflitos (LWW)</td>
+                      <td style="padding: 6px 10px; color:var(--aee-neutral);">`components/ui/sync/`, `lib/db.ts`</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">Zero sobreposição cega de relatórios</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 10px; font-weight:700;">Fase 3 — Analítico LGPD</td>
+                      <td style="padding: 6px 10px;">Painel de Auditoria Visual de Histórico</td>
+                      <td style="padding: 6px 10px; color:var(--aee-neutral);">`app/admin/auditoria/`, database audit log</td>
+                      <td style="padding: 6px 10px; color:var(--tertiary);">Relatórios em PDF assinados para DPO</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============================================================
+           NAVIGATION CONTROLS — Bottom Bar
+           ============================================================ -->
+      <footer class="nav-bar">
+        
+        <div class="nav-hint">
+          <span>Navegue usando as setas do teclado</span>
+          <span class="kbd">←</span>
+          <span class="kbd">→</span>
+          <span>ou</span>
+          <span class="kbd">Espaço</span>
+        </div>
+
+        <div class="nav-buttons">
+          <button class="nav-btn btn-prev" id="btnPrev" onclick="prevSlide()" disabled>
+            <span class="arrow">←</span> Anterior
+          </button>
+          
+          <button class="nav-btn btn-next" id="btnNext" onclick="nextSlide()">
+            Próximo <span class="arrow">→</span>
+          </button>
+        </div>
+
+      </footer>
+
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       APPLICATION LOGIC — Slide Management and Smooth Transitions
+       ============================================================ -->
+  <script>
+    // State variables
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const navItems = document.querySelectorAll('.nav-item');
+    const progressFill = document.getElementById('progressFill');
+    const currentSlideNum = document.getElementById('currentSlideNum');
+    
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    /**
+     * Navigates to a specific slide by index, orchestrating active states and exit directions.
+     */
+    function goToSlide(index) {
+      if (index < 0 || index >= totalSlides || index === currentSlide) return;
+
+      const previousSlide = currentSlide;
+      currentSlide = index;
+
+      // Update slide classes for smooth sliding animations
+      slides.forEach((slide, idx) => {
+        slide.classList.remove('active', 'exit-left');
+
+        if (idx === currentSlide) {
+          slide.classList.add('active');
+        } else if (idx < currentSlide) {
+          slide.classList.add('exit-left');
+        }
+      });
+
+      // Update active navigation item in the sidebar
+      navItems.forEach((item, idx) => {
+        if (idx === currentSlide) {
+          item.classList.add('active');
+          // Smoothly scroll the active item into view within the sidebar if it overflows
+          item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Update Progress and Counter
+      const progressPercent = (currentSlide / (totalSlides - 1)) * 100;
+      progressFill.style.width = `${progressPercent}%`;
+      currentSlideNum.textContent = currentSlide + 1;
+
+      // Update Button Disabled States
+      btnPrev.disabled = currentSlide === 0;
+      
+      if (currentSlide === totalSlides - 1) {
+        btnNext.innerHTML = 'Fim <span class="arrow">✓</span>';
+        btnNext.disabled = true;
+      } else {
+        btnNext.innerHTML = 'Próximo <span class="arrow">→</span>';
+        btnNext.disabled = false;
+      }
+    }
+
+    // Navigation triggers
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        goToSlide(currentSlide + 1);
+      }
+    }
+
+    // Previous slide trigger
+    function prevSlide() {
+      if (currentSlide > 0) {
+        goToSlide(currentSlide - 1);
+      }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (event) => {
+      // 39 is ArrowRight, 32 is Spacebar
+      if (event.keyCode === 39 || event.keyCode === 32) {
+        // Prevent default spacebar page scrolling
+        if (event.keyCode === 32) event.preventDefault();
+        nextSlide();
+      } 
+      // 37 is ArrowLeft
+      else if (event.keyCode === 37) {
+        prevSlide();
+      }
+    });
+
+    // Initialize display values on boot
+    window.addEventListener('DOMContentLoaded', () => {
+      const progressPercent = (currentSlide / (totalSlides - 1)) * 100;
+      progressFill.style.width = `${progressPercent}%`;
+      currentSlideNum.textContent = currentSlide + 1;
+    });
+  </script>
+
+</body>
+
+</html>

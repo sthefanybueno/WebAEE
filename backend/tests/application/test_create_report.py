@@ -10,11 +10,9 @@ from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 from app.domain.exceptions import PermissaoInsuficienteError
+from tests.application.conftest import MockUnitOfWork
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
+
 
 
 
@@ -79,7 +77,7 @@ async def test_create_report_success(
     repo_template.templates[TipoRelatorio.AEE] = template
 
     use_case = CreateReportUseCase(
-        session=MockAsyncSession(),
+        uow=MockUnitOfWork(),
         report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
     )
     input_dto = CreateReportInput(
@@ -121,7 +119,7 @@ async def test_create_report_invalid_role(
     )
 
     use_case = CreateReportUseCase(
-        session=MockAsyncSession(),
+        uow=MockUnitOfWork(),
         report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
     )
     input_dto = CreateReportInput(

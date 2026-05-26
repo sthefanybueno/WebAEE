@@ -19,21 +19,21 @@ from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student, StatusAluno
 from unittest.mock import AsyncMock, MagicMock
 from app.domain.exceptions import (
-    RelatorioNaoEncontradoError, 
+    RelatorioNaoEncontradoError,
     PermissaoInsuficienteError,
     AlunoNaoEncontradoError,
     AlunoSemEscolaError,
     VinculoDuplicadoError
 )
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
-class MockAsyncSession:
-    def begin(self):
-        return self
-    async def __aenter__(self):
-        return self
-    async def __aexit__(self, t, v, tb):
-        pass
 
+class MockUnitOfWork(AbstractUnitOfWork):
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[None]:
+        yield
 
 
 # ──────────────────────────────────────────────
@@ -101,7 +101,7 @@ class MockAssignmentRepository:
 @pytest.mark.asyncio
 async def test_create_school_sucesso() -> None:
     repo = MockSchoolRepository()
-    use_case = CreateSchoolUseCase(session=MockAsyncSession(), school_repo=repo)
+    use_case = CreateSchoolUseCase(uow=MockUnitOfWork(), school_repo=repo)
     tenant_id = uuid.uuid4()
     inp = CreateSchoolInput(tenant_id=tenant_id, nome="Escola Nova")
     school = await use_case.execute(inp)
@@ -117,7 +117,7 @@ async def test_create_school_sucesso() -> None:
 @pytest.mark.asyncio
 async def test_list_schools_vazio() -> None:
     repo = MockSchoolRepository()
-    use_case = ListSchoolsUseCase(session=MockAsyncSession(), school_repo=repo)
+    use_case = ListSchoolsUseCase(uow=MockUnitOfWork(), school_repo=repo)
     result = await use_case.execute(uuid.uuid4())
     assert result == []
 
@@ -129,7 +129,7 @@ async def test_list_schools_filtra_por_tenant() -> None:
     tenant_b = uuid.uuid4()
     await repo.save(School(tenant_id=tenant_a, nome="Escola A"))
     await repo.save(School(tenant_id=tenant_b, nome="Escola B"))
-    use_case = ListSchoolsUseCase(session=MockAsyncSession(), school_repo=repo)
+    use_case = ListSchoolsUseCase(uow=MockUnitOfWork(), school_repo=repo)
     result = await use_case.execute(tenant_a)
     assert len(result) == 1
     assert result[0].nome == "Escola A"
@@ -142,7 +142,7 @@ async def test_list_schools_filtra_por_tenant() -> None:
 @pytest.mark.asyncio
 async def test_add_comment_requer_coordenacao() -> None:
     repo = MockReportRepository()
-    use_case = AddCommentUseCase(session=MockAsyncSession(), report_repo=repo)
+    use_case = AddCommentUseCase(uow=MockUnitOfWork(), report_repo=repo)
     inp = AddCommentInput(
         report_id=uuid.uuid4(),
         autor_id=uuid.uuid4(),
@@ -156,7 +156,7 @@ async def test_add_comment_requer_coordenacao() -> None:
 @pytest.mark.asyncio
 async def test_add_comment_report_nao_encontrado() -> None:
     repo = MockReportRepository(report=None)
-    use_case = AddCommentUseCase(session=MockAsyncSession(), report_repo=repo)
+    use_case = AddCommentUseCase(uow=MockUnitOfWork(), report_repo=repo)
     inp = AddCommentInput(
         report_id=uuid.uuid4(),
         autor_id=uuid.uuid4(),
@@ -173,7 +173,7 @@ async def test_add_comment_sucesso() -> None:
     autor_id = uuid.uuid4()
     report = Report(tipo=TipoRelatorio.AEE, aluno_id=aluno_id, autor_id=autor_id, conteudo_json=None)
     repo = MockReportRepository(report=report)
-    use_case = AddCommentUseCase(session=MockAsyncSession(), report_repo=repo)
+    use_case = AddCommentUseCase(uow=MockUnitOfWork(), report_repo=repo)
     inp = AddCommentInput(
         report_id=report.id,
         autor_id=autor_id,
@@ -198,7 +198,7 @@ async def test_add_comment_append_em_json_existente() -> None:
         conteudo_json={"comentarios": [{"texto": "primeiro", "autor_id": str(autor_id), "created_at": "2024-01-01"}]},
     )
     repo = MockReportRepository(report=report)
-    use_case = AddCommentUseCase(session=MockAsyncSession(), report_repo=repo)
+    use_case = AddCommentUseCase(uow=MockUnitOfWork(), report_repo=repo)
     inp = AddCommentInput(
         report_id=report.id,
         autor_id=autor_id,
@@ -228,7 +228,7 @@ async def test_assign_aluno_nao_encontrado() -> None:
     student_repo = MockStudentRepository(student=None)
     assignment_repo = MockAssignmentRepository()
     use_case = AssignProfessorUseCase(
-        session=MockAsyncSession(), student_repo=student_repo, assignment_repo=assignment_repo
+        uow=MockUnitOfWork(), student_repo=student_repo, assignment_repo=assignment_repo
     )
     inp = AssignProfessorInput(
         tenant_id=uuid.uuid4(),
@@ -248,7 +248,7 @@ async def test_assign_aluno_outro_tenant() -> None:
     student_repo = MockStudentRepository(student=student)
     assignment_repo = MockAssignmentRepository()
     use_case = AssignProfessorUseCase(
-        session=MockAsyncSession(), student_repo=student_repo, assignment_repo=assignment_repo
+        uow=MockUnitOfWork(), student_repo=student_repo, assignment_repo=assignment_repo
     )
     inp = AssignProfessorInput(
         tenant_id=tenant_id,
@@ -267,7 +267,7 @@ async def test_assign_aluno_sem_escola() -> None:
     student_repo = MockStudentRepository(student=student)
     assignment_repo = MockAssignmentRepository()
     use_case = AssignProfessorUseCase(
-        session=MockAsyncSession(), student_repo=student_repo, assignment_repo=assignment_repo
+        uow=MockUnitOfWork(), student_repo=student_repo, assignment_repo=assignment_repo
     )
     inp = AssignProfessorInput(
         tenant_id=tenant_id,
@@ -295,7 +295,7 @@ async def test_assign_vinculo_duplicado() -> None:
     student_repo = MockStudentRepository(student=student)
     assignment_repo = MockAssignmentRepository(assignments=[existing])
     use_case = AssignProfessorUseCase(
-        session=MockAsyncSession(), student_repo=student_repo, assignment_repo=assignment_repo
+        uow=MockUnitOfWork(), student_repo=student_repo, assignment_repo=assignment_repo
     )
     inp = AssignProfessorInput(
         tenant_id=tenant_id,
@@ -315,7 +315,7 @@ async def test_assign_sucesso() -> None:
     student_repo = MockStudentRepository(student=student)
     assignment_repo = MockAssignmentRepository()
     use_case = AssignProfessorUseCase(
-        session=MockAsyncSession(), student_repo=student_repo, assignment_repo=assignment_repo
+        uow=MockUnitOfWork(), student_repo=student_repo, assignment_repo=assignment_repo
     )
     inp = AssignProfessorInput(
         tenant_id=tenant_id,

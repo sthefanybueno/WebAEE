@@ -3,8 +3,11 @@ Use Case: Criar Aluno
 =====================
 Orquestra o cadastro de novos alunos com conformidade LGPD.
 
-Mudança DDD (v2): usa exceções de domínio e chama métodos da entidade rica
-em vez de manipular campos diretamente.
+[DDD v2] Chama entidade.registrar_consentimento_lgpd() em vez de
+atribuir campos diretamente — a regra reside na entidade.
+
+[Clean Architecture v3] Usa AbstractUnitOfWork em vez de AsyncSession —
+o Use Case é agora totalmente agnóstico de banco de dados.
 """
 
 import uuid
@@ -12,8 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.school_repository import SchoolRepository
 from app.application.ports.student_repository import StudentRepository
 from app.domain.exceptions import (
@@ -25,10 +27,7 @@ from app.domain.models import StatusAluno, Student
 
 
 def _to_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
-    """Converte datetime timezone-aware para naive UTC (sem tzinfo).
-    O PostgreSQL armazena TIMESTAMP (sem timezone) e o asyncpg rejeita
-    datetimes offset-aware. Todos os campos de data entram por aqui.
-    """
+    """Converte datetime timezone-aware para naive UTC."""
     if dt is None:
         return None
     if dt.tzinfo is not None:
@@ -49,29 +48,21 @@ class CreateStudentInput:
 
 
 class CreateStudentUseCase:
-    """Caso de uso para matrícula de novos alunos com conformidade LGPD.
-
-    Este processo exige o consentimento explícito (consentimento_lgpd=True)
-    para processamento de dados sensíveis (diagnóstico/laudo) e valida
-    se a escola de destino pertence ao mesmo tenant do executor.
-
-    [DDD v2] Chama entidade.registrar_consentimento_lgpd() em vez de
-    atribuir campos diretamente — a regra reside na entidade.
-    """
+    """Caso de uso para matrícula de novos alunos com conformidade LGPD."""
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         student_repo: StudentRepository,
         school_repo: SchoolRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.student_repo = student_repo
         self.school_repo = school_repo
 
     async def execute(self, input_dto: CreateStudentInput) -> Student:
         """Executa a criação do aluno dentro de uma transação."""
-        async with self.session.begin():
+        async with self.uow.transaction():
             # Regra de negócio 1: consentimento é obrigatório
             if not input_dto.consentimento_lgpd:
                 raise ConsentimentoLGPDAusenteError()

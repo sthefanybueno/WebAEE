@@ -9,11 +9,9 @@ from app.application.use_cases.reports.sync_report import (
 )
 from app.domain.exceptions import ConflitoSincronizacaoError
 from app.domain.entities.report import Report, TipoRelatorio
+from tests.application.conftest import MockUnitOfWork
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
+
 
 
 
@@ -69,7 +67,7 @@ async def test_sync_report_success(repo_report: MockReportRepository, repo_stude
     )
     repo_report.reports[report_id] = report
 
-    use_case = SyncReportUseCase(session=MockAsyncSession(), report_repo=repo_report, student_repo=repo_student)
+    use_case = SyncReportUseCase(uow=MockUnitOfWork(), report_repo=repo_report, student_repo=repo_student)
     input_dto = SyncReportInput(
         id=report_id,
         tipo=TipoRelatorio.AEE,
@@ -107,7 +105,7 @@ async def test_sync_report_conflict(repo_report: MockReportRepository, repo_stud
     )
     repo_report.reports[report_id] = report
 
-    use_case = SyncReportUseCase(session=MockAsyncSession(), report_repo=repo_report, student_repo=repo_student)
+    use_case = SyncReportUseCase(uow=MockUnitOfWork(), report_repo=repo_report, student_repo=repo_student)
     
     # Cliente envia payload baseado em um timestamp antigo (now)
     input_dto = SyncReportInput(

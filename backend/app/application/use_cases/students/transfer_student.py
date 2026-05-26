@@ -3,17 +3,15 @@ Use Case: Transferir Aluno
 ==========================
 Orquestra a transferência de escola de um aluno (operação atômica).
 
-Mudança DDD (v2): usa exceções de domínio e chama métodos ricos
-(student.transferir_para, assignment.revogar) em vez de manipular
-campos diretamente.
+[DDD v2] Usa exceções de domínio e chama métodos ricos.
+[Clean Architecture v3] Usa AbstractUnitOfWork em vez de AsyncSession.
 """
 
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.professor_assignment_repository import (
     ProfessorAssignmentRepository,
 )
@@ -40,38 +38,25 @@ class TransferStudentInput:
 
 
 class TransferStudentUseCase:
-    """Caso de uso para transferência de escola de um aluno.
-
-    Esta operação é complexa pois envolve:
-    1. Vinculação do aluno a uma nova escola.
-    2. Revogação automática de todos os acessos (vínculos) de professores da escola anterior.
-    3. Registro de histórico de transferências para rastreabilidade pedagógica.
-
-    [DDD v2] Delega para métodos ricos das entidades:
-    - student.transferir_para() — encapsula mudança de escola + auditoria
-    - assignment.revogar() — encapsula encerramento de vínculo com data_fim
-    """
+    """Caso de uso para transferência de escola de um aluno."""
 
     def __init__(
         self,
-        session: AsyncSession,
+        uow: AbstractUnitOfWork,
         student_repo: StudentRepository,
         school_repo: SchoolRepository,
         assignment_repo: ProfessorAssignmentRepository,
         history_repo: StudentSchoolHistoryRepository,
     ) -> None:
-        self.session = session
+        self.uow = uow
         self.student_repo = student_repo
         self.school_repo = school_repo
         self.assignment_repo = assignment_repo
         self.history_repo = history_repo
 
     async def execute(self, input_dto: TransferStudentInput) -> Student:
-        """Executa a transferência do aluno entre escolas do mesmo tenant.
-
-        Esta operação é executada dentro de uma transação atômica.
-        """
-        async with self.session.begin():
+        """Executa a transferência do aluno entre escolas do mesmo tenant."""
+        async with self.uow.transaction():
             student = await self.student_repo.get_by_id(input_dto.student_id)
             if student is None:
                 raise AlunoNaoEncontradoError(input_dto.student_id)
@@ -93,7 +78,7 @@ class TransferStudentUseCase:
                 assignment.revogar(now)
                 await self.assignment_repo.save(assignment)
 
-            # Transferir via método rico da entidade (valida estado + rastreabilidade)
+            # Transferir via método rico da entidade
             student.transferir_para(input_dto.nova_escola_id, input_dto.user_id)
             saved_student = await self.student_repo.save(student)
 

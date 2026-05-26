@@ -10,11 +10,9 @@ from app.application.use_cases.users.accept_invite import (
 from app.domain.entities.user import User, PapelUsuario
 from app.infrastructure.security.tokens import create_invite_token
 from app.infrastructure.security.passwords import verify_password
+from tests.application.conftest import MockUnitOfWork
 
-class MockAsyncSession:
-    def begin(self): return self
-    async def __aenter__(self): return self
-    async def __aexit__(self, t, v, tb): pass
+
 
 
 class MockUserRepository:
@@ -42,7 +40,7 @@ async def test_accept_invite_success() -> None:
         ativo=False,
     )
     repo = MockUserRepository({user_id: user})
-    use_case = AcceptInviteUseCase(session=MockAsyncSession(), user_repo=repo)
+    use_case = AcceptInviteUseCase(uow=MockUnitOfWork(), user_repo=repo)
     
     token = create_invite_token(user_id)
     input_dto = AcceptInviteInput(token=token, nova_senha="SenhaForte123")
@@ -56,7 +54,7 @@ async def test_accept_invite_success() -> None:
 
 @pytest.mark.asyncio
 async def test_accept_invite_invalid_token() -> None:
-    use_case = AcceptInviteUseCase(session=MockAsyncSession(), user_repo=MockUserRepository())
+    use_case = AcceptInviteUseCase(uow=MockUnitOfWork(), user_repo=MockUserRepository())
     input_dto = AcceptInviteInput(token="token_invalido_ou_expirado", nova_senha="SenhaForte123")
     
     with pytest.raises(InvalidInviteTokenError):
@@ -68,7 +66,7 @@ async def test_accept_invite_user_not_found() -> None:
     # Token válido, mas usuário foi deletado/não existe no banco
     user_id = uuid.uuid4()
     repo = MockUserRepository({})
-    use_case = AcceptInviteUseCase(session=MockAsyncSession(), user_repo=repo)
+    use_case = AcceptInviteUseCase(uow=MockUnitOfWork(), user_repo=repo)
     
     token = create_invite_token(user_id)
     input_dto = AcceptInviteInput(token=token, nova_senha="SenhaForte123")
@@ -91,7 +89,7 @@ async def test_accept_invite_already_active() -> None:
         ativo=True,
     )
     repo = MockUserRepository({user_id: user})
-    use_case = AcceptInviteUseCase(session=MockAsyncSession(), user_repo=repo)
+    use_case = AcceptInviteUseCase(uow=MockUnitOfWork(), user_repo=repo)
     
     # Ele pega um token antigo válido e tenta usar de novo
     token = create_invite_token(user_id)

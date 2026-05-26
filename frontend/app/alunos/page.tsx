@@ -10,15 +10,12 @@ import { useAlunos } from '@/hooks/useAlunos'
 type FilterType = 'todos' | 'pendente' | 'feito'
 
 export default function AlunosPage() {
-  const { alunos, loading } = useAlunos()
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<FilterType>('todos')
 
-  const alunosFiltrados = (alunos || []).filter((a) => {
-    const matchBusca = a.nome.toLowerCase().includes(busca.toLowerCase())
-    const matchFiltro = filtro === 'todos' || (filtro === 'pendente' ? a.sync_status === 'pending' : a.sync_status !== 'pending')
-    return matchBusca && matchFiltro
-  })
+  // ✅ Toda lógica de filtro delegada ao Hook (Controller/Adapter)
+  // O componente não sabe o que significa 'pending' ou como filtrar — apenas passa parâmetros.
+  const { alunos, loading } = useAlunos(undefined, busca, filtro)
 
   return (
     <AppShell title="Gestão de Alunos">
@@ -29,7 +26,7 @@ export default function AlunosPage() {
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)' }}>Alunos</h2>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: 13, marginTop: 3 }}>
-              {loading ? 'Carregando...' : `${alunosFiltrados.length} aluno${alunosFiltrados.length !== 1 ? 's' : ''} encontrado${alunosFiltrados.length !== 1 ? 's' : ''}`}
+              {loading ? 'Carregando...' : `${alunos.length} aluno${alunos.length !== 1 ? 's' : ''} encontrado${alunos.length !== 1 ? 's' : ''}`}
             </p>
           </div>
           <Link href="/alunos/novo" className="btn-primary">
@@ -81,7 +78,7 @@ export default function AlunosPage() {
           <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
             <Loader2 size={28} color="#1A6F45" style={{ animation: 'spin 1s linear infinite' }} />
           </div>
-        ) : alunosFiltrados.length === 0 ? (
+        ) : alunos.length === 0 ? (
           <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', textAlign: 'center' }}>
             <p style={{ fontSize: 48, marginBottom: 16 }}>🔍</p>
             <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)' }}>Nenhum aluno encontrado</p>
@@ -106,7 +103,7 @@ export default function AlunosPage() {
                 </tr>
               </thead>
               <tbody>
-                {alunosFiltrados.map((aluno) => (
+                {alunos.map((aluno) => (
                   <tr key={aluno.server_id || aluno.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

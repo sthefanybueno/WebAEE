@@ -13,7 +13,7 @@ class CreateUserInput:
     nome: str
     papel: PapelUsuario
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.domain.exceptions import PermissaoInsuficienteError, DomainException
 
@@ -28,15 +28,15 @@ class CreateUserUseCase:
     possam criar novos integrantes no sistema, respeitando as regras de 
     negócio de cada papel (Admin, Coordenação, Prof. AEE).
     """
-    def __init__(self, session: AsyncSession, user_repo: UserRepository, email_service: EmailService):
-        self.session = session
+    def __init__(self, uow: AbstractUnitOfWork, user_repo: UserRepository, email_service: EmailService):
+        self.uow = uow
         self.user_repo = user_repo
         self.email_service = email_service
 
     async def execute(self, input_dto: CreateUserInput) -> User:
         """Cria um novo usuário no sistema dentro de uma transação.
         """
-        async with self.session.begin():
+        async with self.uow.transaction():
             # Regras de criação por papel (RBAC):
             # ADMIN      → pode criar qualquer papel
             # COORDENACAO → pode criar coordenacao, prof_aee, prof_apoio, prof_regente

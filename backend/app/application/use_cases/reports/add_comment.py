@@ -14,7 +14,7 @@ class AddCommentInput:
     executor_papel: PapelUsuario
     texto: str
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 class AddCommentUseCase:
     """Caso de uso para adição de comentários da coordenação em relatórios.
@@ -23,14 +23,14 @@ class AddCommentUseCase:
     conteúdo pedagógico produzido pelos professores, servindo como 
     ferramenta de feedback e supervisão.
     """
-    def __init__(self, session: AsyncSession, report_repo: ReportRepository):
-        self.session = session
+    def __init__(self, uow: AbstractUnitOfWork, report_repo: ReportRepository):
+        self.uow = uow
         self.report_repo = report_repo
 
     async def execute(self, input_dto: AddCommentInput) -> Report:
         """Adiciona um comentário ao relatório especificado dentro de uma transação.
         """
-        async with self.session.begin():
+        async with self.uow.transaction():
             if input_dto.executor_papel != PapelUsuario.COORDENACAO:
                 raise PermissaoInsuficienteError(acao="adicionar comentário", papel_requerido="COORDENACAO")
 

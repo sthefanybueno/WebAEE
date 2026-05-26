@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Optional, Dict, List
+from typing import Any, Optional, Dict, List, Union
 import os
 from sqlalchemy import Column, JSON
 from sqlalchemy.dialects.postgresql import JSONB
@@ -21,7 +21,7 @@ class ReportTemplateORM(SQLModel, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, nullable=False)
     tipo: TipoRelatorio = Field(nullable=False, index=True)
-    secoes: Optional[List[Dict[str, Any]]] = Field(
+    secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
     )
