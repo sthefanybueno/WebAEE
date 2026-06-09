@@ -18,6 +18,13 @@ from app.infrastructure.orm_models import *
 # access to the values within the .ini file in use.
 config = context.config
 
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+
 # Sobrescrever a URL se estiver em variavel de ambiente (para fallback Docker)
 database_url = os.environ.get("DATABASE_URL")
 if database_url:
