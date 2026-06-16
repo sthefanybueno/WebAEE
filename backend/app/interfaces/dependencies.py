@@ -33,8 +33,9 @@ async def get_current_user(
             papel = PapelUsuario("_".join(parts[4:]))
         else:
             # Fallback for old tokens or generic mock testing tokens
-            user_id = uuid.uuid4()
-            tenant_id = uuid.uuid4()
+            # FIXED: Utiliza UUID fixo para não quebrar referências entre requisições (ex: tenant_id)
+            user_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
+            tenant_id = uuid.UUID("22222222-2222-2222-2222-222222222222")
             papel = PapelUsuario.PROF_AEE
             
     except (ValueError, IndexError):

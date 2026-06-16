@@ -1,5 +1,5 @@
 import os
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
@@ -13,7 +13,7 @@ DATABASE_URL = os.environ.get(
 )
 
 # SQLite em memória precisa de check_same_thread=False e StaticPool
-kwargs = {}
+kwargs: dict[str, Any] = {}
 if "sqlite" in DATABASE_URL:
     kwargs["connect_args"] = {"check_same_thread": False}
     if ":memory:" in DATABASE_URL:

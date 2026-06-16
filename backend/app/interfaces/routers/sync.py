@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import select
+from sqlmodel import select, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.domain.models import Student
@@ -37,7 +37,7 @@ async def sync_pull(
     alunos_atualizados = [Student(**orm.model_dump()) for orm in result_alunos.all()]
 
     # Relatórios
-    stmt_relatorios = select(ReportORM).join(StudentORM, ReportORM.aluno_id == StudentORM.id).where(
+    stmt_relatorios = select(ReportORM).join(StudentORM, col(ReportORM.aluno_id) == col(StudentORM.id)).where(
         StudentORM.tenant_id == current_user.tenant_id,
         ReportORM.updated_at > last_sync
     )

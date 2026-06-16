@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlmodel import select, func
+from sqlmodel import select, func, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 from datetime import datetime, timezone
 
@@ -19,7 +19,7 @@ async def get_dashboard(
     session: AsyncSession = Depends(get_session)
 ):
     # Total de Alunos Ativos no tenant
-    stmt_alunos = select(func.count(StudentORM.id)).where(
+    stmt_alunos = select(func.count(col(StudentORM.id))).where(
         StudentORM.tenant_id == current_user.tenant_id,
         StudentORM.status == StatusAluno.ATIVO.value
     )
@@ -28,12 +28,12 @@ async def get_dashboard(
     # Total de Relatórios Pendentes (travado == False) no tenant
     # (Supondo que alunos pertençam ao tenant seja validado indiretamente pelo autor ou aluno)
     # Como simplificação do MVP: pegamos os relatórios do usuário ou da sua visualização
-    stmt_reports = select(func.count(ReportORM.id)).where(ReportORM.travado == False)  # noqa: E712
+    stmt_reports = select(func.count(col(ReportORM.id))).where(ReportORM.travado == False)  # noqa: E712
     total_reports = (await session.exec(stmt_reports)).one()
 
     # Total de Fotos Criadas Hoje
     hoje = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
-    stmt_fotos = select(func.count(PhotoORM.id)).where(PhotoORM.created_at >= hoje)
+    stmt_fotos = select(func.count(col(PhotoORM.id))).where(PhotoORM.created_at >= hoje)
     total_fotos = (await session.exec(stmt_fotos)).one()
 
     return DashboardResponse(

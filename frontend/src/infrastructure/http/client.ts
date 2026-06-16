@@ -20,9 +20,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 export class ApiError extends Error {
   constructor(
     public readonly statusCode: number,
-    public readonly detail: string,
+    public readonly detail: any,
   ) {
-    super(detail)
+    super(typeof detail === 'string' ? detail : JSON.stringify(detail))
     this.name = 'ApiError'
   }
 }
@@ -53,7 +53,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new ApiError(res.status, (body as { detail?: string }).detail ?? 'Erro desconhecido')
+    throw new ApiError(res.status, (body as { detail?: any }).detail ?? body ?? 'Erro desconhecido')
   }
 
   // 204 No Content não possui body

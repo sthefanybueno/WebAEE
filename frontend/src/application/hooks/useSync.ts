@@ -54,26 +54,47 @@ export function useSync() {
         const endpoint = `/api/${item.entidade}s`
         let payload = { ...item.payload } as Record<string, unknown>
 
-        // Patch automático para corrigir dados em cache (ex: Beatriz Costa) na fila
+        // Patch automático para corrigir dados em cache na fila
         if (item.entidade === 'aluno') {
-          if (!payload.escola_atual_id && payload.escola_atual) {
+          const nomeEscola = payload.escola_atual || payload.escola
+          if (!payload.escola_atual_id && nomeEscola) {
             const mapEscolaReverse: Record<string, string> = {
               'E.E. Castelo Branco': '00000000-0000-0000-0000-000000000001',
               'E.M. Flores do Campo': '00000000-0000-0000-0000-000000000002',
               'E.M. Primavera': '00000000-0000-0000-0000-000000000003'
             }
-            payload.escola_atual_id = mapEscolaReverse[payload.escola_atual as string] || '00000000-0000-0000-0000-000000000001'
+            payload.escola_atual_id = mapEscolaReverse[nomeEscola as string] || '00000000-0000-0000-0000-000000000001'
           }
           if (payload.consentimento_lgpd === undefined) {
             payload.consentimento_lgpd = true
           }
         }
 
+        // Patch automático para fotos (relacionamentos e upload)
+        if (item.entidade === 'foto') {
+          // Tenta atualizar o aluno_id caso o aluno tenha acabado de ser sincronizado
+          if (payload.aluno_id && String(payload.aluno_id).length < 32) {
+             const localAlunoId = Number(payload.aluno_id)
+             if (!isNaN(localAlunoId)) {
+               const aluno = await db.alunos.get(localAlunoId)
+               if (aluno && aluno.server_id) {
+                 payload.aluno_id = aluno.server_id
+               }
+             }
+          }
+          if (!payload.url) {
+            // TODO: Fazer upload real do blob da foto. Placeholder por enquanto.
+            payload.url = "https://placeholder.com/offline-sync.jpg"
+          }
+        }
+
+        let response: any = null
+
         if (item.operacao === 'create') {
-          await apiClient.post(endpoint, payload)
+          response = await apiClient.post(endpoint, payload)
         } else if (item.operacao === 'update') {
           const serverId = payload.server_id
-          await apiClient.put(`${endpoint}/${serverId}`, payload)
+          response = await apiClient.put(`${endpoint}/${serverId}`, payload)
         } else if (item.operacao === 'delete') {
           const serverId = payload.server_id
           await apiClient.delete(`${endpoint}/${serverId}`)
@@ -86,10 +107,12 @@ export function useSync() {
           item.entidade === 'aluno' &&
           (item.payload as { local_id?: number }).local_id
         ) {
-          await db.alunos.update(
-            (item.payload as { local_id: number }).local_id,
-            { sync_status: 'synced' },
-          )
+          const localId = (item.payload as { local_id: number }).local_id
+          const updateData: any = { sync_status: 'synced' }
+          if (response && response.id) {
+            updateData.server_id = response.id
+          }
+          await db.alunos.update(localId, updateData)
         }
       } catch (err) {
         if (err instanceof ApiError) {
@@ -101,8 +124,9 @@ export function useSync() {
           }
 
           // Erro de servidor (4xx/5xx): mantÃ©m na fila para prÃ³xima tentativa
+          const detailStr = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail)
           console.warn(
-            `[Sync] Falha no item ${item.id} (HTTP ${err.statusCode}): ${err.detail}. SerÃ¡ retentado.`,
+            `[Sync] Falha no item ${item.id} (HTTP ${err.statusCode}): ${detailStr}. SerÃ¡ retentado.`,
           )
         } else {
           // Erro de rede inesperado (offline, timeout, etc.)

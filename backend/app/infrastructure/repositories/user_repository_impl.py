@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from sqlmodel import select, func
+from sqlmodel import select, func, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.ports.user_repository import UserRepository
@@ -43,7 +43,7 @@ class SQLModelUserRepository(UserRepository):
     ) -> tuple[list[User], int]:
         statement = select(UserORM).where(UserORM.tenant_id == tenant_id)
         if nome:
-            statement = statement.where(UserORM.nome.ilike(f"%{nome}%"))
+            statement = statement.where(col(UserORM.nome).ilike(f"%{nome}%"))
         if papel:
             statement = statement.where(UserORM.papel == papel)
             
