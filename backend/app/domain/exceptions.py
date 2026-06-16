@@ -11,12 +11,17 @@ Hierarquia:
     ├── AlunoNaoEncontradoError        (404)
     ├── UsuarioNaoEncontradoError      (404)
     ├── EscolaNaoEncontradaError       (404)
+    ├── RelatorioNaoEncontradoError    (404)
     ├── TenantMismatchError            (403)
-    ├── ConsentimentoLGPDAusenteError  (422)
+    ├── PermissaoInsuficienteError     (403)
     ├── AlunoJaArquivadoError          (409)
     ├── RelatorioTravadoError          (409)
+    ├── AlunoSemEscolaError            (409)
+    ├── VinculoDuplicadoError          (409)
+    ├── ConflitoSincronizacaoError     (409)
+    ├── ConsentimentoLGPDAusenteError  (422)
     ├── JustificativaInsuficienteError (422)
-    └── PermissaoInsuficienteError     (403)
+    └── EmailJaEmUsoError              (409)
 """
 
 from __future__ import annotations
@@ -160,3 +165,14 @@ class JustificativaInsuficienteError(DomainException):
         super().__init__(
             f"A justificativa para acesso a dados sensíveis deve ter no mínimo {minimo} caracteres (LGPD art. 37)."
         )
+
+
+class EmailJaEmUsoError(DomainException):
+    """E-mail já cadastrado no sistema — duplicidade não é permitida.
+
+    Movido para o Domínio (Correção #2): exceções de regras de negócio
+    devem viver em domain/exceptions.py, não em Use Cases.
+    """
+
+    def __init__(self, email: str) -> None:
+        super().__init__(f"O e-mail '{email}' já está em uso por outro usuário.")

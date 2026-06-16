@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -52,14 +52,30 @@ export function useSync() {
     for (const item of items) {
       try {
         const endpoint = `/api/${item.entidade}s`
+        let payload = { ...item.payload } as Record<string, unknown>
+
+        // Patch automático para corrigir dados em cache (ex: Beatriz Costa) na fila
+        if (item.entidade === 'aluno') {
+          if (!payload.escola_atual_id && payload.escola_atual) {
+            const mapEscolaReverse: Record<string, string> = {
+              'E.E. Castelo Branco': '00000000-0000-0000-0000-000000000001',
+              'E.M. Flores do Campo': '00000000-0000-0000-0000-000000000002',
+              'E.M. Primavera': '00000000-0000-0000-0000-000000000003'
+            }
+            payload.escola_atual_id = mapEscolaReverse[payload.escola_atual as string] || '00000000-0000-0000-0000-000000000001'
+          }
+          if (payload.consentimento_lgpd === undefined) {
+            payload.consentimento_lgpd = true
+          }
+        }
 
         if (item.operacao === 'create') {
-          await apiClient.post(endpoint, item.payload)
+          await apiClient.post(endpoint, payload)
         } else if (item.operacao === 'update') {
-          const serverId = (item.payload as { server_id?: string }).server_id
-          await apiClient.put(`${endpoint}/${serverId}`, item.payload)
+          const serverId = payload.server_id
+          await apiClient.put(`${endpoint}/${serverId}`, payload)
         } else if (item.operacao === 'delete') {
-          const serverId = (item.payload as { server_id?: string }).server_id
+          const serverId = payload.server_id
           await apiClient.delete(`${endpoint}/${serverId}`)
         }
 

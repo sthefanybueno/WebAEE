@@ -1,0 +1,60 @@
+Título:	Critérios que serão avaliados na apresentação
+Conteúdo:	
+   Para garantir que a IA não alucine e gere o código exatamente como você espera, a regra de ouro do OpenSpec é a separação estrita de responsabilidades entre os artefatos.
+
+   No OpenSpec, as especificações (specs/) não devem conter detalhes de implementação ou escolhas de bibliotecas. Se você misturar código com comportamento nas specs, a IA ficará confusa. O segredo contra alucinações é distribuir a informação corretamente entre o config.yaml, as specs/, o design.md e as tasks.md.
+
+   Aqui está o que deve constar em cada parte para blindar a IA:
+
+   1. O Contexto Base (openspec/config.yaml)
+
+   A principal ferramenta anti-alucinação do OpenSpec é o config.yaml. O contexto definido aqui é injetado em todas as requisições de planejamento da IA. Você deve definir sua stack estritamente neste arquivo:
+
+   •    Backend: Restrinja a IA a usar "FastAPI com tipagem estrita via Pydantic v2" e "SQLAlchemy 2.0 (ou SQLModel) para o PostgreSQL".
+
+   •    Frontend: Defina claramente "Next.js com App Router", "TypeScript obrigatório em todos os arquivos", "TailwindCSS para estilização" e "Uso exclusivo de componentes do ecossistema shadcn/ui".
+
+   •    Orquestração: Especifique que a aplicação deve rodar via "Docker e docker-compose", garantindo que a IA crie os Dockerfiles adequados.
+
+   2. As Especificações de Comportamento (specs/)
+
+   As specs funcionam como um contrato de comportamento, não um plano de implementação. Para que a IA saiba exatamente o que o sistema deve fazer, você deve incluir:
+
+   •    Linguagem de Requisitos: Use as palavras-chave do padrão RFC 2119 (MUST, SHALL, SHOULD) para indicar a força de cada requisito.
+
+   •    Cenários Dado/Quando/Então (Given/When/Then): Descreva os fluxos de forma testável. É aqui que você amarra a resiliência do sistema.
+
+   o    Exemplo Anti-Alucinação para a API: "Dado que o payload de entrada omite um campo obrigatório, Quando a requisição é feita ao FastAPI, Então o sistema MUST retornar um erro HTTP 422 Unprocessable Entity."
+
+   o    Exemplo Anti-Alucinação para o Front: "Dado que o usuário clica em 'Salvar', Quando a API demora a responder, Então a interface MUST exibir o componente de loading padrão e desabilitar o botão."
+
+   •    Caminhos de Erro: Especifique não apenas o caminho feliz, mas o que acontece se o banco de dados (PostgreSQL) cair ou se uma validação de front-end falhar.
+
+   3. O Documento de Design (design.md)
+
+   É aqui que você previne alucinações arquiteturais e dita o "como". Se o design estiver fraco, a IA vai inventar pastas e padrões de código indesejados. O design.md deve conter:
+
+   •    Estrutura do Banco de Dados: A modelagem exata das tabelas no PostgreSQL (relações, chaves estrangeiras, índices).
+
+   •    Contratos TypeSafe: Como os modelos de banco se traduzem em schemas do Pydantic no FastAPI.
+
+   •    Arquitetura do Next.js: Definição explícita de quais pastas serão Server Components e quais serão Client Components (ex: 'use client').
+
+   •    Mapeamento de UI: Liste explicitamente quais componentes do shadcn/ui serão usados (ex: [ ] Button, [ ] DataTable, [ ] Dialog), para que a IA não tente criar componentes do zero usando Tailwind puro.
+
+   •    Topologia Docker: A estrutura do docker-compose.yml, incluindo os serviços (db, api, web), as variáveis de ambiente necessárias e as redes internas.
+
+   4. O Checklist de Tarefas (tasks.md)
+
+   Para a implementação do código (fase do /opsx:apply), as tarefas devem ser literais, pequenas e encadeadas:
+
+   •    Seja sequencial: a IA precisa configurar o Docker primeiro, depois o banco PostgreSQL, depois o FastAPI e, por último, o Next.js.
+
+   •    Inclua passos de validação (ex: "Criar o componente X utilizando o shadcn/ui e garantir que ele renderiza corretamente").
+
+   Resumo da estratégia: Você proíbe a IA de alucinar definindo os limites de tecnologia no config.yaml, amarrando o comportamento e tratamento de erros no specs/ (Dado/Quando/Então), mapeando a arquitetura exata de pastas e bibliotecas no design.md e forçando-a a construir passo-a-passo no tasks.md.
+
+   5. O design (arquivos PNG das Telas)
+
+   Inclua imagens das telas principais do seu sistema. Caso tenha algum detalhe específico, inclua a imagem dele também. Isso impede que a IA crie e utilize recursos que você não especificou. Deixe bem claro o que você quer que a IA utilize como logo e ícones do seu sistema, não permita que a IA utilize emojis no lugar de Ícones, informe a biblioteca que você quer que ela utilize.
+

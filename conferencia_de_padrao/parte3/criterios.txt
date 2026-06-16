@@ -1,0 +1,64 @@
+Título:	Conteúdos que devem ser apresentados
+Conteúdo:	
+- domínio: entidade, value-objects, erros e repositórios.
+
+- aplicação: casos de uso
+
+- infraestrutura: HTTP, Injeção de Dependências, Implementação do repositórios e Storage
+
+- apresentação: componentes, User Interface, Hooks
+
+- testes: unitário, de integração, vitest e react testing library
+
+
+Título:	Critérios de avaliação da prova 3
+Conteúdo:	
+
+#### Executar corretamente (5 pontos)
+
+
+
+#### 1. Camada de Domínio (3 pontos)
+
+* **Domínio forte sem entidades anêmicas e com inversão de dependências**
+
+
+
+#### 2. Infraestrutura e Offline-First (2 pontos)
+
+* **Implementação do Contrato, Persistência Local e Simulação Assíncrona:**
+
+
+
+#### 3. Camada de Aplicação / Fat Hook (2 pontos)
+
+* **Encapsulamento, Atualização Otimista (Optimistic Update):**
+
+
+
+#### 4. Apresentação e Interface (3 pontos)
+
+* **Separação de Responsabilidades, Diretivas Next.js, Estilização Modular**
+
+
+
+#### 5. Pirâmide de Testes (4 pontos)
+
+* **Teste Unitário e Teste de Componente com cobertura de 80%**
+
+
+
+---
+
+
+
+### Exemplos de Penalidades na Correção
+
+1. **Vazamento de Domínio:**
+
+2. **Componente Obeso:**
+
+3. **Falso Offline-First:**
+
+4. **Testes Frágeis:**
+

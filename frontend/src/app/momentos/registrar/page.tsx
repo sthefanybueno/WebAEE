@@ -1,13 +1,14 @@
-﻿'use client'
+'use client'
 
 import { useState, useRef } from 'react'
 import { AppShell } from '@/presentation/components/layout/AppShell'
 import { ArrowLeft, Camera, ImagePlus, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { cn, getInitials } from '@/presentation/utils/utils'
 import { useAlunos } from '@/application/hooks/useAlunos'
 import { salvarFotoLocal } from '@/application/services/fotoLocalService'
+import { useEffect } from 'react'
 
 type Tag = 'autonomia' | 'comunicacao' | 'motor_fino' | 'socializacao' | 'outro'
 
@@ -29,14 +30,30 @@ export default function RegistrarMomentoPage() {
   const [tag, setTag] = useState<Tag | null>(null)
   const [saving, setSaving] = useState(false)
   const [busca, setBusca] = useState('')
+  const [erroGlobal, setErroGlobal] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const searchParams = useSearchParams()
+  const prefilledAlunoId = searchParams.get('aluno_id')
+
+  useEffect(() => {
+    if (prefilledAlunoId) {
+      setAlunoId(prefilledAlunoId)
+    }
+  }, [prefilledAlunoId])
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setSelectedFile(file)
     setPreviewUrl(URL.createObjectURL(file))
-    setTimeout(() => setStep(2), 400)
+    
+    // Skip step 2 if student is already pre-filled
+    if (alunoId || prefilledAlunoId) {
+      setTimeout(() => setStep(3), 400)
+    } else {
+      setTimeout(() => setStep(2), 400)
+    }
   }
 
   function handleSelectAluno(id: string) {
@@ -45,23 +62,23 @@ export default function RegistrarMomentoPage() {
   }
 
   async function handleSalvar() {
-    if (!tag || !alunoId || !selectedFile) { 
-      alert('Preencha todos os passos (foto, aluno e tag).')
-      return 
+    setErroGlobal(null)
+    if (!tag || !alunoId || !selectedFile) {
+      setErroGlobal('Preencha todos os passos: foto, aluno e contexto pedagógico.')
+      return
     }
-    
+
     setSaving(true)
     try {
       const numAlunoId = parseInt(alunoId)
       if (isNaN(numAlunoId)) {
-        throw new Error('ID do aluno invÃ¡lido.')
+        throw new Error('ID do aluno inválido.')
       }
-
       await salvarFotoLocal(numAlunoId, selectedFile, tag)
       router.push('/dashboard')
     } catch (err) {
-      console.error(err)
-      alert('Erro ao salvar momento localmente.')
+      console.error('[handleSalvar] Erro ao salvar momento localmente:', err)
+      setErroGlobal('Não foi possível salvar o momento. Verifique o armazenamento local e tente novamente.')
     } finally {
       setSaving(false)
     }
@@ -69,8 +86,6 @@ export default function RegistrarMomentoPage() {
 
   return (
     <AppShell
-      role="prof_aee"
-      hideNav
       header={
         <>
           <Link href="/dashboard" aria-label="Voltar" className="p-2 -ml-2 rounded-full hover:bg-[--color-primary-light] transition-colors">
@@ -87,6 +102,13 @@ export default function RegistrarMomentoPage() {
         ))}
       </div>
 
+      {/* Erro global — substitui alert() por UI React testável */}
+      {erroGlobal && (
+        <div className="mx-4 mt-3 flex items-start gap-3 p-3.5 bg-red-50 border border-red-200 rounded-xl">
+          <span className="text-red-600 shrink-0 text-sm">⚠️</span>
+          <p className="text-[13px] font-semibold text-red-800">{erroGlobal}</p>
+        </div>
+      )}
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {step === 1 && (
           <div className="space-y-4">
@@ -181,7 +203,7 @@ export default function RegistrarMomentoPage() {
 
         <div className="flex gap-3 pt-4">
           {step > 1 && (
-            <button onClick={() => setStep(s => s - 1)}
+            <button onClick={() => setStep(s => (s === 3 && (alunoId || prefilledAlunoId) && prefilledAlunoId === alunoId) ? 1 : s - 1)}
               className="flex-1 min-h-[48px] border border-[--color-border] text-[--color-text-secondary] font-bold rounded-xl hover:bg-[--color-surface] transition-colors cursor-pointer">
               Anterior
             </button>

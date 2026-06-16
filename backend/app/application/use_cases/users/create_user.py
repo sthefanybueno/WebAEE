@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import uuid
 from app.application.ports.user_repository import UserRepository
 from app.application.ports.email_service import EmailService
-from app.infrastructure.security.tokens import create_invite_token
+from app.application.ports.invite_token_service import InviteTokenService
 from app.domain.entities.user import User, PapelUsuario
 
 @dataclass
@@ -15,11 +15,7 @@ class CreateUserInput:
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 
-from app.domain.exceptions import PermissaoInsuficienteError, DomainException
-
-class EmailJaEmUsoError(DomainException):
-    def __init__(self, email: str) -> None:
-        super().__init__(f"O e-mail '{email}' já está em uso por outro usuário.")
+from app.domain.exceptions import PermissaoInsuficienteError, EmailJaEmUsoError, DomainException
 
 class CreateUserUseCase:
     """Caso de uso para criação de novos usuários com validação de hierarquia (RBAC).
@@ -27,11 +23,21 @@ class CreateUserUseCase:
     Este caso de uso garante que apenas usuários com permissões adequadas 
     possam criar novos integrantes no sistema, respeitando as regras de 
     negócio de cada papel (Admin, Coordenação, Prof. AEE).
+
+    [Clean Architecture v4] InviteTokenService é injetado como port abstrato —
+    o Use Case não conhece JWT nem qualquer detalhe de infraestrutura.
     """
-    def __init__(self, uow: AbstractUnitOfWork, user_repo: UserRepository, email_service: EmailService):
+    def __init__(
+        self,
+        uow: AbstractUnitOfWork,
+        user_repo: UserRepository,
+        email_service: EmailService,
+        token_service: InviteTokenService,
+    ):
         self.uow = uow
         self.user_repo = user_repo
         self.email_service = email_service
+        self.token_service = token_service
 
     async def execute(self, input_dto: CreateUserInput) -> User:
         """Cria um novo usuário no sistema dentro de uma transação.
@@ -69,7 +75,7 @@ class CreateUserUseCase:
             
             # Gerar token e disparar e-mail fora da transação de banco se preferir, 
             # mas aqui disparamos no fluxo
-            token = create_invite_token(saved_user.id)
+            token = self.token_service.create_invite_token(saved_user.id)
             await self.email_service.send_invite_email(to_email=saved_user.email, token=token)
             
             return saved_user

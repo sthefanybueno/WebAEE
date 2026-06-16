@@ -137,3 +137,31 @@ class Report(BaseModel):
         self.conflict_flag = False
         self.updated_by = user_id
         self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    def atualizar_conteudo(self, conteudo: dict, user_id: uuid.UUID) -> None:
+        """Atualiza o conteúdo do relatório com rastreabilidade completa.
+
+        Encapsula atomicamente: validação de estado travado + atualização
+        de conteúdo + rastreamento de quem editou + timestamp UTC.
+
+        [DDD] Esta é a forma correta de atualizar um relatório — o Use Case
+        deve chamar este método em vez de manipular campos diretamente.
+        Isso garante que NUNCA seja possível alterar o conteúdo sem registrar
+        `updated_by` e `updated_at`, e sem verificar o estado `travado`.
+
+        Args:
+            conteudo: Novo conteúdo JSON do relatório.
+            user_id: ID do usuário que está realizando a edição.
+
+        Raises:
+            RelatorioTravadoError: se o relatório já estiver finalizado.
+        """
+        from app.domain.exceptions import RelatorioTravadoError  # noqa: PLC0415
+
+        if self.travado:
+            raise RelatorioTravadoError()
+
+        self.conteudo_json = conteudo
+        self.updated_by = user_id
+        self.updated_at = _utcnow()
+

@@ -1,192 +1,189 @@
-﻿'use client'
+'use client'
+
+/**
+ * NovoAlunoPage — Thin Component (Apresentação pura).
+ * Toda lógica vive no Fat Hook `useNovoAlunoForm`.
+ */
 
 import { AppShell } from '@/presentation/components/layout/AppShell'
-import { ArrowLeft, Save, Info, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Info, Loader2, AlertCircle, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { salvarAlunoLocal } from '@/application/hooks/useAlunos'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-
-const novoAlunoSchema = z.object({
-  nome: z.string().min(3, 'Nome deve conter pelo menos 3 caracteres'),
-  nascimento: z.string().min(1, 'Selecione a data de nascimento'),
-  escola_atual: z.string().min(1, 'Selecione a unidade de ensino'),
-  diagnostico: z.string().optional(),
-  lgpd: z.literal(true, { message: 'Ã‰ obrigatÃ³rio consentir com o termo da LGPD.' }),
-})
-
-type NovoAlunoInput = z.infer<typeof novoAlunoSchema>
+import { useNovoAlunoForm } from '@/application/hooks/useNovoAlunoForm'
 
 export default function NovoAlunoPage() {
-  const router = useRouter()
-  
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<NovoAlunoInput>({
-    resolver: zodResolver(novoAlunoSchema),
-    defaultValues: {
-      nome: '',
-      nascimento: '',
-      escola_atual: '',
-      diagnostico: '',
-    },
-  })
-
-  async function onSubmit(data: NovoAlunoInput) {
-    try {
-      await salvarAlunoLocal({
-        nome: data.nome,
-        escola_atual: data.escola_atual,
-        data_nascimento: data.nascimento,
-        diagnostico: data.diagnostico || '',
-        status: 'ativo'
-      })
-      router.push('/alunos')
-    } catch (err) {
-      console.error(err)
-      alert('Erro ao salvar aluno localmente.')
-    }
-  }
+  const { register, errors, onSubmit, isSubmitting, erroGlobal, escolas, escolasLoading } = useNovoAlunoForm()
 
   return (
     <AppShell title="Novo Aluno">
-      <div className="max-w-[760px] mx-auto py-8 px-7">
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '36px 24px' }}>
 
-        {/* Header */}
-        <div className="flex items-center gap-3.5 mb-7">
-          <Link
-            href="/alunos"
-            className="w-9 h-9 rounded-lg border border-[--color-border] flex items-center justify-center text-[--color-text-secondary] bg-white hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft size={17} />
+        {/* ── Header ───────────────────────────────────────── */}
+        <div className="flex items-center gap-3" style={{ marginBottom: 32 }}>
+          <Link href="/alunos" className="btn-icon" style={{ flexShrink: 0 }}>
+            <ArrowLeft size={16} />
           </Link>
           <div>
-            <h2 className="text-xl font-bold text-[--color-text-primary]">Novo Aluno</h2>
-            <p className="text-[13px] text-[--color-text-secondary] mt-0.5">
-              Preencha as informaÃ§Ãµes para iniciar o acompanhamento especializado.
+            <h2 style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-.025em', color: 'var(--s-900)', lineHeight: 1.2 }}>
+              Novo Aluno
+            </h2>
+            <p style={{ fontSize: 13.5, color: 'var(--color-sub)', marginTop: 4 }}>
+              Preencha os dados para iniciar o acompanhamento especializado.
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} id="form-novo-aluno" className="space-y-5">
+        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-          {/* Card: Dados Pessoais */}
-          <div className="card overflow-hidden">
-            <div className="py-3.5 px-5 border-b border-[--color-border] bg-gray-50">
-              <p className="text-[13.5px] font-bold text-[--color-text-primary]">Dados Pessoais</p>
-              <p className="text-[12px] text-[--color-text-secondary] mt-0.5">InformaÃ§Ãµes bÃ¡sicas de identificaÃ§Ã£o.</p>
+          {/* ── Erro global ───────────────────────────────── */}
+          {erroGlobal && (
+            <div className="flex items-start gap-3" style={{ padding: '14px 16px', background: 'var(--r-50)', border: '1px solid var(--r-100)', borderRadius: 'var(--r-lg)' }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: 'var(--r-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <AlertCircle size={14} color="var(--r-600)" />
+              </div>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: 13.5, color: '#991b1b' }}>Erro ao salvar</p>
+                <p style={{ fontSize: 13, color: '#b91c1c', marginTop: 2 }}>{erroGlobal}</p>
+              </div>
             </div>
-            <div className="p-5 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div className="col-span-full">
-                <label htmlFor="nome" className="form-label">Nome Completo *</label>
+          )}
+
+          {/* ── Card: Dados Pessoais ──────────────────────── */}
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <div className="card-head">
+              <p className="card-head-title">Dados Pessoais</p>
+              <p className="card-head-desc">Informações básicas de identificação do estudante.</p>
+            </div>
+
+            <div style={{ padding: '22px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+              {/* Nome */}
+              <div>
+                <label htmlFor="nome" className="label">
+                  Nome Completo <span style={{ color: 'var(--r-600)' }}>*</span>
+                </label>
                 <input
                   id="nome"
                   type="text"
-                  placeholder="Ex: JoÃ£o da Silva Santos"
-                  className={`form-input ${errors.nome ? 'border-red-500 focus:border-red-500 focus:box-shadow-none' : ''}`}
+                  placeholder="Ex: João da Silva Santos"
+                  className={`input${errors.nome ? ' error' : ''}`}
                   {...register('nome')}
                 />
                 {errors.nome && (
-                  <span className="text-xs text-red-500 mt-1 block font-medium">{errors.nome.message}</span>
+                  <p className="form-error">
+                    <AlertCircle size={11} />{errors.nome.message}
+                  </p>
                 )}
               </div>
-              
-              <div>
-                <label htmlFor="nascimento" className="form-label">Data de Nascimento *</label>
-                <input
-                  id="nascimento"
-                  type="date"
-                  className={`form-input ${errors.nascimento ? 'border-red-500 focus:border-red-500' : ''}`}
-                  {...register('nascimento')}
-                />
-                {errors.nascimento && (
-                  <span className="text-xs text-red-500 mt-1 block font-medium">{errors.nascimento.message}</span>
-                )}
-              </div>
-              
-              <div>
-                <label htmlFor="escola_atual" className="form-label">Escola Vinculada *</label>
-                <select
-                  id="escola_atual"
-                  className={`form-input cursor-pointer ${errors.escola_atual ? 'border-red-500 focus:border-red-500' : ''}`}
-                  {...register('escola_atual')}
-                >
-                  <option value="">Selecione a unidade</option>
-                  <option value="E.E. Castelo Branco">E.E. Castelo Branco</option>
-                  <option value="E.M. Flores do Campo">E.M. Flores do Campo</option>
-                  <option value="E.M. Primavera">E.M. Primavera</option>
-                </select>
-                {errors.escola_atual && (
-                  <span className="text-xs text-red-500 mt-1 block font-medium">{errors.escola_atual.message}</span>
-                )}
+
+              {/* Nascimento + Escola — 2 colunas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="nascimento" className="label">
+                    Data de Nascimento <span style={{ color: 'var(--r-600)' }}>*</span>
+                  </label>
+                  <input
+                    id="nascimento"
+                    type="date"
+                    className={`input${errors.nascimento ? ' error' : ''}`}
+                    {...register('nascimento')}
+                  />
+                  {errors.nascimento && (
+                    <p className="form-error">
+                      <AlertCircle size={11} />{errors.nascimento.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="escola_atual_id" className="label">
+                    Escola Vinculada <span style={{ color: 'var(--r-600)' }}>*</span>
+                  </label>
+                  <select
+                    id="escola_atual_id"
+                    className={`input${errors.escola_atual_id ? ' error' : ''}`}
+                    {...register('escola_atual_id')}
+                    disabled={escolasLoading}
+                  >
+                    <option value="">
+                      {escolasLoading ? 'Carregando...' : 'Selecione a escola'}
+                    </option>
+                    {escolas.map(e => (
+                      <option key={e.id} value={e.id}>{e.nome}</option>
+                    ))}
+                  </select>
+                  {errors.escola_atual_id && (
+                    <p className="form-error">
+                      <AlertCircle size={11} />{errors.escola_atual_id.message}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Card: InformaÃ§Ãµes ClÃ­nicas */}
-          <div className="card overflow-hidden">
-            <div className="py-3.5 px-5 border-b border-[--color-border] bg-gray-50">
-              <p className="text-[13.5px] font-bold text-[--color-text-primary]">InformaÃ§Ãµes ClÃ­nicas</p>
-              <p className="text-[12px] text-[--color-text-secondary] mt-0.5">Dados sensÃ­veis â€” acesso auditado conforme LGPD Art. 58 LDB.</p>
+          {/* ── Card: Informações Clínicas ────────────────── */}
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <div className="card-head">
+              <p className="card-head-title">Informações Clínicas</p>
+              <p className="card-head-desc">Dados sensíveis — acesso auditado (LGPD Art. 58 LDB).</p>
             </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label htmlFor="diagnostico" className="form-label">Laudo / DiagnÃ³stico Principal</label>
-                <textarea
-                  id="diagnostico"
-                  rows={4}
-                  placeholder="Descreva as principais caracterÃ­sticas clÃ­nicas e pedagÃ³gicas..."
-                  className="form-input min-h-[90px] resize-vertical"
-                  {...register('diagnostico')}
-                />
-                <p className="flex items-center gap-1.5 mt-1.5 text-xs text-[--color-text-secondary]">
-                  <Info size={12} /> Campo sensÃ­vel â€” visÃ­vel apenas para profissionais autorizados.
-                </p>
-              </div>
+
+            <div style={{ padding: '22px 22px' }}>
+              <label htmlFor="diagnostico" className="label">
+                Laudo / Diagnóstico Principal
+              </label>
+              <textarea
+                id="diagnostico"
+                rows={4}
+                placeholder="Descreva as características clínicas e pedagógicas relevantes..."
+                className="input"
+                {...register('diagnostico')}
+              />
+              <p className="form-hint">
+                <Info size={11} />
+                Visível apenas para profissionais autorizados.
+              </p>
             </div>
           </div>
 
-          {/* LGPD */}
-          <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl p-4">
-            <label className="flex items-start gap-3 cursor-pointer">
+          {/* ── LGPD ─────────────────────────────────────── */}
+          <div style={{ background: 'var(--b-50)', border: '1px solid var(--b-100)', borderRadius: 'var(--r-lg)', padding: '16px 18px' }}>
+            <div className="flex items-center gap-2" style={{ marginBottom: 10 }}>
+              <ShieldCheck size={14} color="var(--b-600)" />
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: '#1e40af' }}>Consentimento LGPD</span>
+            </div>
+            <label className="flex items-start gap-3" style={{ cursor: 'pointer' }}>
               <input
                 type="checkbox"
-                className="mt-0.5 w-4 h-4 accent-[#1A6F45] cursor-pointer shrink-0"
+                style={{ marginTop: 2, width: 16, height: 16, accentColor: 'var(--g-700)', cursor: 'pointer', flexShrink: 0 }}
                 {...register('lgpd')}
               />
-              <span className="text-[13px] text-[#1E40AF] leading-relaxed">
-                Confirmo que obtive o <strong>consentimento LGPD</strong> do responsÃ¡vel legal para
-                registro e tratamento dos dados deste estudante (base legal: Art. 58 LDB).
+              <span style={{ fontSize: 13, color: '#1e40af', lineHeight: 1.6 }}>
+                Confirmo que obtive o <strong>consentimento do responsável legal</strong> para
+                registro e tratamento dos dados deste estudante (Art. 58 LDB).
               </span>
             </label>
             {errors.lgpd && (
-              <span className="text-xs text-red-500 mt-2 block font-semibold">{errors.lgpd.message}</span>
+              <p className="form-error" style={{ marginTop: 8 }}>
+                <AlertCircle size={11} />{errors.lgpd.message}
+              </p>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2.5">
-            <Link href="/alunos" className="btn-ghost">Cancelar</Link>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="btn-primary flex items-center gap-1.5"
-            >
-              {isSubmitting ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <Save size={15} />
-              )}
+          {/* ── Ações ────────────────────────────────────── */}
+          <div className="flex justify-end gap-2.5" style={{ paddingTop: 4 }}>
+            <Link href="/alunos" className="btn btn-ghost">Cancelar</Link>
+            <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+              {isSubmitting
+                ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                : <Save size={14} />
+              }
               {isSubmitting ? 'Salvando...' : 'Salvar Aluno'}
             </button>
           </div>
         </form>
+
       </div>
     </AppShell>
   )
 }
-

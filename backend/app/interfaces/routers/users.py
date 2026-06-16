@@ -19,22 +19,23 @@ from app.interfaces.schemas.user import CreateUserRequest, UserResponse
 from app.interfaces.schemas.pagination import PaginatedResponse
 from app.domain.entities.user import User, PapelUsuario
 
+from app.infrastructure.security.invite_token_service_impl import JWTInviteTokenService
+
 from app.domain.exceptions import (
     DomainException,
+    EmailJaEmUsoError,
     UsuarioNaoEncontradoError,
     TenantMismatchError,
     PermissaoInsuficienteError,
 )
 from app.application.use_cases.users.accept_invite import (
-    AcceptInviteUseCase, 
+    AcceptInviteUseCase,
     AcceptInviteInput,
     InvalidInviteTokenError,
     UserAlreadyActiveError,
 )
 
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
-
-from app.application.use_cases.users.create_user import EmailJaEmUsoError
 
 _DOMAIN_TO_HTTP: dict[type, int] = {
     UsuarioNaoEncontradoError: status.HTTP_404_NOT_FOUND,
@@ -45,6 +46,7 @@ _DOMAIN_TO_HTTP: dict[type, int] = {
     UserAlreadyActiveError: status.HTTP_400_BAD_REQUEST,
 }
 
+
 def _handle_domain_exception(e: DomainException) -> None:
     status_code = _DOMAIN_TO_HTTP.get(type(e), status.HTTP_400_BAD_REQUEST)
     raise HTTPException(status_code=status_code, detail=str(e))
@@ -53,7 +55,8 @@ def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> Cr
     return CreateUserUseCase(
         uow=SQLAlchemyUnitOfWork(session),
         user_repo=SQLModelUserRepository(session),
-        email_service=ConsoleEmailService()
+        email_service=ConsoleEmailService(),
+        token_service=JWTInviteTokenService(),
     )
 
 def get_accept_invite_use_case(session: AsyncSession = Depends(get_session)) -> AcceptInviteUseCase:

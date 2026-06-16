@@ -78,21 +78,37 @@ async def create_report(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+from app.application.use_cases.reports.list_reports_by_student import (
+    ListReportsByStudentUseCase,
+    ListReportsByStudentInput,
+)
+
+
+def get_list_reports_by_student_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> ListReportsByStudentUseCase:
+    return ListReportsByStudentUseCase(
+        report_repo=SQLModelReportRepository(session),
+        student_repo=SQLModelStudentRepository(session),
+    )
+
+
 @router.get("/aluno/{student_id}", response_model=List[ReportResponse])
 async def list_reports_by_student(
     student_id: uuid.UUID,
     tipo: Optional[TipoRelatorio] = None,
-    session: AsyncSession = Depends(get_session),
     current_user: CurrentUser = Depends(get_current_user),
+    use_case: ListReportsByStudentUseCase = Depends(get_list_reports_by_student_use_case),
 ):
-    student_repo = SQLModelStudentRepository(session)
-    student = await student_repo.get_by_id(student_id)
-    if not student or student.tenant_id != current_user.tenant_id:
-        raise HTTPException(status_code=404, detail="Estudante não encontrado")
-
-    repo = SQLModelReportRepository(session)
-    reports = await repo.list_by_student(student_id, tipo)
-    return reports
+    """Lista relatórios de um aluno. Verificação de tenant delegada ao Use Case."""
+    try:
+        return await use_case.execute(ListReportsByStudentInput(
+            student_id=student_id,
+            tenant_id=current_user.tenant_id,
+            tipo=tipo,
+        ))
+    except DomainException as e:
+        _handle_domain_exception(e)
 
 from datetime import datetime, timezone
 from app.domain.entities.report import ReportTemplate

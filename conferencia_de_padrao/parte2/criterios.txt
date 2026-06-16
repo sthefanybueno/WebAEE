@@ -1,0 +1,22 @@
+Título:	Critérios de avaliação da prova 2
+Conteúdo:	
+Pontuação:
+
+- (5) Executar corretamente
+
+- (2) Especificação: requisitos, Given / When / Then
+
+- (4) Domínio rico
+
+- (4) Casos de uso
+
+- (4) Adaptadores: api, persistência, _to_entity
+
+Importante (perde ponto)
+
+- Vazamento de lógica
+
+- Tratamento de erros
+
+- Acoplamento de repositório
+

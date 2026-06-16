@@ -12,11 +12,14 @@ class SQLModelReportRepository(ReportRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    @staticmethod
+    def _to_entity(orm: ReportORM) -> Report:
+        """Converte ORM model → entidade de domínio (Adaptador: persistência → domínio)."""
+        return Report(**orm.model_dump())
+
     async def get_by_id(self, id: uuid.UUID) -> Optional[Report]:
         orm = await self.session.get(ReportORM, id)
-        if orm:
-            return Report(**orm.model_dump())
-        return None
+        return self._to_entity(orm) if orm else None
 
     async def list_by_student(
         self, student_id: uuid.UUID, tipo: Optional[TipoRelatorio] = None
@@ -25,10 +28,11 @@ class SQLModelReportRepository(ReportRepository):
         if tipo:
             statement = statement.where(ReportORM.tipo == tipo)
         result = await self.session.exec(statement)
-        return [Report(**orm.model_dump()) for orm in result.all()]
+        return [self._to_entity(orm) for orm in result.all()]
 
     async def save(self, report: Report) -> Report:
         orm = ReportORM(**report.model_dump())
         orm = await self.session.merge(orm)
         await self.session.flush()
-        return Report(**orm.model_dump())
+        return self._to_entity(orm)
+

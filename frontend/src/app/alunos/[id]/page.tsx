@@ -76,7 +76,7 @@ export default function AlunoPerfilPage() {
             {/* Main CTA */}
             <div className="flex flex-wrap gap-3 mt-4">
               <Link
-                href="/relatorios"
+                href={`/relatorios/novo?aluno_id=${aluno.id}`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1A6F45] hover:bg-[#155838] text-white font-semibold rounded-xl shadow-sm transition-all text-[14px]"
               >
                 <FileText size={16} />

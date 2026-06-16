@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useMemo } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -7,18 +7,23 @@ import { db, type AlunoLocal } from '@/infrastructure/db/db'
 // Re-export do serviÃ§o para conveniÃªncia dos consumidores que importam daqui
 export { salvarAlunoLocal } from '@/application/services/alunoLocalService'
 
-type FiltroSync = 'todos' | 'pendente' | 'feito'
+type FiltroSync = 'todos' | 'local' | 'synced'
 
 /**
- * useAlunos â€” hook reativo que lÃª do IndexedDB via Dexie.
+ * useAlunos — hook reativo que lê do IndexedDB via Dexie.
  *
- * Responsabilidades (Controller/Adapter):
+ * Responsabilidades (Fat Hook / Controller/Adapter):
  *  - Busca reativa via useLiveQuery (atualiza quando IndexedDB muda).
  *  - Filtragem por status de cadastro (ativo/arquivado).
  *  - Filtragem por busca de nome e por status de sync.
  *
- * NUNCA coloque lÃ³gica de filtro nos componentes â€” passe os parÃ¢metros
- * aqui e deixe o hook aplicar as regras de negÃ³cio.
+ * SyncStatus alinhado com backend (app/domain/value_objects/sync_status.py):
+ *   - 'local'  → criado offline, aguardando sincronização
+ *   - 'synced' → confirmado pelo servidor
+ *   - 'failed' → sync falhou, aguarda reprocessamento
+ *
+ * NUNCA coloque lógica de filtro nos componentes — passe os parâmetros
+ * aqui e deixe o hook aplicar as regras de negócio.
  */
 export function useAlunos(
   filtroStatus?: 'ativo' | 'arquivado',
@@ -33,7 +38,7 @@ export function useAlunos(
     [filtroStatus],
   )
 
-  // Regra de filtro encapsulada no Hook â€” nÃ£o no componente de pÃ¡gina
+  // Regra de filtro encapsulada no Hook — não no componente de página
   const alunosFiltrados = useMemo(() => {
     if (!alunos) return []
     return alunos.filter((a) => {
@@ -42,9 +47,9 @@ export function useAlunos(
       const matchSync =
         !filtroSync ||
         filtroSync === 'todos' ||
-        (filtroSync === 'pendente'
-          ? a.sync_status === 'pending'
-          : a.sync_status !== 'pending')
+        (filtroSync === 'local'   // pendentes: criados offline
+          ? a.sync_status === 'local'
+          : a.sync_status === 'synced') // sincronizados com sucesso
       return matchBusca && matchSync
     })
   }, [alunos, filtroBusca, filtroSync])

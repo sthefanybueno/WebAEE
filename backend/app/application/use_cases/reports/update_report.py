@@ -46,11 +46,7 @@ class UpdateReportUseCase:
             if not report.pode_ser_editado():
                 raise RelatorioTravadoError()
 
-            # Atualiza dados dinâmicos do JSON. O controle do estado fica no domínio,
-            # porém aqui estamos alterando a payload pura
-            from datetime import datetime, timezone
-
-            report.conteudo_json = input_dto.conteudo_json
-            report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            # Método rico encapsula: validação de estado + conteúdo + updated_by + updated_at
+            report.atualizar_conteudo(input_dto.conteudo_json, input_dto.user_id)
 
             return await self.report_repo.save(report)
