@@ -16,7 +16,7 @@ export default function AlunoPerfilPage() {
     return (
       <AppShell title="Perfil do Aluno">
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="animate-spin text-[#1A6F45]" size={32} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       </AppShell>
     )
@@ -27,8 +27,10 @@ export default function AlunoPerfilPage() {
       <AppShell title="Perfil do Aluno">
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <p className="text-5xl mb-4">🔍</p>
-          <p className="text-xl font-bold text-[--color-text-primary]">Aluno não encontrado</p>
-          <Link href="/alunos" className="mt-4 text-[#1A6F45] font-semibold hover:underline">← Voltar para lista</Link>
+          <p className="text-xl font-bold text-slate-900">Aluno não encontrado</p>
+          <Link href="/alunos" className="mt-4 text-primary font-semibold hover:underline">
+            ← Voltar para lista
+          </Link>
         </div>
       </AppShell>
     )
@@ -36,57 +38,63 @@ export default function AlunoPerfilPage() {
 
   return (
     <AppShell title="Perfil do Aluno">
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-5xl mx-auto p-6 lg:p-8 space-y-6">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[13px] text-[--color-text-secondary]">
-          <Link href="/alunos" className="hover:text-[#1A6F45] transition-colors">Alunos</Link>
-          <span>/</span>
-          <span className="text-[--color-text-primary] font-medium">{aluno.nome}</span>
+        <div className="flex items-center gap-2 text-sm text-slate-500">
+          <Link href="/alunos" className="hover:text-primary transition-colors">Alunos</Link>
+          <span className="text-slate-300">/</span>
+          <span className="text-slate-900 font-medium">{aluno.nome}</span>
         </div>
 
         {/* Profile header */}
-        <div className="bg-white border border-[--color-border] rounded-2xl p-6 flex flex-col sm:flex-row items-start gap-5 shadow-sm">
-          <div className="w-20 h-20 rounded-2xl bg-[#D1F0E0] flex items-center justify-center text-[#1A6F45] font-bold text-2xl shrink-0">
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-6 lg:p-8 flex flex-col sm:flex-row items-start gap-6 shadow-sm">
+          <div className="w-20 h-20 rounded-2xl bg-primary-light flex items-center justify-center text-primary font-bold text-2xl shrink-0">
             {getInitials(aluno.nome)}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h2 className="text-2xl font-bold text-[--color-text-primary]">{aluno.nome}</h2>
-                <p className="text-[--color-text-secondary] text-[14px] mt-0.5">
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">{aluno.nome}</h2>
+                <p className="text-slate-500 text-sm mt-1">
                   {aluno.escola_atual}
                   {aluno.data_nascimento && ` • ${new Date(aluno.data_nascimento).toLocaleDateString('pt-BR')}`}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                {aluno.sync_status === 'pending' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 border border-orange-200 text-orange-700 text-[12px] font-semibold rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                {aluno.sync_status === 'local' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                     Aguardando sync
                   </span>
                 )}
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 text-green-700 text-[12px] font-semibold rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                {aluno.sync_status === 'failed' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    Falha no sync
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold rounded-full">
+                  <span className={`w-1.5 h-1.5 rounded-full ${aluno.status === 'ativo' ? 'bg-emerald-500 animate-glow-pulse' : 'bg-slate-400'}`} />
                   {aluno.status === 'ativo' ? 'Ativo' : 'Arquivado'}
                 </span>
               </div>
             </div>
 
             {/* Main CTA */}
-            <div className="flex flex-wrap gap-3 mt-4">
+            <div className="flex flex-wrap gap-3 mt-6">
               <Link
                 href={`/relatorios/novo?aluno_id=${aluno.id}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1A6F45] hover:bg-[#155838] text-white font-semibold rounded-xl shadow-sm transition-all text-[14px]"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
               >
-                <FileText size={16} />
+                <FileText size={18} />
                 Relatório de Hoje
               </Link>
               <Link
                 href="/momentos/registrar"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-[--color-border] text-[--color-text-primary] font-semibold rounded-xl hover:bg-[--color-surface] transition-all text-[14px]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-all text-sm shadow-sm active:scale-[0.98]"
               >
-                <Camera size={16} />
+                <Camera size={18} />
                 Registrar Momento
               </Link>
             </div>
@@ -97,54 +105,54 @@ export default function AlunoPerfilPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Left: Laudo + Horários */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-6">
 
             {/* Laudo */}
             {aluno.diagnostico && (
-              <div className="bg-white border border-[--color-border] rounded-2xl shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-[--color-border] bg-[--color-surface] flex items-center justify-between">
-                  <h3 className="font-bold text-[--color-text-primary]">Laudo / Diagnóstico</h3>
-                  <button className="text-[12px] text-[#1A6F45] font-semibold hover:underline flex items-center gap-1">
-                    <Edit size={12} /> Editar
+              <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                  <h3 className="font-bold text-slate-900">Laudo / Diagnóstico</h3>
+                  <button className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+                    <Edit size={14} /> Editar
                   </button>
                 </div>
-                <div className="p-5">
-                  <p className="text-[14px] text-[--color-text-secondary] leading-relaxed">{aluno.diagnostico}</p>
-                  <p className="mt-3 text-[11px] text-[--color-text-secondary] bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-lg">
-                    🔒 Campo sensível — acesso auditado por LGPD Art. 58 LDB
+                <div className="p-6">
+                  <p className="text-sm text-slate-600 leading-relaxed">{aluno.diagnostico}</p>
+                  <p className="mt-4 text-xs text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2 rounded-lg font-medium inline-flex items-center gap-1.5">
+                    <span className="text-amber-500">🔒</span> Campo sensível — acesso auditado por LGPD Art. 58 LDB
                   </p>
                 </div>
               </div>
             )}
 
             {/* Ações rápidas */}
-            <div className="bg-white border border-[--color-border] rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-[--color-border] bg-[--color-surface]">
-                <h3 className="font-bold text-[--color-text-primary]">Registros</h3>
+            <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="font-bold text-slate-900">Registros</h3>
               </div>
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link
                   href="/momentos/registrar"
-                  className="flex items-center gap-3 p-4 rounded-xl border border-[--color-border] hover:border-[#1A6F45]/40 hover:bg-[--color-surface] transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-primary/40 hover:bg-slate-50 hover:shadow-sm transition-all group"
                 >
-                  <div className="w-10 h-10 bg-[#D1F0E0] rounded-xl flex items-center justify-center">
-                    <Camera size={18} className="text-[#1A6F45]" />
+                  <div className="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center">
+                    <Camera size={22} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[14px] text-[--color-text-primary] group-hover:text-[#1A6F45] transition-colors">Registrar Momento</p>
-                    <p className="text-[12px] text-[--color-text-secondary]">Captura fotográfica pedagógica</p>
+                    <p className="font-semibold text-sm text-slate-900 group-hover:text-primary transition-colors">Registrar Momento</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Captura fotográfica pedagógica</p>
                   </div>
                 </Link>
                 <Link
                   href="/horarios"
-                  className="flex items-center gap-3 p-4 rounded-xl border border-[--color-border] hover:border-[#1A6F45]/40 hover:bg-[--color-surface] transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-primary/40 hover:bg-slate-50 hover:shadow-sm transition-all group"
                 >
-                  <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
-                    <Clock size={18} className="text-purple-600" />
+                  <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                    <Clock size={22} className="text-purple-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-[14px] text-[--color-text-primary] group-hover:text-[#1A6F45] transition-colors">Ver Horários</p>
-                    <p className="text-[12px] text-[--color-text-secondary]">Grade de atendimentos</p>
+                    <p className="font-semibold text-sm text-slate-900 group-hover:text-primary transition-colors">Ver Horários</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Grade de atendimentos</p>
                   </div>
                 </Link>
               </div>
@@ -152,21 +160,23 @@ export default function AlunoPerfilPage() {
           </div>
 
           {/* Right: Info sidebar */}
-          <div className="space-y-5">
-            <div className="bg-white border border-[--color-border] rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-[--color-border] bg-[--color-surface]">
-                <h3 className="font-bold text-[--color-text-primary]">Informações</h3>
+          <div className="space-y-6">
+            <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="font-bold text-slate-900">Informações</h3>
               </div>
-              <dl className="divide-y divide-[--color-border]">
+              <dl className="divide-y divide-slate-100">
                 {[
                   { label: 'Escola', value: aluno.escola_atual || '—' },
                   { label: 'Nascimento', value: aluno.data_nascimento ? new Date(aluno.data_nascimento).toLocaleDateString('pt-BR') : '—' },
-                  { label: 'Status', value: aluno.status || '—' },
-                  { label: 'Sincronização', value: aluno.sync_status === 'pending' ? 'Pendente' : 'Atualizado' },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex justify-between px-5 py-3">
-                    <dt className="text-[13px] text-[--color-text-secondary]">{label}</dt>
-                    <dd className="text-[13px] font-semibold text-[--color-text-primary] text-right">{value}</dd>
+                  { label: 'Status', value: aluno.status || '—', capitalize: true },
+                  { label: 'Sincronização', value: aluno.sync_status === 'local' ? 'Aguardando' : aluno.sync_status === 'failed' ? 'Falhou' : 'Atualizado' },
+                ].map(({ label, value, capitalize }) => (
+                  <div key={label} className="flex items-center justify-between px-6 py-4">
+                    <dt className="text-sm text-slate-500">{label}</dt>
+                    <dd className={`text-sm font-semibold text-slate-900 text-right ${capitalize ? 'capitalize' : ''}`}>
+                      {value}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -174,9 +184,9 @@ export default function AlunoPerfilPage() {
 
             <Link
               href="/alunos"
-              className="flex items-center gap-2 text-[13px] text-[--color-text-secondary] hover:text-[#1A6F45] transition-colors"
+              className="flex items-center justify-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors w-full px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 shadow-sm"
             >
-              <ArrowLeft size={14} /> Voltar para lista
+              <ArrowLeft size={16} /> Voltar para lista
             </Link>
           </div>
         </div>
@@ -184,4 +194,3 @@ export default function AlunoPerfilPage() {
     </AppShell>
   )
 }
-

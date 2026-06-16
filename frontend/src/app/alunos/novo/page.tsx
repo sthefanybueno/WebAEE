@@ -15,92 +15,100 @@ export default function NovoAlunoPage() {
 
   return (
     <AppShell title="Novo Aluno">
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '36px 24px' }}>
+      <div className="max-w-3xl mx-auto p-6 lg:p-8 space-y-8">
 
         {/* ── Header ───────────────────────────────────────── */}
-        <div className="flex items-center gap-3" style={{ marginBottom: 32 }}>
-          <Link href="/alunos" className="btn-icon" style={{ flexShrink: 0 }}>
-            <ArrowLeft size={16} />
+        <div className="flex items-start sm:items-center gap-4">
+          <Link 
+            href="/alunos" 
+            className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0 mt-1 sm:mt-0"
+          >
+            <ArrowLeft size={18} />
           </Link>
           <div>
-            <h2 style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-.025em', color: 'var(--s-900)', lineHeight: 1.2 }}>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
               Novo Aluno
             </h2>
-            <p style={{ fontSize: 13.5, color: 'var(--color-sub)', marginTop: 4 }}>
+            <p className="text-sm text-slate-500 mt-1">
               Preencha os dados para iniciar o acompanhamento especializado.
             </p>
           </div>
         </div>
 
-        <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <form onSubmit={onSubmit} className="space-y-6">
 
           {/* ── Erro global ───────────────────────────────── */}
           {erroGlobal && (
-            <div className="flex items-start gap-3" style={{ padding: '14px 16px', background: 'var(--r-50)', border: '1px solid var(--r-100)', borderRadius: 'var(--r-lg)' }}>
-              <div style={{ width: 30, height: 30, borderRadius: 9, background: 'var(--r-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <AlertCircle size={14} color="var(--r-600)" />
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                <AlertCircle size={16} className="text-red-600" />
               </div>
-              <div>
-                <p style={{ fontWeight: 700, fontSize: 13.5, color: '#991b1b' }}>Erro ao salvar</p>
-                <p style={{ fontSize: 13, color: '#b91c1c', marginTop: 2 }}>{erroGlobal}</p>
+              <div className="pt-1.5">
+                <p className="text-sm font-bold text-red-800">Erro ao salvar</p>
+                <p className="text-sm text-red-700 mt-0.5">{erroGlobal}</p>
               </div>
             </div>
           )}
 
           {/* ── Card: Dados Pessoais ──────────────────────── */}
-          <div className="card" style={{ overflow: 'hidden' }}>
-            <div className="card-head">
-              <p className="card-head-title">Dados Pessoais</p>
-              <p className="card-head-desc">Informações básicas de identificação do estudante.</p>
+          <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="text-base font-bold text-slate-900">Dados Pessoais</h3>
+              <p className="text-sm text-slate-500 mt-1">Informações básicas de identificação do estudante.</p>
             </div>
 
-            <div style={{ padding: '22px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-
+            <div className="p-6 space-y-6">
               {/* Nome */}
               <div>
-                <label htmlFor="nome" className="label">
-                  Nome Completo <span style={{ color: 'var(--r-600)' }}>*</span>
+                <label htmlFor="nome" className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Nome Completo <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="nome"
                   type="text"
                   placeholder="Ex: João da Silva Santos"
-                  className={`input${errors.nome ? ' error' : ''}`}
+                  className={`w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow ${
+                    errors.nome ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-300'
+                  }`}
                   {...register('nome')}
                 />
                 {errors.nome && (
-                  <p className="form-error">
-                    <AlertCircle size={11} />{errors.nome.message}
+                  <p className="flex items-center gap-1.5 text-xs text-red-500 mt-1.5 font-medium">
+                    <AlertCircle size={12} />{errors.nome.message}
                   </p>
                 )}
               </div>
 
               {/* Nascimento + Escola — 2 colunas */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="nascimento" className="label">
-                    Data de Nascimento <span style={{ color: 'var(--r-600)' }}>*</span>
+                  <label htmlFor="nascimento" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Data de Nascimento <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="nascimento"
                     type="date"
-                    className={`input${errors.nascimento ? ' error' : ''}`}
+                    className={`w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow ${
+                      errors.nascimento ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-300'
+                    }`}
                     {...register('nascimento')}
                   />
                   {errors.nascimento && (
-                    <p className="form-error">
-                      <AlertCircle size={11} />{errors.nascimento.message}
+                    <p className="flex items-center gap-1.5 text-xs text-red-500 mt-1.5 font-medium">
+                      <AlertCircle size={12} />{errors.nascimento.message}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="escola_atual_id" className="label">
-                    Escola Vinculada <span style={{ color: 'var(--r-600)' }}>*</span>
+                  <label htmlFor="escola_atual_id" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Escola Vinculada <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="escola_atual_id"
-                    className={`input${errors.escola_atual_id ? ' error' : ''}`}
+                    className={`w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow cursor-pointer ${
+                      errors.escola_atual_id ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-300'
+                    }`}
                     {...register('escola_atual_id')}
                     disabled={escolasLoading}
                   >
@@ -112,8 +120,8 @@ export default function NovoAlunoPage() {
                     ))}
                   </select>
                   {errors.escola_atual_id && (
-                    <p className="form-error">
-                      <AlertCircle size={11} />{errors.escola_atual_id.message}
+                    <p className="flex items-center gap-1.5 text-xs text-red-500 mt-1.5 font-medium">
+                      <AlertCircle size={12} />{errors.escola_atual_id.message}
                     </p>
                   )}
                 </div>
@@ -122,61 +130,72 @@ export default function NovoAlunoPage() {
           </div>
 
           {/* ── Card: Informações Clínicas ────────────────── */}
-          <div className="card" style={{ overflow: 'hidden' }}>
-            <div className="card-head">
-              <p className="card-head-title">Informações Clínicas</p>
-              <p className="card-head-desc">Dados sensíveis — acesso auditado (LGPD Art. 58 LDB).</p>
+          <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="text-base font-bold text-slate-900">Informações Clínicas</h3>
+              <p className="text-sm text-slate-500 mt-1">Dados sensíveis — acesso auditado (LGPD Art. 58 LDB).</p>
             </div>
 
-            <div style={{ padding: '22px 22px' }}>
-              <label htmlFor="diagnostico" className="label">
+            <div className="p-6">
+              <label htmlFor="diagnostico" className="block text-sm font-medium text-slate-700 mb-1.5">
                 Laudo / Diagnóstico Principal
               </label>
               <textarea
                 id="diagnostico"
                 rows={4}
                 placeholder="Descreva as características clínicas e pedagógicas relevantes..."
-                className="input"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow resize-y min-h-[100px]"
                 {...register('diagnostico')}
               />
-              <p className="form-hint">
-                <Info size={11} />
+              <p className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
+                <Info size={14} className="text-slate-400" />
                 Visível apenas para profissionais autorizados.
               </p>
             </div>
           </div>
 
           {/* ── LGPD ─────────────────────────────────────── */}
-          <div style={{ background: 'var(--b-50)', border: '1px solid var(--b-100)', borderRadius: 'var(--r-lg)', padding: '16px 18px' }}>
-            <div className="flex items-center gap-2" style={{ marginBottom: 10 }}>
-              <ShieldCheck size={14} color="var(--b-600)" />
-              <span style={{ fontSize: 12.5, fontWeight: 700, color: '#1e40af' }}>Consentimento LGPD</span>
+          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck size={16} className="text-blue-600" />
+              <span className="text-sm font-bold text-blue-900">Consentimento LGPD</span>
             </div>
-            <label className="flex items-start gap-3" style={{ cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                style={{ marginTop: 2, width: 16, height: 16, accentColor: 'var(--g-700)', cursor: 'pointer', flexShrink: 0 }}
-                {...register('lgpd')}
-              />
-              <span style={{ fontSize: 13, color: '#1e40af', lineHeight: 1.6 }}>
-                Confirmo que obtive o <strong>consentimento do responsável legal</strong> para
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center shrink-0 mt-0.5">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary/30 focus:ring-offset-0 transition-colors cursor-pointer"
+                  {...register('lgpd')}
+                />
+              </div>
+              <span className="text-sm text-blue-800 leading-relaxed select-none group-hover:text-blue-900 transition-colors">
+                Confirmo que obtive o <strong className="font-semibold">consentimento do responsável legal</strong> para
                 registro e tratamento dos dados deste estudante (Art. 58 LDB).
               </span>
             </label>
             {errors.lgpd && (
-              <p className="form-error" style={{ marginTop: 8 }}>
-                <AlertCircle size={11} />{errors.lgpd.message}
+              <p className="flex items-center gap-1.5 text-xs text-red-500 mt-2.5 font-medium ml-7">
+                <AlertCircle size={12} />{errors.lgpd.message}
               </p>
             )}
           </div>
 
           {/* ── Ações ────────────────────────────────────── */}
-          <div className="flex justify-end gap-2.5" style={{ paddingTop: 4 }}>
-            <Link href="/alunos" className="btn btn-ghost">Cancelar</Link>
-            <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+          <div className="flex items-center justify-end gap-3 pt-4">
+            <Link 
+              href="/alunos" 
+              className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              Cancelar
+            </Link>
+            <button 
+              type="submit" 
+              disabled={isSubmitting} 
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
+            >
               {isSubmitting
-                ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                : <Save size={14} />
+                ? <Loader2 size={16} className="animate-spin" />
+                : <Save size={16} />
               }
               {isSubmitting ? 'Salvando...' : 'Salvar Aluno'}
             </button>

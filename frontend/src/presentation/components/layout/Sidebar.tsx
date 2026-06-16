@@ -9,17 +9,17 @@ import {
 } from 'lucide-react'
 
 const MAIN_NAV = [
-  { href: '/dashboard',          label: 'Dashboard',         Icon: LayoutDashboard },
-  { href: '/alunos',             label: 'Alunos',            Icon: Users },
-  { href: '/relatorios',         label: 'Relatórios',        Icon: FileText },
-  { href: '/horarios',           label: 'Horários',          Icon: Calendar },
-  { href: '/momentos/registrar', label: 'Momentos',          Icon: Camera },
+  { href: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { href: '/alunos', label: 'Alunos', Icon: Users },
+  { href: '/relatorios', label: 'Relatórios', Icon: FileText },
+  { href: '/horarios', label: 'Horários', Icon: Calendar },
+  { href: '/momentos/registrar', label: 'Momentos', Icon: Camera },
 ]
 
 const SYS_NAV = [
-  { href: '/escolas',        label: 'Escolas',  Icon: FileText },
+  { href: '/escolas', label: 'Escolas', Icon: FileText },
   { href: '/admin/usuarios', label: 'Usuários', Icon: UserCog },
-  { href: '/login',          label: 'Sair',     Icon: LogOut },
+  { href: '/login', label: 'Sair', Icon: LogOut },
 ]
 
 interface Props {
@@ -29,7 +29,6 @@ interface Props {
   onMobileClose: () => void
 }
 
-/** Logo AEE — folha estilizada SVG inline */
 function Logo() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -59,99 +58,119 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Prop
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'))
 
-  const cls = [
-    'nav',
-    collapsed ? 'mini' : '',
-    mobileOpen ? 'open' : '',
-  ].filter(Boolean).join(' ')
+  const wClass = collapsed ? 'w-[68px]' : 'w-[252px]'
+  const mobileClass = mobileOpen ? 'translate-x-0' : '-translate-x-full'
 
   return (
     <>
+      {/* Overlay mobile */}
       <div
-        className={`nav-overlay${mobileOpen ? ' visible' : ''}`}
+        className={`fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-40 transition-opacity duration-200 lg:hidden ${mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onMobileClose}
         aria-hidden="true"
       />
 
-      <aside className={cls} aria-label="Navegação principal">
-
+      <aside
+        className={`fixed top-0 left-0 bottom-0 flex flex-col z-50 bg-gradient-to-b from-[#1d7e4f] via-[#1A6F45] to-[#155e3a] transition-all duration-200 shadow-xl lg:translate-x-0 ${wClass} ${mobileClass}`}
+        aria-label="Navegação principal"
+      >
         {/* Brand */}
-        <div className="nav-brand">
-          <div className="nav-logo">
+        <div className="h-16 flex items-center px-3 gap-3 shrink-0 border-b border-white/10">
+          <div className="w-8 h-8 rounded-lg shrink-0 bg-white/10 border border-white/20 flex items-center justify-center shadow-sm">
             <Logo />
           </div>
-          <div className="nav-wordmark">
-            <span className="nav-name">Sistema AEE</span>
-            <span className="nav-sub">Ed. Especializado</span>
+
+          <div className={`flex flex-col overflow-hidden transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[200px]'}`}>
+            <span className="text-sm font-bold text-white whitespace-nowrap leading-tight tracking-tight">Sistema AEE</span>
+            <span className="text-[10px] font-medium text-white/50 whitespace-nowrap uppercase tracking-widest">Ed. Especializado</span>
           </div>
-          <div style={{ flex: 1 }} />
-          <button
-            className="nav-toggle"
-            onClick={onToggle}
-            title={collapsed ? 'Expandir' : 'Recolher'}
-          >
-            {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
-          </button>
+
+          <div className="flex-1" />
+
+          {/* Close Mobile */}
           <button
             onClick={onMobileClose}
-            className="lg-hide"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 26, height: 26, borderRadius: 7,
-              border: 'none', background: 'rgba(255,255,255,.1)',
-              cursor: 'pointer', color: 'white',
-            }}
+            className="lg:hidden flex items-center justify-center w-7 h-7 rounded-md bg-white/10 text-white shrink-0"
             aria-label="Fechar menu"
           >
-            <X size={13} />
+            <X size={14} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="nav-scroll">
-          <p className="nav-section-label">Principal</p>
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3 custom-scrollbar">
+          <p className={`text-[10px] font-bold tracking-widest uppercase text-white/30 px-2 py-2 whitespace-nowrap transition-opacity duration-200 ${collapsed ? 'opacity-0' : ''}`}>
+            Principal
+          </p>
 
-          {MAIN_NAV.map(({ href, label, Icon }) => {
-            const active = isActive(href)
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={onMobileClose}
-                className={`nav-item${active ? ' active' : ''}`}
-                aria-current={active ? 'page' : undefined}
-              >
-                <Icon size={16} className="nav-icon" />
-                <span className="nav-label">{label}</span>
-                <span className="nav-tooltip">{label}</span>
-              </Link>
-            )
-          })}
+          <div className="space-y-1">
+            {MAIN_NAV.map(({ href, label, Icon }) => {
+              const active = isActive(href)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onMobileClose}
+                  className={`group relative flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap overflow-hidden transition-colors ${active ? 'bg-white/15 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]' : 'text-white/60 hover:bg-white/10 hover:text-white/90'
+                    }`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-white/85 rounded-r-sm" />}
+                  <Icon size={18} className="shrink-0" />
+                  <span className={`transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>{label}</span>
 
-          <div className="nav-divider" />
-          <p className="nav-section-label">Sistema</p>
+                  {collapsed && (
+                    <span className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 bg-slate-900 border border-white/10 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md whitespace-nowrap shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+                      {label}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
 
-          {SYS_NAV.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={onMobileClose}
-              className={`nav-item${isActive(href) ? ' active' : ''}`}
-            >
-              <Icon size={16} className="nav-icon" />
-              <span className="nav-label">{label}</span>
-              <span className="nav-tooltip">{label}</span>
-            </Link>
-          ))}
+          <div className="h-px bg-white/10 my-4 mx-2" />
+
+          <p className={`text-[10px] font-bold tracking-widest uppercase text-white/30 px-2 py-2 whitespace-nowrap transition-opacity duration-200 ${collapsed ? 'opacity-0' : ''}`}>
+            Sistema
+          </p>
+
+          <div className="space-y-1">
+            {SYS_NAV.map(({ href, label, Icon }) => {
+              const active = isActive(href)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={onMobileClose}
+                  className={`group relative flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap overflow-hidden transition-colors ${active ? 'bg-white/15 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]' : 'text-white/60 hover:bg-white/10 hover:text-white/90'
+                    }`}
+                >
+                  {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-white/85 rounded-r-sm" />}
+                  <Icon size={18} className="shrink-0" />
+                  <span className={`transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>{label}</span>
+
+                  {collapsed && (
+                    <span className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 bg-slate-900 border border-white/10 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md whitespace-nowrap shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+                      {label}
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </div>
         </nav>
 
-        {/* User */}
-        <div className="nav-footer">
-          <div className="nav-user">
-            <div className="nav-avatar">VP</div>
-            <div className="nav-user-info">
-              <p className="nav-user-name">Prof. Valdirene</p>
-              <p className="nav-user-role">Professor AEE</p>
+        {/* Footer User */}
+        <div className="p-2 border-t border-white/10 shrink-0">
+          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+            <div className="w-8 h-8 rounded-full shrink-0 bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-white text-xs font-bold tracking-wide">
+              VP
+            </div>
+            <div className={`overflow-hidden transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>
+              <p className="text-xs font-semibold text-white whitespace-nowrap">Prof. Valdirene</p>
+              <p className="text-[10px] text-white/50 whitespace-nowrap">Professor AEE</p>
             </div>
           </div>
         </div>
@@ -166,8 +185,8 @@ export function useSidebar() {
   return {
     collapsed,
     mobileOpen,
-    toggle:      () => setCollapsed(c => !c),
-    openMobile:  () => setMobileOpen(true),
+    toggle: () => setCollapsed(c => !c),
+    openMobile: () => setMobileOpen(true),
     closeMobile: () => setMobileOpen(false),
   }
 }

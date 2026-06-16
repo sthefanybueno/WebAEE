@@ -13,11 +13,11 @@ import { useEffect } from 'react'
 type Tag = 'autonomia' | 'comunicacao' | 'motor_fino' | 'socializacao' | 'outro'
 
 const TAGS: { value: Tag; label: string; emoji: string }[] = [
-  { value: 'autonomia',    label: 'Autonomia',    emoji: 'ðŸŽ¯' },
-  { value: 'comunicacao',  label: 'ComunicaÃ§Ã£o',  emoji: 'ðŸ’¬' },
-  { value: 'motor_fino',   label: 'Motor Fino',   emoji: 'âœ‹' },
-  { value: 'socializacao', label: 'SocializaÃ§Ã£o', emoji: 'ðŸ¤' },
-  { value: 'outro',        label: 'Outro',        emoji: 'ðŸ“' },
+  { value: 'autonomia',    label: 'Autonomia',    emoji: '🎯' },
+  { value: 'comunicacao',  label: 'Comunicação',  emoji: '💬' },
+  { value: 'motor_fino',   label: 'Motor Fino',   emoji: '✋' },
+  { value: 'socializacao', label: 'Socialização', emoji: '🤝' },
+  { value: 'outro',        label: 'Outro',        emoji: '📌' },
 ]
 
 export default function RegistrarMomentoPage() {
@@ -85,144 +85,156 @@ export default function RegistrarMomentoPage() {
   }
 
   return (
-    <AppShell
-      header={
-        <>
-          <Link href="/dashboard" aria-label="Voltar" className="p-2 -ml-2 rounded-full hover:bg-[--color-primary-light] transition-colors">
-            <ArrowLeft size={20} />
-          </Link>
-          <h1 className="text-[18px] font-bold text-[--color-text-primary]">Registrar Momento</h1>
-          <span className="text-[13px] font-bold text-[--color-primary]">{step}/3</span>
-        </>
-      }
-    >
-      <div className="flex gap-1 px-4 -mt-1 mb-2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className={cn("h-1 flex-1 rounded-full transition-all duration-500", s <= step ? 'bg-[--color-primary]' : 'bg-[--color-border]')} />
-        ))}
-      </div>
-
-      {/* Erro global — substitui alert() por UI React testável */}
-      {erroGlobal && (
-        <div className="mx-4 mt-3 flex items-start gap-3 p-3.5 bg-red-50 border border-red-200 rounded-xl">
-          <span className="text-red-600 shrink-0 text-sm">⚠️</span>
-          <p className="text-[13px] font-semibold text-red-800">{erroGlobal}</p>
-        </div>
-      )}
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {step === 1 && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-[22px] font-bold text-[--color-text-primary]">Selecione a foto</h2>
-              <p className="text-[15px] text-[--color-text-secondary]">Capture ou escolha da galeria.</p>
-            </div>
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="w-full aspect-video rounded-2xl border-2 border-dashed border-[--color-border] flex flex-col items-center justify-center gap-3 hover:border-[--color-primary] hover:bg-[--color-primary-light]/20 transition-all overflow-hidden cursor-pointer"
+    <AppShell title="Registrar Momento">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 lg:py-8 space-y-6">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/dashboard" 
+              className="flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0"
+              aria-label="Voltar"
             >
-              {previewUrl
-                ? <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                : <>
-                    <Camera size={40} className="text-[--color-text-secondary]" />
-                    <p className="text-[15px] font-bold text-[--color-text-secondary]">Toque para adicionar foto</p>
-                  </>
-              }
-            </button>
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => fileRef.current?.click()}
-                className="min-h-[48px] flex items-center justify-center gap-2 border border-[--color-border] rounded-xl font-bold text-[--color-text-primary] hover:bg-[--color-surface] transition-colors cursor-pointer">
-                <Camera size={18} /> CÃ¢mera
+              <ArrowLeft size={18} />
+            </Link>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
+              Registrar Momento
+            </h1>
+          </div>
+          <span className="text-sm font-bold text-primary bg-primary-light/50 px-3 py-1 rounded-full">{step}/3</span>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="flex gap-1">
+          {[1, 2, 3].map((s) => (
+            <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", s <= step ? 'bg-primary' : 'bg-slate-200')} />
+          ))}
+        </div>
+
+        {/* Erro global */}
+        {erroGlobal && (
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <span className="text-red-600 shrink-0 text-sm mt-0.5">⚠️</span>
+            <p className="text-sm font-semibold text-red-800 leading-snug">{erroGlobal}</p>
+          </div>
+        )}
+
+        <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm p-5 sm:p-8">
+          {step === 1 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Selecione a foto</h2>
+                <p className="text-sm text-slate-500 mt-1">Capture ou escolha da galeria.</p>
+              </div>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="w-full aspect-video rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-3 hover:border-primary hover:bg-primary-light/10 transition-all overflow-hidden cursor-pointer"
+              >
+                {previewUrl
+                  ? <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                  : <>
+                      <Camera size={40} className="text-slate-400" />
+                      <p className="text-sm font-semibold text-slate-500">Toque para adicionar foto</p>
+                    </>
+                }
               </button>
-              <button onClick={() => fileRef.current?.click()}
-                className="min-h-[48px] flex items-center justify-center gap-2 border border-[--color-border] rounded-xl font-bold text-[--color-text-primary] hover:bg-[--color-surface] transition-colors cursor-pointer">
-                <ImagePlus size={18} /> Galeria
+              <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <button onClick={() => fileRef.current?.click()}
+                  className="py-3 flex items-center justify-center gap-2 border border-slate-200 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm active:scale-[0.98]">
+                  <Camera size={18} /> Câmera
+                </button>
+                <button onClick={() => fileRef.current?.click()}
+                  className="py-3 flex items-center justify-center gap-2 border border-slate-200 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm active:scale-[0.98]">
+                  <ImagePlus size={18} /> Galeria
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Para qual aluno?</h2>
+                <p className="text-sm text-slate-500 mt-1">Selecione o estudante deste momento.</p>
+              </div>
+              <div className="relative">
+                <input type="search" value={busca} onChange={(e) => setBusca(e.target.value)}
+                  placeholder="Buscar aluno..." autoFocus
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow text-sm" />
+                {loadingAlunos && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-primary" size={18} />}
+              </div>
+              <div className="flex flex-col gap-2.5 max-h-[40vh] overflow-y-auto pr-1 pb-1">
+                {(alunos || []).filter(a => a.nome.toLowerCase().includes(busca.toLowerCase())).map((a) => (
+                  <button key={a.id} onClick={() => handleSelectAluno(a.id!.toString())}
+                    className={cn('w-full flex items-center gap-4 p-4 rounded-xl border text-left transition-all hover:border-primary/40 active:scale-[0.99]',
+                      alunoId === a.id?.toString() ? 'border-primary bg-primary-light shadow-sm' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50')}>
+                    <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                      {getInitials(a.nome)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-slate-900 truncate">{a.nome}</p>
+                      <p className="text-xs text-slate-500 truncate mt-0.5">{a.escola_atual}</p>
+                    </div>
+                    {alunoId === a.id?.toString() && <Check size={20} className="ml-auto text-primary shrink-0" />}
+                  </button>
+                ))}
+                {!loadingAlunos && (alunos || []).length === 0 && (
+                  <div className="p-8 text-center text-slate-500 text-sm">
+                    Nenhum aluno encontrado.
+                    <Link href="/alunos/novo" className="block text-primary font-bold mt-3 hover:underline">Cadastrar aluno</Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Qual é o contexto?</h2>
+                <p className="text-sm text-slate-500 mt-1">Selecione a área pedagógica deste momento.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {TAGS.map((t) => (
+                  <button key={t.value} onClick={() => setTag(t.value)}
+                    className={cn('py-4 px-3 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 font-semibold text-sm rounded-xl border transition-all active:scale-[0.98]',
+                      tag === t.value
+                        ? 'bg-primary text-white border-primary shadow-md'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-primary/40 hover:bg-slate-50',
+                      t.value === 'outro' ? 'col-span-2' : ''
+                    )}>
+                    <span className="text-xl sm:text-lg leading-none">{t.emoji}</span> 
+                    <span>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-8 mt-4 border-t border-slate-100">
+            {step > 1 && (
+              <button onClick={() => setStep(s => (s === 3 && (alunoId || prefilledAlunoId) && prefilledAlunoId === alunoId) ? 1 : s - 1)}
+                className="flex-1 py-3 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm active:scale-[0.98]">
+                Anterior
               </button>
-            </div>
+            )}
+            {step < 3 ? (
+              <button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !previewUrl}
+                className="flex-[2] py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
+                Próximo →
+              </button>
+            ) : (
+              <button onClick={handleSalvar} disabled={!tag || saving}
+                className="flex-[2] py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
+                {saving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
+                {saving ? 'Salvando...' : 'Salvar e Fechar'}
+              </button>
+            )}
           </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-[22px] font-bold text-[--color-text-primary]">Para qual aluno?</h2>
-              <p className="text-[15px] text-[--color-text-secondary]">Selecione o estudante deste momento.</p>
-            </div>
-            <div className="relative">
-              <input type="search" value={busca} onChange={(e) => setBusca(e.target.value)}
-                placeholder="Buscar aluno..." autoFocus
-                className="w-full min-h-[48px] px-4 rounded-xl border border-[--color-border] bg-[--color-surface] outline-none focus:border-[--color-primary] transition-colors text-[15px]" />
-              {loadingAlunos && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-[--color-primary]" size={18} />}
-            </div>
-            <div className="flex flex-col gap-2 max-h-[40vh] overflow-y-auto">
-              {(alunos || []).filter(a => a.nome.toLowerCase().includes(busca.toLowerCase())).map((a) => (
-                <button key={a.id} onClick={() => handleSelectAluno(a.id!.toString())}
-                  className={cn('w-full flex items-center gap-4 p-4 bg-[--color-surface-card] rounded-2xl border text-left transition-all hover:border-[--color-primary]/40 cursor-pointer',
-                    alunoId === a.id?.toString() ? 'border-[--color-primary] bg-[--color-primary-light]' : 'border-[--color-border]')}>
-                  <div className="w-10 h-10 rounded-full bg-[--color-primary-light] flex items-center justify-center text-[--color-primary] font-bold text-sm shrink-0">
-                    {getInitials(a.nome)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-[--color-text-primary] truncate">{a.nome}</p>
-                    <p className="text-[13px] text-[--color-text-secondary] truncate">{a.escola_atual}</p>
-                  </div>
-                  {alunoId === a.id?.toString() && <Check size={18} className="ml-auto text-[--color-primary] shrink-0" />}
-                </button>
-              ))}
-              {!loadingAlunos && (alunos || []).length === 0 && (
-                <div className="p-8 text-center text-[--color-text-secondary]">
-                  Nenhum aluno cadastrado.
-                  <Link href="/alunos/novo" className="block text-[--color-primary] font-bold mt-2 underline">Cadastrar aluno</Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-[22px] font-bold text-[--color-text-primary]">Qual Ã© o contexto?</h2>
-              <p className="text-[15px] text-[--color-text-secondary]">Selecione a Ã¡rea pedagÃ³gica deste momento.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {TAGS.map((t) => (
-                <button key={t.value} onClick={() => setTag(t.value)}
-                  className={cn('min-h-[56px] flex items-center justify-center gap-2 font-bold rounded-xl border transition-all cursor-pointer',
-                    tag === t.value
-                      ? 'bg-[--color-primary] text-white border-transparent shadow-md'
-                      : 'bg-[--color-surface-card] text-[--color-text-primary] border-[--color-border] hover:border-[--color-primary]/40',
-                    t.value === 'outro' ? 'col-span-2' : ''
-                  )}>
-                  {t.emoji} {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-3 pt-4">
-          {step > 1 && (
-            <button onClick={() => setStep(s => (s === 3 && (alunoId || prefilledAlunoId) && prefilledAlunoId === alunoId) ? 1 : s - 1)}
-              className="flex-1 min-h-[48px] border border-[--color-border] text-[--color-text-secondary] font-bold rounded-xl hover:bg-[--color-surface] transition-colors cursor-pointer">
-              Anterior
-            </button>
-          )}
-          {step < 3 ? (
-            <button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !previewUrl}
-              className="flex-[2] min-h-[48px] bg-[--color-primary] hover:bg-[--color-primary-hover] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-40 cursor-pointer">
-              PrÃ³ximo â†’
-            </button>
-          ) : (
-            <button onClick={handleSalvar} disabled={!tag || saving}
-              className="flex-[2] min-h-[48px] bg-[--color-primary] hover:bg-[--color-primary-hover] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-40 cursor-pointer">
-              {saving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-              {saving ? 'Salvando...' : 'Salvar e Fechar'}
-            </button>
-          )}
         </div>
       </div>
     </AppShell>
   )
 }
-

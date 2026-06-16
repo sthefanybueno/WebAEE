@@ -45,7 +45,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-.025em', color: 'var(--s-900)', lineHeight: 1.2 }}>
-              Bom dia, Professora Valdirene 👋
+              Bom dia 👋
             </h2>
             <p style={{ fontSize: 14, color: 'var(--color-sub)', marginTop: 6 }}>{saudacao}</p>
           </div>

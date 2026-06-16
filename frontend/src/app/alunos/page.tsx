@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { AppShell } from '@/presentation/components/layout/AppShell'
-import { Search, Plus, Loader2, AlertCircle, CheckCircle2, Clock, Users } from 'lucide-react'
+import { Search, Plus, Loader2, AlertCircle, CheckCircle2, Clock, Users, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
 import { useAlunos } from '@/application/hooks/useAlunos'
@@ -22,15 +22,15 @@ export default function AlunosPage() {
 
   return (
     <AppShell title="Alunos">
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '36px 24px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div className="max-w-5xl mx-auto p-6 lg:p-8 space-y-6">
 
         {/* ── Header ───────────────────────────────────────── */}
-        <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-.025em', color: 'var(--s-900)', lineHeight: 1.2 }}>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900 leading-tight">
               Alunos
             </h2>
-            <p style={{ fontSize: 13.5, color: 'var(--color-sub)', marginTop: 5 }}>
+            <p className="text-sm text-slate-500 mt-1">
               {loading
                 ? 'Carregando...'
                 : `${alunos.length} aluno${alunos.length !== 1 ? 's' : ''} encontrado${alunos.length !== 1 ? 's' : ''}`
@@ -38,53 +38,49 @@ export default function AlunosPage() {
             </p>
           </div>
 
-          <Link href="/alunos/novo" className="btn btn-primary">
-            <Plus size={15} />
+          <Link 
+            href="/alunos/novo" 
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+          >
+            <Plus size={16} />
             Novo Aluno
           </Link>
         </div>
 
         {/* ── Barra de busca + filtros ─────────────────────── */}
-        <div className="flex gap-3 flex-wrap items-center">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           {/* Search */}
-          <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
+          <div className="relative flex-1 min-w-[240px] w-full">
             <Search
-              size={14}
-              style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--s-400)', pointerEvents: 'none' }}
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
             <input
               type="search"
               value={busca}
               onChange={e => setBusca(e.target.value)}
               placeholder="Buscar pelo nome..."
-              className="input"
-              style={{ paddingLeft: 38 }}
+              className="w-full h-10 pl-10 pr-10 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
             />
             {loading && (
               <Loader2
-                size={13}
-                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--g-700)', animation: 'spin 1s linear infinite' }}
+                size={16}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 animate-spin"
               />
             )}
           </div>
 
           {/* Filtros */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {FILTROS.map(f => (
               <button
                 key={f.value}
                 onClick={() => setFiltro(f.value)}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: 'var(--r-full)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  border: filtro === f.value ? '1px solid var(--g-200)' : '1px solid var(--color-border)',
-                  background: filtro === f.value ? 'var(--g-50)' : 'transparent',
-                  color: filtro === f.value ? 'var(--g-700)' : 'var(--color-sub)',
-                  cursor: 'pointer',
-                  transition: 'all .14s',
-                }}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 border ${
+                  filtro === f.value 
+                    ? 'bg-slate-100 border-slate-200 text-slate-900 shadow-sm' 
+                    : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                }`}
               >
                 {f.label}
               </button>
@@ -94,125 +90,119 @@ export default function AlunosPage() {
 
         {/* ── Conteúdo ─────────────────────────────────────── */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center" style={{ padding: '80px 0', gap: 14 }}>
-            <Loader2 size={26} style={{ color: 'var(--g-700)', animation: 'spin 1s linear infinite' }} />
-            <p style={{ fontSize: 13.5, color: 'var(--color-sub)', fontWeight: 500 }}>Carregando alunos...</p>
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
+            <Loader2 size={32} className="text-slate-400 animate-spin" />
+            <p className="text-sm font-medium text-slate-500">Carregando alunos...</p>
           </div>
 
         ) : alunos.length === 0 ? (
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '64px 24px', textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--s-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
-              <Users size={24} color="var(--s-400)" />
+          <div className="bg-white border border-slate-200/60 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] p-12 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-6 border border-slate-100">
+              <Users size={28} className="text-slate-400" />
             </div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--s-900)' }}>Nenhum aluno encontrado</p>
-            <p style={{ fontSize: 13.5, color: 'var(--color-sub)', marginTop: 6, marginBottom: 24, maxWidth: 300 }}>
-              {busca ? 'Tente outros termos de busca ou ajuste os filtros.' : 'Cadastre o primeiro aluno para começar.'}
+            <p className="text-lg font-bold text-slate-900">Nenhum aluno encontrado</p>
+            <p className="text-sm text-slate-500 mt-2 mb-8 max-w-sm leading-relaxed">
+              {busca ? 'Tente outros termos de busca ou ajuste os filtros.' : 'Cadastre o primeiro aluno para começar o acompanhamento.'}
             </p>
-            <Link href="/alunos/novo" className="btn btn-primary" style={{ fontSize: 13 }}>
-              <Plus size={14} /> Cadastrar Aluno
+            <Link 
+              href="/alunos/novo" 
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+            >
+              <Plus size={16} /> Cadastrar Aluno
             </Link>
           </div>
 
         ) : (
-          <div className="card" style={{ overflow: 'hidden' }}>
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>Aluno</th>
-                  <th>Escola</th>
-                  <th>Nascimento</th>
-                  <th>Status</th>
-                  <th>Sincronização</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {alunos.map(a => (
-                  <tr key={a.server_id ?? a.id}>
-
-                    {/* Nome */}
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div style={{
-                          width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                          background: 'var(--g-100)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          color: 'var(--g-700)', fontSize: 11.5, fontWeight: 700, letterSpacing: '.03em',
-                        }}>
-                          {getInitials(a.nome)}
-                        </div>
-                        <span style={{ fontWeight: 600, fontSize: 13.5 }}>{a.nome}</span>
-                      </div>
-                    </td>
-
-                    {/* Escola */}
-                    <td style={{ color: 'var(--color-sub)', fontSize: 13 }}>
-                      {a.escola_atual || '—'}
-                    </td>
-
-                    {/* Nascimento */}
-                    <td style={{ color: 'var(--color-sub)', fontSize: 13 }}>
-                      {a.data_nascimento
-                        ? new Date(a.data_nascimento).toLocaleDateString('pt-BR')
-                        : '—'}
-                    </td>
-
-                    {/* Status */}
-                    <td>
-                      <span className={`badge ${a.status === 'ativo' ? 'b-green' : 'b-slate'}`}>
-                        <span style={{
-                          width: 6, height: 6, borderRadius: '50%',
-                          background: a.status === 'ativo' ? '#16a34a' : 'var(--s-400)',
-                          flexShrink: 0,
-                          ...(a.status === 'ativo' ? { animation: 'glow-pulse 2s ease infinite' } : {}),
-                        }} />
-                        {a.status === 'ativo' ? 'Ativo' : 'Arquivado'}
-                      </span>
-                    </td>
-
-                    {/* Sync */}
-                    <td>
-                      {a.sync_status === 'local' ? (
-                        <span className="badge b-amber">
-                          <Clock size={10} style={{ flexShrink: 0 }} />
-                          Pendente
-                        </span>
-                      ) : a.sync_status === 'failed' ? (
-                        <span className="badge b-red">
-                          <AlertCircle size={10} style={{ flexShrink: 0 }} />
-                          Falhou
-                        </span>
-                      ) : (
-                        <span className="badge b-green">
-                          <CheckCircle2 size={10} style={{ flexShrink: 0 }} />
-                          Sincronizado
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Ação */}
-                    <td style={{ textAlign: 'right' }}>
-                      <Link
-                        href={`/alunos/${a.server_id ?? a.id}`}
-                        style={{
-                          fontSize: 12.5, fontWeight: 600, color: 'var(--g-700)',
-                          textDecoration: 'none', padding: '5px 12px',
-                          borderRadius: 'var(--r-full)',
-                          background: 'var(--g-50)',
-                          border: '1px solid var(--g-200)',
-                          display: 'inline-block',
-                          transition: 'background .14s',
-                        }}
-                        onMouseEnter={e => ((e.target as HTMLElement).style.background = 'var(--g-100)')}
-                        onMouseLeave={e => ((e.target as HTMLElement).style.background = 'var(--g-50)')}
-                      >
-                        Ver perfil →
-                      </Link>
-                    </td>
+          <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-slate-200">
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Aluno</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Escola</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sincronização</th>
+                    <th className="px-6 py-4"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {alunos.map(a => (
+                    <tr 
+                      key={a.server_id ?? a.id}
+                      className="group hover:bg-slate-50/80 transition-colors duration-150"
+                    >
+                      {/* Nome */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full shrink-0 bg-green-50 flex items-center justify-center text-primary text-xs font-bold tracking-wide">
+                            {getInitials(a.nome)}
+                          </div>
+                          <span className="font-semibold text-sm text-slate-900">{a.nome}</span>
+                        </div>
+                      </td>
+
+                      {/* Escola */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                        {a.escola_atual || '—'}
+                      </td>
+
+                      {/* Nascimento */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                        {a.data_nascimento
+                          ? new Date(a.data_nascimento).toLocaleDateString('pt-BR')
+                          : '—'}
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          a.status === 'ativo' 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {a.status === 'ativo' && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-glow-pulse" />
+                          )}
+                          {a.status === 'ativo' ? 'Ativo' : 'Arquivado'}
+                        </span>
+                      </td>
+
+                      {/* Sync */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {a.sync_status === 'local' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                            <Clock size={12} className="shrink-0" />
+                            Pendente
+                          </span>
+                        ) : a.sync_status === 'failed' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                            <AlertCircle size={12} className="shrink-0" />
+                            Falhou
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <CheckCircle2 size={12} className="shrink-0" />
+                            Sincronizado
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Ação */}
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <Link
+                          href={`/alunos/${a.server_id ?? a.id}`}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                          title="Ver perfil"
+                        >
+                          <ChevronRight size={18} />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
