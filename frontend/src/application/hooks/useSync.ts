@@ -4,28 +4,24 @@ import { useEffect, useState, useCallback } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/infrastructure/db/db'
 import { apiClient, ApiError } from '@/infrastructure/http/client'
+import type { AlunoLocal } from '@/infrastructure/db/db'
 
 type SyncState = 'idle' | 'syncing' | 'error' | 'offline'
 
 /**
- * useSync â€” drena a fila de sincronizaÃ§Ã£o quando o dispositivo fica online.
+ * useSync — gerencia a sincronização bidirecional entre o Dexie e o backend.
  *
- * Fluxo:
- *   1. Detecta evento `online`
- *   2. LÃª sync_queue ordenado por prioridade (1 = relatÃ³rios, 2 = alunos/fotos)
- *   3. Para cada item, chama apiClient.post/patch/delete
- *   4. Se sucesso â†’ remove da fila e marca entidade como `synced`
- *   5. Se 401    â†’ interrompe sync (sessÃ£o expirada; apiClient redireciona)
- *   6. Se outro erro â†’ mantÃ©m na fila para prÃ³xima tentativa (falha transiente)
+ * Fluxo Up (runSync):
+ *   1. Drena sync_queue quando online.
+ *   2. POST/PUT/DELETE para API e atualiza local_id para server_id.
  *
- * Tratamento de erros:
- *   - `ApiError` com status 401: para o loop imediatamente.
- *   - `ApiError` com outros status: item permanece na fila.
- *   - Erros de rede inesperados: item permanece na fila.
+ * Fluxo Down (runSyncDown):
+ *   1. Busca lista completa de Alunos do servidor.
+ *   2. Faz merge com a base local (atualizando campos, mantendo o que foi editado offline se necessário).
  *
  * [Clean Architecture v3]
- *   - pendingCount agora Ã© reativo via useLiveQuery (sem setInterval frÃ¡gil).
- *   - ConstruÃ§Ã£o de URL permanece aqui pois Ã© responsabilidade de adaptador HTTP.
+ *   - pendingCount agora é reativo via useLiveQuery.
+ *   - Lógica de requests encapsulada aqui, separando do componente UI.
  */
 export function useSync() {
   const [state, setState] = useState<SyncState>('idle')
@@ -52,27 +48,20 @@ export function useSync() {
     for (const item of items) {
       try {
         const endpoint = `/api/${item.entidade}s`
-        let payload = { ...item.payload } as Record<string, unknown>
+        const payload = { ...item.payload } as Record<string, unknown>
 
         // Patch automático para corrigir dados em cache na fila
         if (item.entidade === 'aluno') {
-          const nomeEscola = payload.escola_atual || payload.escola
-          if (!payload.escola_atual_id && nomeEscola) {
-            const mapEscolaReverse: Record<string, string> = {
-              'E.E. Castelo Branco': '00000000-0000-0000-0000-000000000001',
-              'E.M. Flores do Campo': '00000000-0000-0000-0000-000000000002',
-              'E.M. Primavera': '00000000-0000-0000-0000-000000000003'
-            }
-            payload.escola_atual_id = mapEscolaReverse[nomeEscola as string] || '00000000-0000-0000-0000-000000000001'
-          }
           if (payload.consentimento_lgpd === undefined) {
             payload.consentimento_lgpd = true
           }
         }
 
-        // Patch automático para fotos (relacionamentos e upload)
+        let response: any = null
+        let skipDefaultRequest = false
+
+        // Para fotos: atualiza aluno_id se o aluno foi sincronizado recentemente
         if (item.entidade === 'foto') {
-          // Tenta atualizar o aluno_id caso o aluno tenha acabado de ser sincronizado
           if (payload.aluno_id && String(payload.aluno_id).length < 32) {
              const localAlunoId = Number(payload.aluno_id)
              if (!isNaN(localAlunoId)) {
@@ -82,22 +71,40 @@ export function useSync() {
                }
              }
           }
-          if (!payload.url) {
-            // TODO: Fazer upload real do blob da foto. Placeholder por enquanto.
-            payload.url = "https://placeholder.com/offline-sync.jpg"
+          
+          if (item.operacao === 'create') {
+            const localFotoId = (payload as any).local_foto_id
+            const foto = await db.fotos.get(localFotoId)
+            
+            if (foto && foto.blob) {
+              const formData = new FormData()
+              formData.append('file', foto.blob, 'photo.jpg')
+              formData.append('aluno_id', String(payload.aluno_id))
+              formData.append('tag', String(payload.tag))
+
+              // Usa o httpClient, passando body no format options
+              // Como is FormData, Content-Type não será application/json
+              const res = await apiClient.post('/api/fotos/upload', formData)
+              response = res
+              skipDefaultRequest = true
+            } else {
+              console.warn(`[Sync] Foto blob not found for item ${item.id}. Ignorando da fila.`)
+              await db.sync_queue.delete(item.id!)
+              continue
+            }
           }
         }
 
-        let response: any = null
-
-        if (item.operacao === 'create') {
-          response = await apiClient.post(endpoint, payload)
-        } else if (item.operacao === 'update') {
-          const serverId = payload.server_id
-          response = await apiClient.put(`${endpoint}/${serverId}`, payload)
-        } else if (item.operacao === 'delete') {
-          const serverId = payload.server_id
-          await apiClient.delete(`${endpoint}/${serverId}`)
+        if (!skipDefaultRequest) {
+          if (item.operacao === 'create') {
+            response = await apiClient.post(endpoint, payload)
+          } else if (item.operacao === 'update') {
+            const serverId = payload.server_id
+            response = await apiClient.put(`${endpoint}/${serverId}`, payload)
+          } else if (item.operacao === 'delete') {
+            const serverId = payload.server_id
+            await apiClient.delete(`${endpoint}/${serverId}`)
+          }
         }
 
         // Sucesso: remove da fila e marca como sincronizado
@@ -114,6 +121,18 @@ export function useSync() {
           }
           await db.alunos.update(localId, updateData)
         }
+        
+        if (
+          item.entidade === 'foto' &&
+          (item.payload as any).local_foto_id
+        ) {
+          const localFotoId = (item.payload as any).local_foto_id
+          await db.fotos.update(localFotoId, {
+            sync_status: 'synced',
+            server_id: response?.id,
+            url_remote: response?.url
+          })
+        }
       } catch (err) {
         if (err instanceof ApiError) {
           if (err.statusCode === 401) {
@@ -121,6 +140,13 @@ export function useSync() {
             console.error('[Sync] SessÃ£o expirada. SincronizaÃ§Ã£o interrompida.')
             setState('error')
             return // Para o loop inteiramente
+          }
+          if (err.statusCode === 404) {
+            // O item nÃ£o existe no servidor (ex: foi deletado por outro meio).
+            // Para evitar loop infinito, removemos da fila.
+            console.warn(`[Sync] Servidor retornou 404 para o item ${item.id} (${item.entidade}). Removendo da fila de sync para evitar loop infinito.`)
+            await db.sync_queue.delete(item.id!)
+            continue
           }
 
           // Erro de servidor (4xx/5xx): mantÃ©m na fila para prÃ³xima tentativa
@@ -142,14 +168,69 @@ export function useSync() {
     setState(remaining === 0 ? 'idle' : 'error')
   }, [])
 
+  // Função para baixar os dados do servidor para o Dexie
+  const runSyncDown = useCallback(async () => {
+    if (!navigator.onLine) return
+
+    try {
+      // 1. Buscar Alunos da API
+      const alunosServer = await apiClient.get<any[]>('/api/alunos')
+      
+      // 2. Para cada aluno, salvar/atualizar no Dexie.
+      // O campo sync_status será marcado como 'synced' pois veio do servidor.
+      const alunosToPut = alunosServer.map(a => {
+        const { id, ...rest } = a
+        return {
+          ...rest,
+          server_id: id,
+          sync_status: 'synced',
+          conflict_flag: false,
+        }
+      })
+
+      for (const aluno of alunosToPut) {
+        const existente = await db.alunos.where('server_id').equals(aluno.server_id).first()
+        if (existente) {
+          // Mantém o ID local e atualiza os dados A MENOS QUE haja edições locais pendentes
+          if (existente.sync_status !== 'local') {
+            await db.alunos.update(existente.id!, aluno)
+          }
+        } else {
+          // Insere novo
+          await db.alunos.add(aluno)
+        }
+      }
+      
+      console.log(`[SyncDown] ${alunosToPut.length} alunos sincronizados com o servidor.`)
+    } catch (err) {
+      console.error('[SyncDown] Erro ao buscar alunos do servidor:', err)
+    }
+  }, [])
+
   // Dispara sync automaticamente quando ficar online
   useEffect(() => {
-    window.addEventListener('online', runSync)
-    // Tenta sync imediato ao montar (caso jÃ¡ esteja online com pendÃªncias)
-    if (navigator.onLine) runSync()
-    return () => window.removeEventListener('online', runSync)
-  }, [runSync])
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
-  return { state, pendingCount, runSync }
+    const handleOnline = () => {
+      runSyncDown()
+      runSync()
+    }
+    window.addEventListener('online', handleOnline)
+    
+    // Tenta sync imediato ao montar (caso já esteja online com pendências)
+    if (navigator.onLine) {
+      timeoutId = setTimeout(() => {
+        runSyncDown()
+        runSync()
+      }, 0)
+    }
+    
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [runSync, runSyncDown])
+
+  return { state, pendingCount, runSync, runSyncDown }
 }
 

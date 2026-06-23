@@ -1,40 +1,57 @@
 import uuid
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, HTTPException, status, Depends, Request
+from sqlmodel.ext.asyncio.session import AsyncSession
+from app.infrastructure.database import get_session
 from app.interfaces.schemas.auth import LoginRequest, LoginResponse, TokenRefreshRequest, TokenRefreshResponse
 from app.domain.entities.user import PapelUsuario
 from app.infrastructure.rate_limit import limiter
+from app.infrastructure.security.tokens import create_access_token, decode_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/login", response_model=LoginResponse)
 @limiter.limit("5/minute")
-async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(
+    request: Request, 
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: AsyncSession = Depends(get_session)
+):
     """
-    **🔑 Login de desenvolvimento (Mock)**
-
-    - **Username**: qualquer e-mail
-    - **Password**: digite o **papel** desejado:
-      - `coordenacao` → acesso total (cria usuários, vê tudo)
-      - `prof_aee` → cria e edita relatórios
-      - `prof_apoio` → acompanha alunos
-      - `prof_regente` → somente leitura
-      - qualquer outra coisa → usa `coordenacao` por padrão
+    **🔑 Login com Banco de Dados**
     """
-    # Tenta usar o password como papel, fallback para coordenacao
-    try:
-        papel = PapelUsuario(form_data.password.strip().lower())
-    except ValueError:
-        papel = PapelUsuario.COORDENACAO  # padrão mais permissivo para dev
+    from app.infrastructure.repositories.user_repository_impl import SQLModelUserRepository
+    from app.infrastructure.security.passwords import verify_password
+    
+    repo = SQLModelUserRepository(session)
+    user = await repo.get_by_email(form_data.username.strip().lower())
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="E-mail ou senha incorretos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    if not user.ativo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuário inativo"
+        )
 
-    user_id = uuid.uuid4()
-    tenant_id = uuid.uuid4()
+    # Substituindo mock pelo JWT real integrado ao Postgres
+    access_token = create_access_token(
+        user_id=user.id,
+        tenant_id=user.tenant_id,
+        papel=user.papel.value,
+        nome=user.nome
+    )
 
     return LoginResponse(
-        access_token=f"mock_token_{user_id}_{tenant_id}_{papel.value}",
-        user_id=user_id,
-        tenant_id=tenant_id,
-        papel=papel
+        access_token=access_token,
+        user_id=user.id,
+        tenant_id=user.tenant_id,
+        papel=user.papel
     )
 
 @router.post("/refresh", response_model=TokenRefreshResponse)
@@ -43,12 +60,22 @@ async def refresh_token(request: TokenRefreshRequest):
     Simula o rotacionamento silencioso do JWT token.
     PWA utiliza essa rota intermitentemente para evitar o logout silencioso.
     """
-    if not request.refresh_token.startswith("mock_"):
+    # Decodifica o token antigo para extrair os dados e gerar um novo
+    payload = decode_access_token(request.refresh_token)
+    if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh token inválido"
+            detail="Refresh token inválido ou expirado"
         )
     
+    # Gera o novo JWT real mantendo os dados da sessão original
+    new_access_token = create_access_token(
+        user_id=uuid.UUID(payload["sub"]),
+        tenant_id=uuid.UUID(payload["tenant_id"]),
+        papel=payload["papel"],
+        nome=payload.get("nome", "Usuário")
+    )
+    
     return TokenRefreshResponse(
-        access_token=f"mock_refreshed_token_{uuid.uuid4()}",
+        access_token=new_access_token,
     )

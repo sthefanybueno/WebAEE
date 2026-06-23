@@ -70,11 +70,14 @@ export default function RegistrarMomentoPage() {
 
     setSaving(true)
     try {
-      const numAlunoId = parseInt(alunoId)
-      if (isNaN(numAlunoId)) {
-        throw new Error('ID do aluno inválido.')
+      if (!alunoId) {
+        throw new Error('ID do aluno não informado.')
       }
-      await salvarFotoLocal(numAlunoId, selectedFile, tag)
+      
+      // alunoId pode ser um número (ID local) ou string (UUID)
+      const idParaSalvar = isNaN(Number(alunoId)) ? alunoId : Number(alunoId)
+      
+      await salvarFotoLocal(idParaSalvar, selectedFile, tag)
       router.push('/dashboard')
     } catch (err) {
       console.error('[handleSalvar] Erro ao salvar momento localmente:', err)

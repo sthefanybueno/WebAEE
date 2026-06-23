@@ -13,6 +13,7 @@ class CurrentUser:
     papel: PapelUsuario
 
 
+from app.infrastructure.security.tokens import decode_access_token
 from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -21,24 +22,18 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme)
 ) -> CurrentUser:
     """
-    Mock de autenticação compatível com o botão (Authorize) do Swagger (MVP).
-    O token esperado é o retornado pelo /api/auth/login ou formato mock manual:
-    Formato: "mock_token_{user_id}_{tenant_id}_{papel}"
+    Decodifica e valida o JWT real emitido em /api/auth/login
+    para recuperar o usuário autenticado.
     """
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token JWT inválido ou expirado")
+        
     try:
-        parts = token.split("_")
-        if len(parts) >= 5 and parts[0] == "mock" and parts[1] == "token":
-            user_id = uuid.UUID(parts[2])
-            tenant_id = uuid.UUID(parts[3])
-            papel = PapelUsuario("_".join(parts[4:]))
-        else:
-            # Fallback for old tokens or generic mock testing tokens
-            # FIXED: Utiliza UUID fixo para não quebrar referências entre requisições (ex: tenant_id)
-            user_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
-            tenant_id = uuid.UUID("22222222-2222-2222-2222-222222222222")
-            papel = PapelUsuario.PROF_AEE
-            
-    except (ValueError, IndexError):
-        raise HTTPException(status_code=401, detail="Token JWT inválido")
+        user_id = uuid.UUID(payload["sub"])
+        tenant_id = uuid.UUID(payload["tenant_id"])
+        papel = PapelUsuario(payload["papel"])
+    except (ValueError, KeyError):
+        raise HTTPException(status_code=401, detail="Token JWT malformado")
         
     return CurrentUser(id=user_id, tenant_id=tenant_id, papel=papel)

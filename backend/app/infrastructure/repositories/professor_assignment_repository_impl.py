@@ -25,6 +25,16 @@ class SQLModelProfessorAssignmentRepository(ProfessorAssignmentRepository):
         result = await self._session.exec(stmt)
         return [ProfessorAssignment(**orm.model_dump()) for orm in result.all()]
 
+    async def list_active_by_user(
+        self, user_id: uuid.UUID
+    ) -> List[ProfessorAssignment]:
+        stmt = select(ProfessorAssignmentORM).where(
+            ProfessorAssignmentORM.usuario_id == user_id,
+            ProfessorAssignmentORM.data_fim == None,
+        )
+        result = await self._session.exec(stmt)
+        return [ProfessorAssignment(**orm.model_dump()) for orm in result.all()]
+
     async def save(self, assignment: ProfessorAssignment) -> ProfessorAssignment:
         orm = ProfessorAssignmentORM(**assignment.model_dump())
         orm = await self._session.merge(orm)

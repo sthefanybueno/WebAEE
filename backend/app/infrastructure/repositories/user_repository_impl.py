@@ -50,7 +50,7 @@ class SQLModelUserRepository(UserRepository):
         count_statement = select(func.count()).select_from(statement.subquery())
         total = (await self.session.exec(count_statement)).one()
         
-        statement = statement.offset((page - 1) * size).limit(size)
+        statement = statement.order_by(UserORM.nome).offset((page - 1) * size).limit(size)
         result = await self.session.exec(statement)
         items = [User(**orm.model_dump()) for orm in result.all()]
         

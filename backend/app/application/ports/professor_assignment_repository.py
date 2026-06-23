@@ -10,6 +10,11 @@ class ProfessorAssignmentRepository(Protocol):
     ) -> List[ProfessorAssignment]:
         ...
 
+    async def list_active_by_user(
+        self, user_id: uuid.UUID
+    ) -> List[ProfessorAssignment]:
+        ...
+
     async def save(
         self, assignment: ProfessorAssignment
     ) -> ProfessorAssignment:

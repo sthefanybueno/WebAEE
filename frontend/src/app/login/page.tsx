@@ -16,104 +16,101 @@ export default function LoginPage() {
     e.preventDefault()
     setErro('')
     setLoading(true)
-    await new Promise(r => setTimeout(r, 700))
-    if (email === 'professor@aee.gov.br' && senha === 'senha') {
-      document.cookie = 'aee_token=mock_token; path=/'
-      localStorage.setItem('aee_token', 'mock_token')
-      router.push('/dashboard')
-    } else {
-      setErro('E-mail ou senha incorretos.')
+    
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username: email, password: senha })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        document.cookie = `aee_token=${data.access_token}; path=/`
+        localStorage.setItem('aee_token', data.access_token)
+        router.push('/dashboard')
+      } else {
+        const errorData = await res.json().catch(() => null)
+        setErro(errorData?.detail || 'E-mail ou senha incorretos.')
+      }
+    } catch (err) {
+      setErro('Erro ao conectar ao servidor. Verifique se o backend está rodando.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: 'var(--c-gray-50)' }}>
+    <div className="flex min-h-[100dvh] bg-slate-50">
 
       {/* ── Left branding panel ── */}
-      <div style={{
-        width: 440, flexShrink: 0, background: 'linear-gradient(155deg, #1e7c4e 0%, #1A6F45 55%, #155838 100%)',
-        display: 'flex', flexDirection: 'column', padding: '40px 44px',
-        position: 'relative', overflow: 'hidden',
-      }}
-        className="login-panel"
+      <div 
+        className="hidden md:flex flex-col relative overflow-hidden"
+        style={{
+          width: 440, flexShrink: 0, background: 'linear-gradient(155deg, #1e7c4e 0%, #1A6F45 55%, #155838 100%)',
+          padding: '40px 44px'
+        }}
       >
         {/* Decorative blobs */}
-        <div style={{ position: 'absolute', top: -80, right: -80, width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -60, left: -40, width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '45%', left: '60%', width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+        <div className="absolute -top-20 -right-20 w-[280px] h-[280px] rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -bottom-16 -left-10 w-[220px] h-[220px] rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute top-[45%] left-[60%] w-[140px] h-[140px] rounded-full bg-white/5 pointer-events-none" />
 
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 13, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="flex items-center gap-3 relative z-10">
+          <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center">
             <Leaf size={22} color="white" />
           </div>
           <div>
-            <p style={{ fontSize: 17, fontWeight: 700, color: 'white', lineHeight: 1.1 }}>Sistema AEE</p>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>Atendimento Educacional Especializado</p>
+            <p className="text-[17px] font-bold text-white leading-tight">Sistema AEE</p>
+            <p className="text-[11px] text-white/60 mt-0.5">Atendimento Educacional Especializado</p>
           </div>
         </div>
 
         {/* Headline */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontSize: 30, fontWeight: 700, color: 'white', lineHeight: 1.3, marginBottom: 28 }}>
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <h1 className="text-[30px] font-bold text-white leading-snug mb-7">
             Acompanhamento<br />pedagógico ao seu<br />alcance, mesmo offline.
           </h1>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[
-              { icon: '🌱', text: 'Funciona 100% offline via IndexedDB' },
-              { icon: '📸', text: 'Registro de momentos pedagógicos' },
-              { icon: '📋', text: 'Relatórios e acompanhamentos diários' },
-              { icon: '🔒', text: 'Dados protegidos — LGPD Art. 58 LDB' },
-            ].map(({ icon, text }) => (
-              <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>{icon}</span>
-                <span style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.78)' }}>{text}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', position: 'relative', zIndex: 1 }}>© 2025 Sistema AEE • v1.0.0</p>
+        <p className="text-[11px] text-white/30 relative z-10">© 2025 Sistema AEE • v1.0.0</p>
       </div>
 
       {/* ── Right form panel ── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-        <div style={{ width: '100%', maxWidth: 400 }}>
+      <div className="flex-1 flex items-center justify-center p-6 md:p-10">
+        <div className="w-full max-w-[400px]">
 
           {/* Mobile logo */}
-          <div style={{ display: 'none', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 32 }} className="login-mobile-logo">
-            <div style={{ width: 40, height: 40, borderRadius: 11, background: '#1A6F45', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="flex md:hidden items-center justify-center gap-2.5 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Leaf size={20} color="white" />
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#1A6F45' }}>Sistema AEE</span>
+            <span className="text-lg font-bold text-primary">Sistema AEE</span>
           </div>
 
           {/* Card */}
-          <div className="card" style={{ padding: '36px 32px' }}>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 4 }}>Bem-vinda de volta</h2>
-            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 28 }}>
-              Entre com suas credenciais para acessar o sistema.
-            </p>
-
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-8 sm:p-10">
+            <h2 className="text-2xl font-bold text-slate-900 text-center mb-8">Seja Bem-Vinda</h2>
+            <form onSubmit={handleLogin} className="flex flex-col gap-5">
               <div>
-                <label htmlFor="email" className="form-label">E-mail institucional</label>
+                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">E-mail</label>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="professor@escola.gov.br"
+                  placeholder="professor@email.com"
                   required
                   autoFocus
-                  className="form-input"
+                  className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
                 />
               </div>
 
               <div>
-                <label htmlFor="senha" className="form-label">Senha</label>
-                <div style={{ position: 'relative' }}>
+                <label htmlFor="senha" className="block text-sm font-medium text-slate-700 mb-1.5">Senha</label>
+                <div className="relative">
                   <input
                     id="senha"
                     type={showSenha ? 'text' : 'password'}
@@ -121,65 +118,38 @@ export default function LoginPage() {
                     onChange={e => setSenha(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="form-input"
-                    style={{ paddingRight: 42 }}
+                    className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow pr-11"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSenha(v => !v)}
-                    style={{
-                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: 'var(--c-gray-400)', display: 'flex', alignItems: 'center',
-                      padding: 4,
-                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 flex items-center justify-center"
                     aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
                   >
-                    {showSenha ? <EyeOff size={17} /> : <Eye size={17} />}
+                    {showSenha ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
               {erro && (
-                <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 9, padding: '10px 14px' }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#DC2626' }}>{erro}</p>
+                <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mt-1">
+                  <p className="text-sm font-medium text-red-600">{erro}</p>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary"
-                style={{ justifyContent: 'center', padding: '11px 20px', fontSize: 14, marginTop: 4, opacity: loading ? 0.7 : 1 }}
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98] mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {loading && <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />}
+                {loading && <Loader2 size={16} className="animate-spin" />}
                 {loading ? 'Entrando...' : 'Entrar no sistema'}
               </button>
             </form>
 
-            {/* Demo hint */}
-            <div style={{ marginTop: 20, background: 'var(--c-gray-50)', border: '1px solid var(--color-border)', borderRadius: 9, padding: '10px 14px' }}>
-              <p style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                🔑 <strong>Demo:</strong>{' '}
-                <code style={{ background: 'white', padding: '1px 6px', borderRadius: 4, color: '#1A6F45', fontSize: 12 }}>professor@aee.gov.br</code>
-                {' / '}
-                <code style={{ background: 'white', padding: '1px 6px', borderRadius: 4, color: '#1A6F45', fontSize: 12 }}>senha</code>
-              </p>
-            </div>
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @media (max-width: 768px) {
-          .login-panel { display: none !important; }
-          .login-mobile-logo { display: flex !important; }
-        }
-      `}</style>
     </div>
   )
 }

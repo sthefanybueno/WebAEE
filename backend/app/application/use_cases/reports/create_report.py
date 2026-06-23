@@ -6,14 +6,15 @@ from app.application.ports.report_template_repository import (
     ReportTemplateRepository,
 )
 from app.application.ports.student_repository import StudentRepository
-from app.domain.entities.report import Report, TipoRelatorio
+from app.domain.entities.report import Report
 from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import AlunoNaoEncontradoError, PermissaoInsuficienteError
+from app.domain.exceptions import DomainException
 
 
 @dataclass
 class CreateReportInput:
-    tipo: TipoRelatorio
+    template_id: uuid.UUID
     aluno_id: uuid.UUID
     autor_id: uuid.UUID
     tenant_id: uuid.UUID
@@ -60,11 +61,13 @@ class CreateReportUseCase:
                 raise PermissaoInsuficienteError(acao="criar relatório")
 
             # 3. Validar se há um template ativo para esse tipo
-            template = await self.template_repo.get_active_by_tipo(input_dto.tipo)
+            template = await self.template_repo.get_by_id(input_dto.template_id)
+            if not template:
+                raise DomainException(f"Template com ID {input_dto.template_id} não encontrado ou inativo.")
 
             # 4. Criar o Relatório
             report = Report(
-                tipo=input_dto.tipo,
+                template_id=input_dto.template_id,
                 aluno_id=input_dto.aluno_id,
                 autor_id=input_dto.autor_id,
                 conteudo_json=input_dto.conteudo_json,

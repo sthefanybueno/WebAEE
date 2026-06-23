@@ -8,7 +8,11 @@ from app.application.use_cases.reports.create_report import (
     CreateReportUseCase,
 )
 from app.application.use_cases.reports.list_templates import ListTemplatesUseCase
-from app.domain.entities.report import TipoRelatorio
+from app.application.use_cases.reports.create_report_template import (
+    CreateReportTemplateInput,
+    CreateReportTemplateUseCase,
+)
+from app.application.use_cases.reports.list_reports_by_template import ListReportsByTemplateUseCase
 from app.infrastructure.database import get_session
 from app.infrastructure.repositories.report_repository_impl import (
     SQLModelReportRepository,
@@ -21,7 +25,7 @@ from app.infrastructure.repositories.student_repository_impl import (
     SQLModelStudentRepository,
 )
 from app.interfaces.dependencies import CurrentUser, get_current_user
-from app.interfaces.schemas.report import CreateReportRequest, ReportResponse, ReportTemplateResponse, ReportDetailResponse, UpdateReportRequest, SyncReportRequest, AddCommentRequest
+from app.interfaces.schemas.report import CreateReportRequest, ReportResponse, ReportTemplateResponse, ReportDetailResponse, UpdateReportRequest, SyncReportRequest, AddCommentRequest, CreateReportTemplateRequest
 from app.domain.exceptions import (
     DomainException,
     AlunoNaoEncontradoError,
@@ -63,7 +67,7 @@ async def create_report(
     use_case: CreateReportUseCase = Depends(get_create_report_use_case),
 ):
     input_dto = CreateReportInput(
-        tipo=request.tipo,
+        template_id=request.template_id,
         aluno_id=request.aluno_id,
         autor_id=current_user.id,
         tenant_id=current_user.tenant_id,
@@ -96,7 +100,7 @@ def get_list_reports_by_student_use_case(
 @router.get("/aluno/{student_id}", response_model=List[ReportResponse])
 async def list_reports_by_student(
     student_id: uuid.UUID,
-    tipo: Optional[TipoRelatorio] = None,
+    template_id: Optional[uuid.UUID] = None,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListReportsByStudentUseCase = Depends(get_list_reports_by_student_use_case),
 ):
@@ -105,7 +109,7 @@ async def list_reports_by_student(
         return await use_case.execute(ListReportsByStudentInput(
             student_id=student_id,
             tenant_id=current_user.tenant_id,
-            tipo=tipo,
+            template_id=template_id,
         ))
     except DomainException as e:
         _handle_domain_exception(e)
@@ -133,6 +137,58 @@ async def list_templates(
     O router delega ao ListTemplatesUseCase — nenhum ORM aqui.
     """
     return await use_case.execute()
+
+@router.get("/templates/{template_id}", response_model=ReportTemplateResponse)
+async def get_template(
+    template_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+):
+    repo = SQLModelReportTemplateRepository(session)
+    template = await repo.get_by_id(template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template não encontrado")
+    return template
+
+def get_create_report_template_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> CreateReportTemplateUseCase:
+    return CreateReportTemplateUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        template_repo=SQLModelReportTemplateRepository(session),
+    )
+
+@router.post("/templates", response_model=ReportTemplateResponse, status_code=status.HTTP_201_CREATED)
+async def create_template(
+    request: CreateReportTemplateRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: CreateReportTemplateUseCase = Depends(get_create_report_template_use_case),
+):
+    """Cria um novo template de relatório."""
+    input_dto = CreateReportTemplateInput(
+        nome=request.nome,
+        descricao=request.descricao,
+        secoes=request.secoes,
+        papel_autor=current_user.papel,
+    )
+    try:
+        return await use_case.execute(input_dto)
+    except DomainException as e:
+        _handle_domain_exception(e)
+
+def get_list_reports_by_template_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> ListReportsByTemplateUseCase:
+    return ListReportsByTemplateUseCase(
+        repository=SQLModelReportRepository(session),
+    )
+
+@router.get("/template/{template_id}/relatorios", response_model=List[ReportResponse])
+async def list_reports_by_template(
+    template_id: uuid.UUID,
+    use_case: ListReportsByTemplateUseCase = Depends(get_list_reports_by_template_use_case),
+):
+    """Lista todos os relatórios de um template específico."""
+    return await use_case.execute(template_id=template_id)
 
 from app.application.use_cases.reports.get_report_detail import GetReportDetailUseCase, GetReportDetailInput
 
@@ -211,7 +267,7 @@ async def sync_reports(
     inputs = [
         SyncReportInput(
             id=i.id,
-            tipo=i.tipo,
+            template_id=i.template_id,
             aluno_id=i.aluno_id,
             autor_id=current_user.id,
             tenant_id=current_user.tenant_id,

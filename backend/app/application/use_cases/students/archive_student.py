@@ -22,6 +22,7 @@ from app.domain.exceptions import (
     AlunoNaoEncontradoError,
     TenantMismatchError,
 )
+from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
 
@@ -29,6 +30,7 @@ from app.domain.models import Student
 class ArchiveStudentInput:
     student_id: uuid.UUID
     tenant_id: uuid.UUID
+    papel: PapelUsuario
     user_id: uuid.UUID
 
 
@@ -48,11 +50,12 @@ class ArchiveStudentUseCase:
     async def execute(self, input_dto: ArchiveStudentInput) -> Student:
         """Executa o arquivamento do aluno dentro de uma transação."""
         async with self.uow.transaction():
-            student = await self.student_repo.get_by_id(input_dto.student_id)
+            professor_id = input_dto.user_id if input_dto.papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
+            student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)
 
             if student is None:
                 raise AlunoNaoEncontradoError(input_dto.student_id)
-            if student.tenant_id != input_dto.tenant_id:
+            if str(student.tenant_id) != str(input_dto.tenant_id) and input_dto.papel.value != PapelUsuario.ADMIN.value:
                 raise TenantMismatchError("aluno")
 
             # Método rico valida estado e lança AlunoJaArquivadoError se necessário

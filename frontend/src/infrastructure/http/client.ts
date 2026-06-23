@@ -33,19 +33,27 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token =
     typeof window !== 'undefined' ? localStorage.getItem('aee_token') : null
 
+  const isFormData = options.body instanceof FormData
+  const headers: Record<string, string> = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  }
+
+  // Se for FormData, o navegador define o Content-Type com o boundary correto.
+  if (!isFormData && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json'
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   })
 
   // Token expirado: limpa sessão e redireciona imediatamente
   if (res.status === 401) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('aee_token')
+      document.cookie = 'aee_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
       window.location.href = '/login'
     }
     throw new ApiError(401, 'Sessão expirada. Faça login novamente.')
@@ -69,13 +77,13 @@ export const apiClient = {
     request<T>(path),
 
   post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'POST', body: body instanceof FormData ? body : JSON.stringify(body) }),
 
   put: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'PUT', body: body instanceof FormData ? body : JSON.stringify(body) }),
 
   patch: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'PATCH', body: body instanceof FormData ? body : JSON.stringify(body) }),
 
   delete: <T>(path: string) =>
     request<T>(path, { method: 'DELETE' }),

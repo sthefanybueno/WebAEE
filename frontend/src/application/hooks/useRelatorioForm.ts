@@ -11,7 +11,7 @@ import { db } from '@/infrastructure/db/db'
 export const novoRelatorioSchema = z.object({
   aluno_id: z.string().min(1, 'Selecione um aluno'),
   data: z.string().min(1, 'Selecione a data'),
-  tipo: z.enum(['diario', 'pdi', 'trimestral'], { required_error: 'Selecione o tipo de documento' }),
+  tipo: z.enum(['diario', 'pdi', 'trimestral'], { error: 'Selecione o tipo de documento' }),
   conteudo: z.string().min(10, 'O relatório deve conter pelo menos 10 caracteres'),
 })
 
@@ -51,12 +51,13 @@ export function useRelatorioForm() {
       const numAlunoId = parseInt(data.aluno_id)
       
       const payload = {
-        server_id: null,
+        server_id: undefined,
         aluno_id: numAlunoId,
         tipo: data.tipo,
         conteudo: data.conteudo,
+        conteudo_json: '', // Default empty
         data_referencia: data.data,
-        sync_status: 'pending' as const,
+        sync_status: 'local' as const,
         updated_at: new Date().toISOString()
       }
       

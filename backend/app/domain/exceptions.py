@@ -21,7 +21,8 @@ Hierarquia:
     ├── ConflitoSincronizacaoError     (409)
     ├── ConsentimentoLGPDAusenteError  (422)
     ├── JustificativaInsuficienteError (422)
-    └── EmailJaEmUsoError              (409)
+    ├── EmailJaEmUsoError              (409)
+    └── NotificacaoNaoEncontradaError  (404)
 """
 
 from __future__ import annotations
@@ -58,6 +59,14 @@ class UsuarioNaoEncontradoError(DomainException):
 
     def __init__(self, user_id: object = None) -> None:
         detail = f"Usuário '{user_id}' não encontrado." if user_id else "Usuário não encontrado."
+        super().__init__(detail)
+
+
+class NotificacaoNaoEncontradaError(DomainException):
+    """Notificação inexistente ou não pertence ao tenant do usuário logado."""
+
+    def __init__(self, notification_id: object = None) -> None:
+        detail = f"Notificação '{notification_id}' não encontrada." if notification_id else "Notificação não encontrada."
         super().__init__(detail)
 
 

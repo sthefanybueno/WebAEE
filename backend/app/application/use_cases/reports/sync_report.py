@@ -4,7 +4,7 @@ from typing import List
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
-from app.domain.entities.report import Report, TipoRelatorio
+from app.domain.entities.report import Report
 from datetime import datetime, timezone
 
 
@@ -19,7 +19,7 @@ from app.domain.exceptions import ConflitoSincronizacaoError
 @dataclass
 class SyncReportInput:
     id: uuid.UUID
-    tipo: TipoRelatorio
+    template_id: uuid.UUID
     aluno_id: uuid.UUID
     autor_id: uuid.UUID
     tenant_id: uuid.UUID
@@ -78,7 +78,7 @@ class SyncReportUseCase:
                 else:
                     report = Report(
                         id=input_dto.id,
-                        tipo=input_dto.tipo,
+                        template_id=input_dto.template_id,
                         aluno_id=input_dto.aluno_id,
                         autor_id=input_dto.autor_id,
                         conteudo_json=input_dto.conteudo_json,

@@ -1,8 +1,8 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, FileText, MoreHorizontal, Calendar } from 'lucide-react'
+import { Home, Users, FileText, Calendar } from 'lucide-react'
 import { cn } from '@/presentation/utils/utils'
 
 type UserRole = 'prof_aee' | 'coordenacao' | 'prof_apoio' | 'prof_regente'
@@ -19,15 +19,25 @@ const navAEE = [
   { href: '/horarios',  label: 'HorÃ¡rios',  Icon: Calendar   },
 ]
 
-// Apoio / Regente â†’ 2 abas (sem FAB)
+// Apoio -> Não pode ver alunos (dashboard, relatórios)
 const navApoio = [
-  { href: '/dashboard', label: 'Meus Alunos', Icon: Users    },
-  { href: '/relatorios',label: 'Registros',   Icon: FileText },
+  { href: '/dashboard', label: 'Home',      Icon: Home       },
+  { href: '/relatorios',label: 'Registros', Icon: FileText   },
+]
+
+// Regente -> Pode ver alunos (dashboard, alunos, relatórios)
+const navRegente = [
+  { href: '/dashboard', label: 'Home',      Icon: Home       },
+  { href: '/alunos',    label: 'Alunos',    Icon: Users      },
+  { href: '/relatorios',label: 'Registros', Icon: FileText   },
 ]
 
 export function BottomNav({ role = 'prof_aee' }: BottomNavProps) {
   const pathname = usePathname()
-  const items = role === 'prof_apoio' || role === 'prof_regente' ? navApoio : navAEE
+  
+  let items = navAEE
+  if (role === 'prof_apoio') items = navApoio
+  if (role === 'prof_regente') items = navRegente
 
   return (
     <nav

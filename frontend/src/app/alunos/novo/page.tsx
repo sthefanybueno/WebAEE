@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { useNovoAlunoForm } from '@/application/hooks/useNovoAlunoForm'
 
 export default function NovoAlunoPage() {
-  const { register, errors, onSubmit, isSubmitting, erroGlobal, escolas, escolasLoading } = useNovoAlunoForm()
+  const { register, errors, onSubmit, isSubmitting, erroGlobal, escolas, escolasLoading, professoresApoio, professoresLoading, escolaIdSelecionada } = useNovoAlunoForm()
 
   return (
     <AppShell title="Novo Aluno">
@@ -102,7 +102,7 @@ export default function NovoAlunoPage() {
 
                 <div>
                   <label htmlFor="escola_atual_id" className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Escola Vinculada <span className="text-red-500">*</span>
+                    Escola <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="escola_atual_id"
@@ -126,6 +126,35 @@ export default function NovoAlunoPage() {
                   )}
                 </div>
               </div>
+
+              {/* Professora de Apoio */}
+              {escolaIdSelecionada && (
+                <div>
+                  <label htmlFor="apoio_id" className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Professora de Apoio
+                  </label>
+                  <select
+                    id="apoio_id"
+                    className={`w-full px-3 py-2 bg-white border rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow cursor-pointer ${
+                      errors.apoio_id ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-slate-300'
+                    }`}
+                    {...register('apoio_id')}
+                    disabled={professoresLoading || professoresApoio.length === 0}
+                  >
+                    <option value="">
+                      {professoresLoading ? 'Carregando...' : professoresApoio.length === 0 ? 'Nenhuma prof. de apoio encontrada' : 'Selecione a professora'}
+                    </option>
+                    {professoresApoio.map(p => (
+                      <option key={p.id} value={p.id}>{p.nome}</option>
+                    ))}
+                  </select>
+                  {errors.apoio_id && (
+                    <p className="flex items-center gap-1.5 text-xs text-red-500 mt-1.5 font-medium">
+                      <AlertCircle size={12} />{errors.apoio_id.message}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

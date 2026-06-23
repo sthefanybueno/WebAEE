@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { apiClient } from '@/infrastructure/http/client'
 
 export const novaEscolaSchema = z.object({
   nome: z.string().min(3, 'Nome deve conter pelo menos 3 caracteres'),
@@ -26,12 +27,11 @@ export function useEscolaForm() {
   async function onSubmit(data: NovaEscolaInput) {
     setErroGlobal(null)
     try {
-      // Mocking save
-      await new Promise(resolve => setTimeout(resolve, 800))
+      await apiClient.post('/api/escolas', { nome: data.nome })
       router.push('/escolas')
-    } catch (err) {
+    } catch (err: any) {
       console.error('[useEscolaForm] Erro:', err)
-      setErroGlobal('Não foi possível salvar a escola. Tente novamente.')
+      setErroGlobal(err.response?.data?.detail || 'Não foi possível salvar a escola. Tente novamente.')
     }
   }
 

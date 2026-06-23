@@ -20,6 +20,7 @@ class StudentORM(SQLModel, table=True):
     nome: str = Field(min_length=2, max_length=255, nullable=False)
     data_nascimento: Optional[datetime] = Field(default=None)
     escola_atual_id: Optional[uuid.UUID] = Field(default=None)
+    apoio_id: Optional[uuid.UUID] = Field(default=None, description="FK para users.id — professor de apoio designado.")
     diagnostico: Optional[str] = Field(default=None)
     laudo: Optional[str] = Field(default=None)
     consentimento_lgpd: bool = Field(default=False, nullable=False)

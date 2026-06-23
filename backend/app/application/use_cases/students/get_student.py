@@ -11,6 +11,7 @@ import uuid
 from dataclasses import dataclass
 
 from app.application.ports.student_repository import StudentRepository
+from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import AlunoNaoEncontradoError, TenantMismatchError
 from app.domain.models import Student
 
@@ -19,6 +20,8 @@ from app.domain.models import Student
 class GetStudentInput:
     student_id: uuid.UUID
     tenant_id: uuid.UUID
+    papel: PapelUsuario
+    user_id: uuid.UUID
 
 
 class GetStudentUseCase:
@@ -34,9 +37,10 @@ class GetStudentUseCase:
             AlunoNaoEncontradoError: se o aluno não existir.
             TenantMismatchError: se o aluno pertencer a outro tenant.
         """
-        student = await self.student_repo.get_by_id(input_dto.student_id)
+        professor_id = input_dto.user_id if input_dto.papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
+        student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)
         if student is None:
             raise AlunoNaoEncontradoError(input_dto.student_id)
-        if student.tenant_id != input_dto.tenant_id:
+        if student.tenant_id != input_dto.tenant_id and input_dto.papel != PapelUsuario.ADMIN:
             raise TenantMismatchError("aluno")
         return student

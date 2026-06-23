@@ -10,27 +10,39 @@ Benefícios:
   - Adicionar novos routers requer mudança apenas aqui.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter, Depends
+from app.interfaces.dependencies import get_current_user
 
 from app.interfaces.routers import (
     auth,
     dashboard,
+    notifications,
     photos,
     reports,
     schools,
     students,
     sync,
     users,
+    schedules
 )
 
+api_router = APIRouter()
+
+# Auth is public
+api_router.include_router(auth.router)
+
+# All other routes require authentication
+protected_deps = [Depends(get_current_user)]
+api_router.include_router(dashboard.router, dependencies=protected_deps)
+api_router.include_router(notifications.router, dependencies=protected_deps)
+api_router.include_router(photos.router, dependencies=protected_deps)
+api_router.include_router(reports.router, dependencies=protected_deps)
+api_router.include_router(schools.router, dependencies=protected_deps)
+api_router.include_router(students.router, dependencies=protected_deps)
+api_router.include_router(sync.router, dependencies=protected_deps)
+api_router.include_router(users.router, dependencies=protected_deps)
+api_router.include_router(schedules.router, dependencies=protected_deps)
 
 def register_routers(app: FastAPI) -> None:
     """Registra todos os routers da aplicação no app FastAPI."""
-    app.include_router(auth.router)
-    app.include_router(students.router)
-    app.include_router(schools.router)
-    app.include_router(photos.router)
-    app.include_router(reports.router)
-    app.include_router(users.router)
-    app.include_router(dashboard.router)
-    app.include_router(sync.router)
+    app.include_router(api_router)

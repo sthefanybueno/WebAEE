@@ -12,6 +12,7 @@ class CreateStudentRequest(BaseModel):
     data_nascimento: Optional[datetime] = None
     diagnostico: Optional[str] = Field(default=None, description="Dado sensível")
     laudo: Optional[str] = Field(default=None, description="Dado sensível")
+    apoio_id: Optional[uuid.UUID] = None
     base_legal: str = "Art. 58 LDB"
 
 
@@ -37,6 +38,7 @@ class StudentPlain(BaseModel):
     nome: str
     tenant_id: uuid.UUID
     escola_atual_id: Optional[uuid.UUID]
+    apoio_id: Optional[uuid.UUID] = None
     status: str
     consentimento_lgpd: bool
     created_at: datetime
@@ -75,10 +77,13 @@ class StudentSensitiveDataResponse(BaseModel):
 
 
 class UpdateStudentRequest(BaseModel):
-    """Payload para edição básica de alunos (sem laudo/diagnóstico)."""
+    """Payload para edição básica de alunos."""
 
     nome: Optional[str] = None
     data_nascimento: Optional[datetime] = None
+    escola_atual_id: Optional[uuid.UUID] = None
+    apoio_id: Optional[uuid.UUID] = None
+    diagnostico: Optional[str] = None
 
 
 from app.domain.entities.user import PapelUsuario

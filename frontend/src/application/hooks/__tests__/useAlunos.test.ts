@@ -1,4 +1,4 @@
-﻿/**
+/**
  * hooks/__tests__/useAlunos.test.ts
  * ===================================
  * Testes unitÃ¡rios do hook useAlunos com Vitest + renderHook.
@@ -130,19 +130,19 @@ describe('useAlunos', () => {
     expect(result.current.alunos[0].nome).toBe('Ana Silva')
   })
 
-  it('deve filtrar pendentes de sync no hook (nÃ£o no componente)', async () => {
+  it('deve filtrar pendentes de sync no hook (não no componente)', async () => {
     // Given: alunos com estados de sync distintos
     const alunos = [
-      makeAluno({ nome: 'Ana', sync_status: 'pending' }),
+      makeAluno({ nome: 'Ana', sync_status: 'local' }),
       makeAluno({ id: 2, nome: 'Pedro', sync_status: 'synced' }),
     ]
     mockToArray.mockReturnValue(alunos)
 
-    // When: filtroSync='pendente'
+    // When: filtroSync='local' (que equivale a buscar pendentes locais)
     const { useAlunos } = await import('@/application/hooks/useAlunos')
-    const { result } = renderHook(() => useAlunos(undefined, undefined, 'pendente'))
+    const { result } = renderHook(() => useAlunos(undefined, undefined, 'local'))
 
-    // Then: apenas Ana (pending) retornada
+    // Then: apenas Ana (local) retornada
     expect(result.current.alunos).toHaveLength(1)
     expect(result.current.alunos[0].nome).toBe('Ana')
   })
@@ -202,7 +202,7 @@ describe('salvarAlunoLocal', () => {
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({
         nome: 'Beatriz Santos',
-        sync_status: 'pending',
+        sync_status: 'local',
       }),
     )
 

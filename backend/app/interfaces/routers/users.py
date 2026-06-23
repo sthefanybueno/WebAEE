@@ -7,19 +7,17 @@ from app.application.use_cases.users.create_user import (
     CreateUserInput,
     CreateUserUseCase,
 )
-from app.application.use_cases.users.accept_invite import AcceptInviteUseCase, AcceptInviteInput
 from app.infrastructure.database import get_session
 from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.user_repository_impl import (
     SQLModelUserRepository,
 )
+from app.infrastructure.repositories.professor_assignment_repository_impl import SQLModelProfessorAssignmentRepository
 from app.infrastructure.services.email_service_impl import ConsoleEmailService
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.user import CreateUserRequest, UserResponse
 from app.interfaces.schemas.pagination import PaginatedResponse
 from app.domain.entities.user import User, PapelUsuario
-
-from app.infrastructure.security.invite_token_service_impl import JWTInviteTokenService
 
 from app.domain.exceptions import (
     DomainException,
@@ -27,12 +25,6 @@ from app.domain.exceptions import (
     UsuarioNaoEncontradoError,
     TenantMismatchError,
     PermissaoInsuficienteError,
-)
-from app.application.use_cases.users.accept_invite import (
-    AcceptInviteUseCase,
-    AcceptInviteInput,
-    InvalidInviteTokenError,
-    UserAlreadyActiveError,
 )
 
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
@@ -42,8 +34,6 @@ _DOMAIN_TO_HTTP: dict[type, int] = {
     TenantMismatchError: status.HTTP_403_FORBIDDEN,
     PermissaoInsuficienteError: status.HTTP_403_FORBIDDEN,
     EmailJaEmUsoError: status.HTTP_409_CONFLICT,
-    InvalidInviteTokenError: status.HTTP_400_BAD_REQUEST,
-    UserAlreadyActiveError: status.HTTP_400_BAD_REQUEST,
 }
 
 
@@ -56,11 +46,8 @@ def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> Cr
         uow=SQLAlchemyUnitOfWork(session),
         user_repo=SQLModelUserRepository(session),
         email_service=ConsoleEmailService(),
-        token_service=JWTInviteTokenService(),
+        assignment_repo=SQLModelProfessorAssignmentRepository(session)
     )
-
-def get_accept_invite_use_case(session: AsyncSession = Depends(get_session)) -> AcceptInviteUseCase:
-    return AcceptInviteUseCase(uow=SQLAlchemyUnitOfWork(session), user_repo=SQLModelUserRepository(session))
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
@@ -72,8 +59,10 @@ async def create_user(
         tenant_id=current_user.tenant_id,
         executor_papel=current_user.papel,
         email=request.email,
+        password=request.password,
         nome=request.nome,
         papel=request.papel,
+        escola_id=request.escola_id,
     )
     try:
         user = await use_case.execute(input_dto)
@@ -131,14 +120,74 @@ async def get_me(
     except DomainException as e:
         _handle_domain_exception(e)
 
-@router.post("/aceitar-convite", response_model=UserResponse)
-async def aceitar_convite(
-    input_dto: AcceptInviteInput,
-    use_case: AcceptInviteUseCase = Depends(get_accept_invite_use_case),
+
+
+from app.application.use_cases.users.update_user import UpdateUserUseCase, UpdateUserInput
+from app.application.use_cases.users.toggle_user_status import ToggleUserStatusUseCase, ToggleUserStatusInput
+import uuid
+
+def get_update_user_use_case(session: AsyncSession = Depends(get_session)) -> UpdateUserUseCase:
+    return UpdateUserUseCase(
+        uow=SQLAlchemyUnitOfWork(session), 
+        user_repo=SQLModelUserRepository(session),
+        assignment_repo=SQLModelProfessorAssignmentRepository(session)
+    )
+
+def get_toggle_status_use_case(session: AsyncSession = Depends(get_session)) -> ToggleUserStatusUseCase:
+    return ToggleUserStatusUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        user_repo=SQLModelUserRepository(session),
+        email_service=ConsoleEmailService()
+    )
+
+from app.interfaces.schemas.user import UpdateUserRequest, ToggleStatusRequest
+
+@router.put("/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: uuid.UUID,
+    request: UpdateUserRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: UpdateUserUseCase = Depends(get_update_user_use_case),
 ):
-    """Permite que um usuário recém-convidado cadastre sua senha usando o link mágico."""
     try:
+        input_dto = UpdateUserInput(
+            user_id_to_update=user_id,
+            executor_papel=current_user.papel,
+            tenant_id=current_user.tenant_id,
+            nome=request.nome,
+            papel=request.papel,
+            escola_id=request.escola_id
+        )
         return await use_case.execute(input_dto)
     except DomainException as e:
         _handle_domain_exception(e)
 
+@router.patch("/{user_id}/status", status_code=status.HTTP_204_NO_CONTENT)
+async def toggle_user_status(
+    user_id: uuid.UUID,
+    request: ToggleStatusRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: ToggleUserStatusUseCase = Depends(get_toggle_status_use_case),
+):
+    try:
+        input_dto = ToggleUserStatusInput(
+            user_id_to_toggle=user_id,
+            executor_id=current_user.id,
+            executor_papel=current_user.papel,
+            tenant_id=current_user.tenant_id,
+            novo_status=request.ativo
+        )
+        await use_case.execute(input_dto)
+    except DomainException as e:
+        _handle_domain_exception(e)
+
+@router.get("/{user_id}/alunos", response_model=List[uuid.UUID])
+async def get_user_alunos(
+    user_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """Retorna os IDs dos alunos atribuídos a este professor regente."""
+    repo = SQLModelProfessorAssignmentRepository(session)
+    assignments = await repo.list_active_by_user(user_id)
+    return [a.aluno_id for a in assignments]

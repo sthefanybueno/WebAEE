@@ -26,6 +26,7 @@ from app.domain.exceptions import (
     EscolaNaoEncontradaError,
     TenantMismatchError,
 )
+from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
 
@@ -34,6 +35,7 @@ class TransferStudentInput:
     student_id: uuid.UUID
     nova_escola_id: uuid.UUID
     tenant_id: uuid.UUID
+    papel: PapelUsuario
     user_id: uuid.UUID
 
 
@@ -57,16 +59,17 @@ class TransferStudentUseCase:
     async def execute(self, input_dto: TransferStudentInput) -> Student:
         """Executa a transferência do aluno entre escolas do mesmo tenant."""
         async with self.uow.transaction():
-            student = await self.student_repo.get_by_id(input_dto.student_id)
+            professor_id = input_dto.user_id if input_dto.papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
+            student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)
             if student is None:
                 raise AlunoNaoEncontradoError(input_dto.student_id)
-            if student.tenant_id != input_dto.tenant_id:
+            if student.tenant_id != input_dto.tenant_id and input_dto.papel != PapelUsuario.ADMIN:
                 raise TenantMismatchError("aluno")
 
             nova_escola = await self.school_repo.get_by_id(input_dto.nova_escola_id)
             if nova_escola is None:
                 raise EscolaNaoEncontradaError(input_dto.nova_escola_id)
-            if nova_escola.tenant_id != input_dto.tenant_id:
+            if nova_escola.tenant_id != input_dto.tenant_id and input_dto.papel != PapelUsuario.ADMIN:
                 raise TenantMismatchError("escola de destino")
 
             # Revogar vínculos ativos via método rico da entidade

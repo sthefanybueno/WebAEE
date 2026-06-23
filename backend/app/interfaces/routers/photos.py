@@ -1,7 +1,11 @@
 import uuid
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+import os
+import shutil
 from sqlmodel.ext.asyncio.session import AsyncSession
+from app.domain.models import TagPedagogica
+import cloudinary.uploader
 
 from app.application.use_cases.photos.create_photo import (
     CreatePhotoInput,
@@ -40,6 +44,37 @@ async def create_photo(
         foto_url=request.url,
         tag=request.tag,
     )
+    try:
+        photo = await use_case.execute(input_dto)
+        return photo
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/upload", response_model=PhotoResponse, status_code=status.HTTP_201_CREATED)
+async def upload_photo(
+    file: UploadFile = File(...),
+    aluno_id: uuid.UUID = Form(...),
+    tag: TagPedagogica = Form(...),
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: CreatePhotoUseCase = Depends(get_create_photo_use_case),
+):
+    try:
+        upload_result = cloudinary.uploader.upload(
+            file.file,
+            folder="fotosAEE"
+        )
+        url = upload_result.get("secure_url")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cloudinary upload error: {str(e)}")
+    
+    input_dto = CreatePhotoInput(
+        tenant_id=current_user.tenant_id,
+        aluno_id=aluno_id,
+        autor_id=current_user.id,
+        foto_url=url,
+        tag=tag,
+    )
+    
     try:
         photo = await use_case.execute(input_dto)
         return photo

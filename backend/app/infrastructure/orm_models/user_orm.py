@@ -1,3 +1,4 @@
+from typing import Optional
 import uuid
 from datetime import datetime, timezone
 from sqlmodel import Field, SQLModel
@@ -16,6 +17,7 @@ class UserORM(SQLModel, table=True):
         nullable=False,
     )
     tenant_id: uuid.UUID = Field(nullable=False, index=True)
+    escola_id: Optional[uuid.UUID] = Field(default=None, foreign_key="schools.id", index=True)
     email: str = Field(max_length=255, nullable=False, unique=True, index=True)
     hashed_password: str = Field(nullable=False)
     nome: str = Field(min_length=2, max_length=255, nullable=False)

@@ -51,6 +51,7 @@ services:
       JWT_TTL_HOURS: ${JWT_TTL_HOURS:-8}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       TZ: America/Sao_Paulo
+      CLOUDINARY_URL: ${CLOUDINARY_URL}
     ports:
       - "8000:8000"
     volumes:

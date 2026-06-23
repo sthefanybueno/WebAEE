@@ -16,7 +16,7 @@ from typing import List, Optional
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
-from app.domain.entities.report import Report, TipoRelatorio
+from app.domain.entities.report import Report
 from app.domain.exceptions import AlunoNaoEncontradoError, TenantMismatchError
 
 
@@ -24,7 +24,7 @@ from app.domain.exceptions import AlunoNaoEncontradoError, TenantMismatchError
 class ListReportsByStudentInput:
     student_id: uuid.UUID
     tenant_id: uuid.UUID
-    tipo: Optional[TipoRelatorio] = None
+    template_id: Optional[uuid.UUID] = None
 
 
 class ListReportsByStudentUseCase:
@@ -57,4 +57,4 @@ class ListReportsByStudentUseCase:
         if student.tenant_id != input_dto.tenant_id:
             raise TenantMismatchError("aluno")
 
-        return await self.report_repo.list_by_student(input_dto.student_id, input_dto.tipo)
+        return await self.report_repo.list_by_student(input_dto.student_id, input_dto.template_id)

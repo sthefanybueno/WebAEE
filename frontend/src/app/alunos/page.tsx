@@ -5,20 +5,17 @@ import { AppShell } from '@/presentation/components/layout/AppShell'
 import { Search, Plus, Loader2, AlertCircle, CheckCircle2, Clock, Users, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
-import { useAlunos } from '@/application/hooks/useAlunos'
+import { useAlunos, useEscolas } from '@/application/hooks/useAlunos'
 
 type Filtro = 'todos' | 'local' | 'synced'
 
-const FILTROS: { value: Filtro; label: string }[] = [
-  { value: 'todos',  label: 'Todos'          },
-  { value: 'local',  label: 'Pendentes'      },
-  { value: 'synced', label: 'Sincronizados'  },
-]
-
 export default function AlunosPage() {
-  const [busca,  setBusca]  = useState('')
-  const [filtro, setFiltro] = useState<Filtro>('todos')
-  const { alunos, loading } = useAlunos(undefined, busca, filtro)
+  const [busca, setBusca] = useState('')
+  const [filtroStatus, setFiltroStatus] = useState<'ativo' | 'arquivado' | 'todos'>('ativo')
+  const [filtroEscola, setFiltroEscola] = useState('todas')
+  
+  const { alunos, loading } = useAlunos(filtroStatus, busca, 'todos', filtroEscola)
+  const escolas = useEscolas()
 
   return (
     <AppShell title="Alunos">
@@ -47,7 +44,7 @@ export default function AlunosPage() {
           </Link>
         </div>
 
-        {/* ── Barra de busca + filtros ─────────────────────── */}
+        {/* ── Barra de busca e filtros ─────────────────────── */}
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           {/* Search */}
           <div className="relative flex-1 min-w-[240px] w-full">
@@ -69,22 +66,29 @@ export default function AlunosPage() {
               />
             )}
           </div>
-
+          
           {/* Filtros */}
-          <div className="flex flex-wrap gap-2">
-            {FILTROS.map(f => (
-              <button
-                key={f.value}
-                onClick={() => setFiltro(f.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 border ${
-                  filtro === f.value 
-                    ? 'bg-slate-100 border-slate-200 text-slate-900 shadow-sm' 
-                    : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+          <div className="flex flex-row gap-3 w-full md:w-auto">
+            <select
+              value={filtroStatus}
+              onChange={e => setFiltroStatus(e.target.value as any)}
+              className="h-10 bg-white border border-slate-300 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            >
+              <option value="ativo">Ativos</option>
+              <option value="arquivado">Desativados</option>
+              <option value="todos">Todos (Status)</option>
+            </select>
+
+            <select
+              value={filtroEscola}
+              onChange={e => setFiltroEscola(e.target.value)}
+              className="h-10 flex-1 md:flex-none min-w-[140px] bg-white border border-slate-300 rounded-lg text-sm text-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-shadow"
+            >
+              <option value="todas">Todas Escolas</option>
+              {escolas.map(escola => (
+                <option key={escola} value={escola}>{escola}</option>
+              ))}
+            </select>
           </div>
         </div>
 

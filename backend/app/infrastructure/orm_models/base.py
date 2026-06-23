@@ -10,6 +10,7 @@ from app.infrastructure.orm_models.photo_orm import PhotoORM
 from app.infrastructure.orm_models.audit_log_orm import AuditLogORM
 from app.infrastructure.orm_models.professor_assignment_orm import ProfessorAssignmentORM
 from app.infrastructure.orm_models.student_history_orm import StudentSchoolHistoryORM
+from app.infrastructure.orm_models.schedule_orm import ScheduleORM
 
 __all__ = [
     "SQLModel",
@@ -23,4 +24,5 @@ __all__ = [
     "AuditLogORM",
     "ProfessorAssignmentORM",
     "StudentSchoolHistoryORM",
+    "ScheduleORM"
 ]

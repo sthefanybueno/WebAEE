@@ -97,11 +97,23 @@ def get_create_student_use_case(
     )
 
 
+from app.application.use_cases.students.activate_student import ActivateStudentInput, ActivateStudentUseCase
+
 def get_archive_student_use_case(
     session: AsyncSession = Depends(get_session),
 ) -> ArchiveStudentUseCase:
     uow = SQLAlchemyUnitOfWork(session)
     return ArchiveStudentUseCase(
+        uow=uow,
+        student_repo=SQLModelStudentRepository(session),
+        audit_repo=SQLModelAuditLogRepository(session),
+    )
+
+def get_activate_student_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> ActivateStudentUseCase:
+    uow = SQLAlchemyUnitOfWork(session)
+    return ActivateStudentUseCase(
         uow=uow,
         student_repo=SQLModelStudentRepository(session),
         audit_repo=SQLModelAuditLogRepository(session),
@@ -169,9 +181,55 @@ def get_sensitive_data_use_case(
     )
 
 
+from app.application.use_cases.students.delete_student import DeleteStudentInput, DeleteStudentUseCase
+
+def get_delete_student_use_case(
+    session: AsyncSession = Depends(get_session),
+) -> DeleteStudentUseCase:
+    uow = SQLAlchemyUnitOfWork(session)
+    return DeleteStudentUseCase(
+        uow=uow,
+        student_repo=SQLModelStudentRepository(session),
+    )
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 # Cada endpoint: (1) monta DTO, (2) delega ao Use Case, (3) traduz exceção.
 # Sem lógica de negócio, sem repositórios, sem persistência direta.
+
+@router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_student(
+    student_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: DeleteStudentUseCase = Depends(get_delete_student_use_case),
+):
+    try:
+        await use_case.execute(DeleteStudentInput(
+            student_id=student_id,
+            tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
+            user_id=current_user.id,
+        ))
+    except DomainException as e:
+        raise _domain_to_http(e) from e
+
+
+@router.post("/{student_id}/arquivar", response_model=StudentResponse)
+async def archive_student(
+    student_id: uuid.UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: ArchiveStudentUseCase = Depends(get_archive_student_use_case),
+) -> StudentResponse:
+    try:
+        student = await use_case.execute(ArchiveStudentInput(
+            student_id=student_id,
+            tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
+            user_id=current_user.id,
+        ))
+        return student  # type: ignore[return-value]
+    except DomainException as e:
+        raise _domain_to_http(e) from e
 
 
 @router.post("/", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
@@ -196,16 +254,17 @@ async def create_student(
         raise _domain_to_http(e) from e
 
 
-@router.post("/{student_id}/arquivar", response_model=StudentResponse)
-async def archive_student(
+@router.post("/{student_id}/ativar", response_model=StudentResponse)
+async def activate_student(
     student_id: uuid.UUID,
     current_user: CurrentUser = Depends(get_current_user),
-    use_case: ArchiveStudentUseCase = Depends(get_archive_student_use_case),
+    use_case: ActivateStudentUseCase = Depends(get_activate_student_use_case),
 ) -> StudentResponse:
     try:
-        student = await use_case.execute(ArchiveStudentInput(
+        student = await use_case.execute(ActivateStudentInput(
             student_id=student_id,
             tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
             user_id=current_user.id,
         ))
         return student  # type: ignore[return-value]
@@ -225,6 +284,7 @@ async def transfer_student(
             student_id=student_id,
             nova_escola_id=request.nova_escola_id,
             tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
             user_id=current_user.id,
         ))
         return student  # type: ignore[return-value]
@@ -245,6 +305,8 @@ async def assign_professor(
             student_id=student_id,
             usuario_id=request.usuario_id,
             tipo_papel=request.tipo_papel,
+            executor_papel=current_user.papel,
+            executor_user_id=current_user.id,
         ))
         return assignment  # type: ignore[return-value]
     except DomainException as e:
@@ -256,6 +318,7 @@ async def assign_professor(
 @router.get("/", response_model=List[StudentResponse])
 async def list_students(
     status_aluno: Optional[str] = None,
+    escola_id: Optional[uuid.UUID] = None,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListStudentsUseCase = Depends(get_list_students_use_case),
 ) -> List[StudentResponse]:
@@ -269,7 +332,10 @@ async def list_students(
 
     students = await use_case.execute(ListStudentsInput(
         tenant_id=current_user.tenant_id,
+        papel=current_user.papel,
+        user_id=current_user.id,
         status=st_enum,
+        escola_id=escola_id,
     ))
     return students  # type: ignore[return-value]
 
@@ -288,6 +354,8 @@ async def get_student(
         student = await use_case.execute(GetStudentInput(
             student_id=student_id,
             tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
+            user_id=current_user.id,
         ))
         return student  # type: ignore[return-value]
     except DomainException as e:
@@ -306,9 +374,12 @@ async def update_student(
         return await use_case.execute(UpdateStudentInput(  # type: ignore[return-value]
             student_id=student_id,
             tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
             user_id=current_user.id,
             nome=request.nome,
             data_nascimento=request.data_nascimento,
+            escola_atual_id=request.escola_atual_id,
+            diagnostico=request.diagnostico,
         ))
     except DomainException as e:
         raise _domain_to_http(e) from e
@@ -328,6 +399,7 @@ async def get_sensitive_data(
         student = await use_case.execute(GetSensitiveDataInput(
             student_id=student_id,
             tenant_id=current_user.tenant_id,
+            papel=current_user.papel,
             user_id=current_user.id,
             justificativa=justificativa,
         ))

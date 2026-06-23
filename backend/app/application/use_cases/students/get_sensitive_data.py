@@ -22,6 +22,7 @@ from app.domain.exceptions import (
     JustificativaInsuficienteError,
     TenantMismatchError,
 )
+from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
 _JUSTIFICATIVA_MINIMA = 10
@@ -31,6 +32,7 @@ _JUSTIFICATIVA_MINIMA = 10
 class GetSensitiveDataInput:
     student_id: uuid.UUID
     tenant_id: uuid.UUID
+    papel: PapelUsuario
     user_id: uuid.UUID
     justificativa: str
 
@@ -67,12 +69,13 @@ class GetSensitiveDataUseCase:
             raise JustificativaInsuficienteError(minimo=_JUSTIFICATIVA_MINIMA)
 
         async with self.uow.transaction():
-            student = await self.student_repo.get_by_id(input_dto.student_id)
+            professor_id = input_dto.user_id if input_dto.papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
+            student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)
 
             # Regra de negócio 2: aluno deve existir e pertencer ao tenant
             if student is None:
                 raise AlunoNaoEncontradoError(input_dto.student_id)
-            if student.tenant_id != input_dto.tenant_id:
+            if student.tenant_id != input_dto.tenant_id and input_dto.papel != PapelUsuario.ADMIN:
                 raise TenantMismatchError("aluno")
 
             # Regra LGPD: registrar acesso com justificativa

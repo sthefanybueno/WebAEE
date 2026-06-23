@@ -80,9 +80,9 @@ export default function EscolasPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {escolas.map((escola) => (
-                    <tr key={escola.id} className="hover:bg-slate-50/80 transition-colors duration-150 group">
+                    <tr key={escola.id} className="hover:bg-slate-50/80 transition-colors duration-150 group cursor-pointer">
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
+                        <Link href={`/escolas/${escola.id}`} className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-primary shrink-0">
                             <Building2 size={18} />
                           </div>
@@ -92,12 +92,14 @@ export default function EscolasPage() {
                             </p>
                             <p className="text-xs text-slate-500 mt-0.5">ID: {escola.id.split('-')[0]}...</p>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-glow-pulse" /> Ativa
-                        </span>
+                        <Link href={`/escolas/${escola.id}`}>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-medium rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-glow-pulse" /> Ativa
+                          </span>
+                        </Link>
                       </td>
                     </tr>
                   ))}

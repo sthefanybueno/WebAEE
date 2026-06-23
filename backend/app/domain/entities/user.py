@@ -62,8 +62,9 @@ class User(BaseModel):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     tenant_id: uuid.UUID = Field(description="FK lógica para tenants.id.")
+    escola_id: Optional[uuid.UUID] = Field(default=None, description="FK para schools.id, obrigatório para prof_apoio e prof_regente.")
     email: str = Field(max_length=255, description="Email único no sistema (login).")
-    hashed_password: str = Field(description="Senha com bcrypt. Inicialmente recebe 'PENDING_INVITE' até usuário aceitar convite.")
+    hashed_password: str = Field(description="Senha do usuário hasheada com bcrypt.")
     nome: str = Field(min_length=2, max_length=255, description="Nome completo do usuário.")
     papel: PapelUsuario = Field(description="Papel RBAC: admin | coordenacao | prof_aee | prof_apoio | prof_regente.")
     ativo: bool = Field(default=True, description="Soft-disable: False bloqueia login sem remover o usuário.")

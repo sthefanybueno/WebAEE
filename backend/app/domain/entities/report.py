@@ -1,13 +1,8 @@
 """
 Sistema AEE — Domínio: Report e ReportTemplate
 ===============================================
-Três tipos de relatório compartilham a mesma tabela `reports`,
-discriminados pelo campo `tipo`.
-
-Tipos:
-  - aee        → criado pela Prof. AEE
-  - anual      → Prof. AEE ou Profissional de Apoio
-  - trimestral → Prof. AEE ou Professora Regente
+Tipos de relatório são cadastrados dinamicamente como `ReportTemplate`.
+Cada `Report` é uma instância de um template específico.
 
 [DDD] Report é uma entidade RICA com métodos que encapsulam
 regras de finalização (travar), edição e conflito offline.
@@ -15,7 +10,6 @@ regras de finalização (travar), edição e conflito offline.
 
 from __future__ import annotations
 
-import enum
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional, Dict, List, Union
@@ -29,15 +23,6 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-class TipoRelatorio(str, enum.Enum):
-    """Discriminador de tipo de relatório."""
-
-    AEE = "aee"
-    ANUAL = "anual"
-    TRIMESTRAL = "trimestral"
-
-
-
 class ReportTemplate(BaseModel):
     """Template configurável de relatório.
 
@@ -45,15 +30,38 @@ class ReportTemplate(BaseModel):
     fica no banco, permitindo alterar formulários sem redeploy.
     O campo `versao` cresce a cada alteração; relatórios congelam
     o snapshot da versão usada na criação.
+
+    `papeis_com_acesso` define quais papéis podem visualizar relatórios
+    deste tipo (ex: ["prof_aee", "coordenacao"]). Lista vazia = sem restrição.
     """
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    tipo: TipoRelatorio = Field(description="Tipo de relatório que este template descreve.")
+    nome: str = Field(description="Nome do tipo de relatório (ex: PDI, Diário).")
+    descricao: str = Field(description="Descrição detalhada sobre o que é este relatório.")
     secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
+    papeis_com_acesso: List[str] = Field(default_factory=list, description="Lista de papéis que podem visualizar relatórios deste tipo. Vazio = todos.")
     versao: int = Field(default=1, description="Versão do template. Incrementa a cada alteração estrutural.")
     ativo: bool = Field(default=True)
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
+
+    def papel_pode_visualizar(self, papel: str) -> bool:
+        """Verifica se um papel pode visualizar relatórios deste tipo.
+
+        Regra de negócio: se papeis_com_acesso estiver vazio, todos podem ver.
+        Admin e Coordenação sempre têm acesso.
+
+        Args:
+            papel: Papel do usuário (ex: 'prof_apoio').
+
+        Returns:
+            True se o papel tem acesso.
+        """
+        if not self.papeis_com_acesso:
+            return True
+        if papel in ("admin", "coordenacao"):
+            return True
+        return papel in self.papeis_com_acesso
 
 
 class Report(BaseModel):
@@ -67,7 +75,7 @@ class Report(BaseModel):
     """
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    tipo: TipoRelatorio = Field(description="Discriminador: aee | anual | trimestral.")
+    template_id: uuid.UUID = Field(description="FK lógica para report_templates.id indicando o tipo do relatório.")
     aluno_id: uuid.UUID = Field(description="FK lógica para students.id.")
     autor_id: uuid.UUID = Field(description="FK lógica para users.id.")
     template_snapshot: Optional[Dict[str, Any]] = Field(default=None, description="Snapshot do template no momento da criação (imutável).")

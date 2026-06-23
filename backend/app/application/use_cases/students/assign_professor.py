@@ -23,6 +23,8 @@ class AssignProfessorInput:
     student_id: uuid.UUID
     usuario_id: uuid.UUID
     tipo_papel: PapelUsuario
+    executor_papel: PapelUsuario
+    executor_user_id: uuid.UUID
 
 
 class AssignProfessorUseCase:
@@ -41,10 +43,11 @@ class AssignProfessorUseCase:
     async def execute(self, input_dto: AssignProfessorInput) -> ProfessorAssignment:
         """Cria um novo vínculo docente para um aluno dentro de uma transação."""
         async with self.uow.transaction():
-            student = await self.student_repo.get_by_id(input_dto.student_id)
+            professor_id = input_dto.executor_user_id if input_dto.executor_papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
+            student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)
 
-            if not student or student.tenant_id != input_dto.tenant_id:
-                raise AlunoNaoEncontradoError(input_dto.student_id)
+            if not student or (student.tenant_id != input_dto.tenant_id and input_dto.executor_papel != PapelUsuario.ADMIN):
+                raise TenantMismatchError("aluno")
 
             if not student.escola_atual_id:
                 raise AlunoSemEscolaError()

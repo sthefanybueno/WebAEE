@@ -1,4 +1,4 @@
-﻿/**
+/**
  * lib/services/fotoLocalService.ts
  * ===================================
  * ServiÃ§o de aplicaÃ§Ã£o/infraestrutura local para momentos pedagÃ³gicos (fotos).
@@ -7,7 +7,7 @@
 import { db, enqueue } from '@/infrastructure/db/db'
 
 export async function salvarFotoLocal(
-  alunoId: number,
+  alunoId: number | string,
   blob: Blob,
   tag: 'autonomia' | 'comunicacao' | 'motor_fino' | 'socializacao' | 'outro'
 ): Promise<number> {
@@ -18,7 +18,7 @@ export async function salvarFotoLocal(
     aluno_id: alunoId,
     blob,
     tag_pedagogica: tag,
-    sync_status: 'pending',
+    sync_status: 'local',
     created_at: agora
   })
 

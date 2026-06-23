@@ -1,17 +1,34 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 import uuid
-from app.domain.entities.report import TipoRelatorio
 from datetime import datetime
 
+class CreateReportTemplateRequest(BaseModel):
+    nome: str
+    descricao: str
+    secoes: dict
+
+class ReportTemplateCreate(BaseModel):
+    nome: str
+    descricao: str
+    secoes: dict
+
+class ReportTemplateResponse(BaseModel):
+    id: uuid.UUID
+    nome: str
+    descricao: str
+    secoes: dict
+    versao: int
+    ativo: bool
+
 class CreateReportRequest(BaseModel):
-    tipo: TipoRelatorio
+    template_id: uuid.UUID
     aluno_id: uuid.UUID
     conteudo_json: dict
 
 class ReportResponse(BaseModel):
     id: uuid.UUID
-    tipo: TipoRelatorio
+    template_id: uuid.UUID
     aluno_id: uuid.UUID
     autor_id: uuid.UUID
     conteudo_json: dict
@@ -22,11 +39,6 @@ class ReportDetailResponse(ReportResponse):
     """Retorna relatório com todos os detalhes incluindo o template para geração de PDF (RN-21)."""
     template_snapshot: Optional[dict] = None
 
-class ReportTemplateResponse(BaseModel):
-    id: uuid.UUID
-    tipo: TipoRelatorio
-    secoes: dict
-
 class UpdateReportRequest(BaseModel):
     conteudo_json: dict
 
@@ -35,7 +47,7 @@ class AddCommentRequest(BaseModel):
 
 class SyncReportItemRequest(BaseModel):
     id: uuid.UUID
-    tipo: TipoRelatorio
+    template_id: uuid.UUID
     aluno_id: uuid.UUID
     conteudo_json: dict
     updated_at_local: datetime

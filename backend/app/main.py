@@ -13,6 +13,8 @@ Toda a composição de rotas fica em app/interfaces/api_router.py.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import cloudinary
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -55,6 +57,13 @@ app.add_middleware(SlowAPIMiddleware)
 # ── Routers ────────────────────────────────────────────────────────────────
 register_routers(app)
 
+# ── Cloudinary ─────────────────────────────────────────────────────────────
+cloudinary_url = os.getenv("CLOUDINARY_URL")
+if cloudinary_url:
+    cloudinary.config()
+    print("Cloudinary configured.")
+else:
+    print("WARNING: CLOUDINARY_URL not set in environment.")
 
 # ── Infra ──────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["infra"])

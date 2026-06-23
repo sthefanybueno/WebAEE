@@ -1,14 +1,15 @@
+import uuid
 from typing import List, Optional, Protocol
 
-from app.domain.entities.report import ReportTemplate, TipoRelatorio
-
+from app.domain.entities.report import ReportTemplate
 
 class ReportTemplateRepository(Protocol):
-    async def get_active_by_tipo(
-        self, tipo: TipoRelatorio
-    ) -> Optional[ReportTemplate]:
+    async def get_by_id(self, template_id: uuid.UUID) -> Optional[ReportTemplate]:
         ...
 
     async def list_all(self) -> List[ReportTemplate]:
-        """Retorna todos os templates ativos do sistema."""
+        """Retorna todos os templates do sistema."""
+        ...
+
+    async def save(self, template: ReportTemplate) -> ReportTemplate:
         ...

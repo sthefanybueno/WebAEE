@@ -6,8 +6,15 @@ Orquestra o cadastro de novos alunos com conformidade LGPD.
 [DDD v2] Chama entidade.registrar_consentimento_lgpd() em vez de
 atribuir campos diretamente — a regra reside na entidade.
 
-[Clean Architecture v3] Usa AbstractUnitOfWork em vez de AsyncSession —
-o Use Case é agora totalmente agnóstico de banco de dados.
+[Clean Architecture] Usa AbstractUnitOfWork — totalmente agnóstico de banco.
+
+Dado que o consentimento_lgpd é False,
+Quando CreateStudentUseCase.execute() é chamado,
+Então MUST lançar ConsentimentoLGPDAusenteError.
+
+Dado que escola_atual_id não existe no banco,
+Quando CreateStudentUseCase.execute() é chamado,
+Então MUST lançar EscolaNaoEncontradaError.
 """
 
 import uuid
@@ -44,6 +51,7 @@ class CreateStudentInput:
     data_nascimento: Optional[datetime] = None
     diagnostico: Optional[str] = None
     laudo: Optional[str] = None
+    apoio_id: Optional[uuid.UUID] = None
     base_legal: str = "Art. 58 LDB"
 
 
@@ -63,43 +71,25 @@ class CreateStudentUseCase:
     async def execute(self, input_dto: CreateStudentInput) -> Student:
         """Executa a criação do aluno dentro de uma transação."""
         async with self.uow.transaction():
-            # Regra de negócio 1: consentimento é obrigatório
+            # Regra de negócio 1: consentimento é obrigatório (LGPD art. 7º)
             if not input_dto.consentimento_lgpd:
                 raise ConsentimentoLGPDAusenteError()
 
-            # Regra de negócio 2: escola deve existir e pertencer ao tenant
+            # Regra de negócio 2: escola deve existir no banco
             school = await self.school_repo.get_by_id(input_dto.escola_atual_id)
             if school is None:
-                # MOCK OFFLINE AUTO-SEED: se for um dos IDs de fallback da interface, cria a escola no banco
-                fallback_ids = [
-                    uuid.UUID('00000000-0000-0000-0000-000000000001'),
-                    uuid.UUID('00000000-0000-0000-0000-000000000002'),
-                    uuid.UUID('00000000-0000-0000-0000-000000000003'),
-                ]
-                if input_dto.escola_atual_id in fallback_ids:
-                    from app.domain.entities.school import School
-                    nomes = {
-                        str(fallback_ids[0]): 'E.E. Castelo Branco',
-                        str(fallback_ids[1]): 'E.M. Flores do Campo',
-                        str(fallback_ids[2]): 'E.M. Primavera'
-                    }
-                    school = School(
-                        id=input_dto.escola_atual_id,
-                        nome=nomes[str(input_dto.escola_atual_id)],
-                        tenant_id=input_dto.tenant_id,
-                        ativo=True
-                    )
-                    await self.school_repo.save(school)
-                else:
-                    raise EscolaNaoEncontradaError(input_dto.escola_atual_id)
-            elif school.tenant_id != input_dto.tenant_id:
-                raise TenantMismatchError("escola")
+                raise EscolaNaoEncontradaError(input_dto.escola_atual_id)
+
+            # Regra de negócio 3: escola deve pertencer ao mesmo tenant
+            if school.tenant_id != input_dto.tenant_id:
+                raise TenantMismatchError("escola atual")
 
             # Cria a entidade e usa método rico para registrar consentimento
             student = Student(
                 nome=input_dto.nome,
                 tenant_id=input_dto.tenant_id,
                 escola_atual_id=input_dto.escola_atual_id,
+                apoio_id=input_dto.apoio_id,
                 data_nascimento=_to_naive_utc(input_dto.data_nascimento),
                 diagnostico=input_dto.diagnostico,
                 laudo=input_dto.laudo,

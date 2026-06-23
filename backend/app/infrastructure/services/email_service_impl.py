@@ -7,24 +7,32 @@ class ConsoleEmailService(EmailService):
     """Implementação Mock do serviço de e-mail que apenas imprime no console.
     Ideal para ambiente de desenvolvimento local."""
     
-    async def send_invite_email(self, to_email: str, token: str) -> None:
-        # Link mágico de exemplo (aponta para um suposto front-end)
-        magic_link = f"http://localhost:3000/aceitar-convite?token={token}"
-        
+    async def send_welcome_email(self, to_email: str, nome: str) -> None:
         message = f"""
         ============================================================
         SIMULAÇÃO DE ENVIO DE E-MAIL (MOCK)
         ============================================================
         Para: {to_email}
-        Assunto: Convite para o Sistema AEE
+        Assunto: Bem-vindo(a) ao Sistema AEE!
         
-        Olá! Você foi convidado para acessar o Sistema AEE.
-        Clique no link abaixo para criar sua senha e completar o cadastro:
-        
-        {magic_link}
-        
-        Este link expira em 48 horas.
+        Olá {nome}! Sua conta no Sistema AEE foi criada com sucesso.
+        Você já pode acessar o sistema utilizando o seu e-mail e a senha fornecida pelo administrador.
         ============================================================
         """
-        # Em vez de logger, vamos usar print direto para facilitar visualização no console dev
+        print(message)
+        
+    async def send_status_change_email(self, to_email: str, nome: str, ativo: bool) -> None:
+        status_str = "ativada" if ativo else "desativada"
+        message = f"""
+        ============================================================
+        SIMULAÇÃO DE ENVIO DE E-MAIL (MOCK)
+        ============================================================
+        Para: {to_email}
+        Assunto: Aviso de Alteração de Status - Sistema AEE
+        
+        Olá {nome},
+        
+        Informamos que sua conta no Sistema AEE foi {status_str} pelo administrador.
+        ============================================================
+        """
         print(message)

@@ -5,7 +5,7 @@ import os
 from sqlalchemy import Column, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
-from app.domain.entities.report import TipoRelatorio, SyncStatus
+from app.domain.entities.report import SyncStatus
 
 _DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 if "sqlite" in _DATABASE_URL:
@@ -20,8 +20,13 @@ class ReportTemplateORM(SQLModel, table=True):
     __tablename__ = "report_templates"  # type: ignore[assignment]
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, nullable=False)
-    tipo: TipoRelatorio = Field(nullable=False, index=True)
+    nome: str = Field(nullable=False, index=True)
+    descricao: str = Field(nullable=False)
     secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(
+        default=None,
+        sa_column=Column(_JSON_TYPE, nullable=True),
+    )
+    papeis_com_acesso: Optional[List[str]] = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
     )
@@ -38,7 +43,7 @@ class ReportORM(SQLModel, table=True):
     __tablename__ = "reports"  # type: ignore[assignment]
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, nullable=False)
-    tipo: TipoRelatorio = Field(nullable=False, index=True)
+    template_id: uuid.UUID = Field(foreign_key="report_templates.id", nullable=False, index=True)
     aluno_id: uuid.UUID = Field(nullable=False, index=True)
     autor_id: uuid.UUID = Field(nullable=False)
     template_snapshot: Optional[Dict[str, Any]] = Field(

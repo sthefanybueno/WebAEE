@@ -1,4 +1,4 @@
-﻿/**
+/**
  * lib/services/alunoLocalService.ts
  * ===================================
  * ServiÃ§o de domÃ­nio local para operaÃ§Ãµes offline-first sobre Alunos.
@@ -33,7 +33,7 @@ export async function salvarAlunoLocal(
   // Persiste no IndexedDB com status pendente
   const id = await db.alunos.add({
     ...dados,
-    sync_status: 'pending',
+    sync_status: 'local',
     updated_at: agora,
   })
 
@@ -55,7 +55,7 @@ export async function atualizarAlunoLocal(
 
   await db.alunos.update(localId, {
     ...dados,
-    sync_status: 'pending',
+    sync_status: 'local',
     updated_at: agora,
   })
 

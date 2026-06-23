@@ -5,7 +5,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.ports.report_repository import ReportRepository
-from app.domain.entities.report import Report, TipoRelatorio
+from app.domain.entities.report import Report
 from app.infrastructure.orm_models.report_orm import ReportORM
 
 class SQLModelReportRepository(ReportRepository):
@@ -22,11 +22,18 @@ class SQLModelReportRepository(ReportRepository):
         return self._to_entity(orm) if orm else None
 
     async def list_by_student(
-        self, student_id: uuid.UUID, tipo: Optional[TipoRelatorio] = None
+        self, student_id: uuid.UUID, template_id: Optional[uuid.UUID] = None
     ) -> List[Report]:
         statement = select(ReportORM).where(ReportORM.aluno_id == student_id)
-        if tipo:
-            statement = statement.where(ReportORM.tipo == tipo)
+        if template_id:
+            statement = statement.where(ReportORM.template_id == template_id)
+        result = await self.session.exec(statement)
+        return [self._to_entity(orm) for orm in result.all()]
+
+    async def list_by_template(
+        self, template_id: uuid.UUID
+    ) -> List[Report]:
+        statement = select(ReportORM).where(ReportORM.template_id == template_id)
         result = await self.session.exec(statement)
         return [self._to_entity(orm) for orm in result.all()]
 

@@ -19,21 +19,23 @@
  *   - consentimento_lgpd: boolean (exigido pelo backend)
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { salvarAlunoLocal } from '@/application/services/alunoLocalService'
 import { useEscolas } from './useEscolas'
+import { apiClient } from '@/infrastructure/http/client'
 
 // ─── Schema de validação ────────────────────────────────────────────────────
 
 export const novoAlunoSchema = z.object({
   nome: z.string().min(3, 'Nome deve conter pelo menos 3 caracteres'),
   nascimento: z.string().min(1, 'Selecione a data de nascimento'),
-  escola_atual_id: z.string().uuid('Selecione uma unidade de ensino válida').min(1, 'Selecione a unidade de ensino'),
+  escola_atual_id: z.string().min(1, 'Selecione a unidade de ensino'),
   diagnostico: z.string().optional(),
+  apoio_id: z.string().optional(),
   lgpd: z.literal(true, { message: 'É obrigatório consentir com o termo da LGPD.' }),
 })
 
@@ -59,8 +61,38 @@ export function useNovoAlunoForm() {
       nascimento: '',
       escola_atual_id: '',
       diagnostico: '',
+      apoio_id: '',
     },
   })
+
+  const [professoresApoio, setProfessoresApoio] = useState<{id: string, nome: string}[]>([])
+  const [professoresLoading, setProfessoresLoading] = useState(false)
+  const escolaIdSelecionada = form.watch('escola_atual_id')
+
+  useEffect(() => {
+    if (!escolaIdSelecionada) {
+      setProfessoresApoio([])
+      return
+    }
+
+    async function fetchProfessoresApoio() {
+      setProfessoresLoading(true)
+      try {
+        const result = await apiClient.get<any>('/api/usuarios/')
+        // Filtra os usuários retornados que sejam prof_apoio E que pertençam à mesma escola
+        const profsApoio = (result?.items || []).filter((u: any) => 
+          u.papel === 'prof_apoio' && u.escola_id === escolaIdSelecionada
+        )
+        setProfessoresApoio(profsApoio)
+      } catch (err) {
+        console.error('Erro ao buscar professores de apoio', err)
+      } finally {
+        setProfessoresLoading(false)
+      }
+    }
+    
+    fetchProfessoresApoio()
+  }, [escolaIdSelecionada])
 
   /**
    * onSubmit — persiste aluno localmente com DTO correto e navega para a lista.
@@ -80,6 +112,7 @@ export function useNovoAlunoForm() {
         escola_atual: escolaNome,
         data_nascimento: data.nascimento,
         diagnostico: data.diagnostico ?? '',
+        apoio_id: data.apoio_id || null,
         status: 'ativo',
         consentimento_lgpd: data.lgpd,
       })
@@ -97,6 +130,9 @@ export function useNovoAlunoForm() {
     erroGlobal,
     escolas,
     escolasLoading,
+    professoresApoio,
+    professoresLoading,
+    escolaIdSelecionada,
     onSubmit: form.handleSubmit(onSubmit),
     isSubmitting: form.formState.isSubmitting,
     errors: form.formState.errors,

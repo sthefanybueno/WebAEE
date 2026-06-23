@@ -71,8 +71,11 @@ class Student(BaseModel):
     nome: str = Field(min_length=2, max_length=255, description="Nome completo do aluno.")
     data_nascimento: Optional[datetime] = Field(default=None, description="Data de nascimento. Opcional no cadastro inicial.")
 
-    # ── Vínculo escolar ───────────────────────────────────
+    # ── Vínculo escolar ───────────────────────────────────────
     escola_atual_id: Optional[uuid.UUID] = Field(default=None, description="FK lógica para schools.id.")
+
+    # ── Vínculo com professor de apoio (1:1) ─────────────────
+    apoio_id: Optional[uuid.UUID] = Field(default=None, description="FK lógica para users.id — professor de apoio designado.")
 
     # ── Campos sensíveis (⚠️ LGPD) ───────────────────────
     diagnostico: Optional[str] = Field(default=None, description="⚠️ SENSÍVEL — diagnóstico clínico.")
@@ -120,6 +123,15 @@ class Student(BaseModel):
             raise AlunoJaArquivadoError()
 
         self.status = StatusAluno.ARQUIVADO  # type: ignore[assignment]
+        self.updated_by = user_id
+        self.updated_at = _utcnow()
+
+    def ativar(self, user_id: uuid.UUID) -> None:
+        """Reativa um aluno arquivado (status → ATIVO)."""
+        if self.status == StatusAluno.ATIVO:
+            return
+
+        self.status = StatusAluno.ATIVO  # type: ignore[assignment]
         self.updated_by = user_id
         self.updated_at = _utcnow()
 

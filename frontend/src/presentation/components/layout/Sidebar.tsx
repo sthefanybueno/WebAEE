@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   LayoutDashboard, Users, FileText, Calendar, Camera,
-  UserCog, LogOut, ChevronLeft, ChevronRight, X,
+  UserCog, LogOut, X,
 } from 'lucide-react'
+import { usePapel } from '@/application/hooks/usePapel'
 
 const MAIN_NAV = [
   { href: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
@@ -52,8 +53,9 @@ function Logo() {
   )
 }
 
-export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Props) {
+export function Sidebar({ collapsed, mobileOpen, onMobileClose }: Props) {
   const pathname = usePathname()
+  const usuario = usePapel()
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'))
@@ -105,7 +107,15 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Prop
           </p>
 
           <div className="space-y-1">
-            {MAIN_NAV.map(({ href, label, Icon }) => {
+            {MAIN_NAV.filter(item => {
+              if (usuario === 'prof_apoio') {
+                return !['/alunos', '/horarios'].includes(item.href)
+              }
+              if (usuario === 'prof_regente') {
+                return item.href !== '/horarios'
+              }
+              return true
+            }).map(({ href, label, Icon }) => {
               const active = isActive(href)
               return (
                 <Link
@@ -137,8 +147,37 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Prop
           </p>
 
           <div className="space-y-1">
-            {SYS_NAV.map(({ href, label, Icon }) => {
+            {SYS_NAV.filter(item => {
+              if (usuario === 'prof_apoio' || usuario === 'prof_regente') {
+                return item.href === '/login' // Só vê Sair
+              }
+              return true
+            }).map(({ href, label, Icon }) => {
               const active = isActive(href)
+              
+              if (href === '/login') {
+                return (
+                  <button
+                    key={href}
+                    onClick={() => {
+                      localStorage.removeItem('aee_token')
+                      document.cookie = 'aee_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+                      window.location.href = '/login'
+                    }}
+                    className={`w-full group relative flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap overflow-hidden transition-colors text-white/60 hover:bg-white/10 hover:text-white/90`}
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    <span className={`transition-all duration-200 text-left ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>{label}</span>
+
+                    {collapsed && (
+                      <span className="absolute left-[calc(100%+12px)] top-1/2 -translate-y-1/2 bg-slate-900 border border-white/10 text-white text-xs font-semibold px-2.5 py-1.5 rounded-md whitespace-nowrap shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+                        {label}
+                      </span>
+                    )}
+                  </button>
+                )
+              }
+
               return (
                 <Link
                   key={href}
@@ -166,11 +205,11 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: Prop
         <div className="p-2 border-t border-white/10 shrink-0">
           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
             <div className="w-8 h-8 rounded-full shrink-0 bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-white text-xs font-bold tracking-wide">
-              VP
+              {usuario?.nome ? usuario.nome.substring(0, 2).toUpperCase() : 'US'}
             </div>
             <div className={`overflow-hidden transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>
-              <p className="text-xs font-semibold text-white whitespace-nowrap">Prof. Valdirene</p>
-              <p className="text-[10px] text-white/50 whitespace-nowrap">Professor AEE</p>
+              <p className="text-xs font-semibold text-white whitespace-nowrap truncate pr-2">{usuario?.nome || 'Usuário'}</p>
+              <p className="text-[10px] text-white/50 whitespace-nowrap truncate pr-2">{usuario?.papel || 'Carregando...'}</p>
             </div>
           </div>
         </div>

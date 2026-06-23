@@ -26,13 +26,14 @@ type FiltroSync = 'todos' | 'local' | 'synced'
  * aqui e deixe o hook aplicar as regras de negócio.
  */
 export function useAlunos(
-  filtroStatus?: 'ativo' | 'arquivado',
+  filtroStatus?: 'ativo' | 'arquivado' | 'todos',
   filtroBusca?: string,
   filtroSync?: FiltroSync,
+  filtroEscola?: string
 ) {
   const alunos = useLiveQuery(
     () =>
-      filtroStatus
+      filtroStatus && filtroStatus !== 'todos'
         ? db.alunos.where('status').equals(filtroStatus).toArray()
         : db.alunos.toArray(),
     [filtroStatus],
@@ -50,14 +51,27 @@ export function useAlunos(
         (filtroSync === 'local'   // pendentes: criados offline
           ? a.sync_status === 'local'
           : a.sync_status === 'synced') // sincronizados com sucesso
-      return matchBusca && matchSync
+          
+      const matchEscola = 
+        !filtroEscola || filtroEscola === 'todas' || a.escola_atual === filtroEscola
+
+      return matchBusca && matchSync && matchEscola
     })
-  }, [alunos, filtroBusca, filtroSync])
+  }, [alunos, filtroBusca, filtroSync, filtroEscola])
 
   return {
     alunos: alunosFiltrados,
     loading: alunos === undefined,
   }
+}
+
+/** useEscolas — extrai lista única de escolas dos alunos no banco local. */
+export function useEscolas() {
+  return useLiveQuery(async () => {
+    const todosAlunos = await db.alunos.toArray()
+    const escolas = new Set(todosAlunos.map(a => a.escola_atual).filter(Boolean))
+    return Array.from(escolas).sort() as string[]
+  }, []) ?? []
 }
 
 /** useAluno â€” retorna um aluno especÃ­fico por ID local ou server_id. */
