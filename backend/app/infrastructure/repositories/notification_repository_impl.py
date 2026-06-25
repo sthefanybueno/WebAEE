@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -22,7 +21,7 @@ class SQLModelNotificationRepository(NotificationRepository):
         orm = await self._session.get(NotificationORM, id)
         return self._to_entity(orm) if orm else None
 
-    async def list_by_tenant(self, tenant_id: uuid.UUID, apenas_nao_lidas: bool = False) -> List[Notification]:
+    async def list_by_tenant(self, tenant_id: uuid.UUID, apenas_nao_lidas: bool = False) -> list[Notification]:
         stmt = select(NotificationORM).where(NotificationORM.tenant_id == tenant_id)
         if apenas_nao_lidas:
             stmt = stmt.where(NotificationORM.lida == False)  # noqa: E712

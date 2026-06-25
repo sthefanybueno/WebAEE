@@ -1,11 +1,11 @@
-import pytest
 import uuid
+
+import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.infrastructure.security.tokens import create_access_token
 from app.main import app
 
-from app.infrastructure.security.tokens import create_access_token
-import uuid
 
 def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
     if not user_id:

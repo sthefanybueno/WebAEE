@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime, timezone
 
 import pytest
 
@@ -11,12 +10,11 @@ from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.school import School
 from app.domain.entities.student_history import StudentSchoolHistory
 from app.domain.entities.user import PapelUsuario
-from app.domain.exceptions import AlunoNaoEncontradoError, EscolaNaoEncontradaError, TenantMismatchError
+from app.domain.exceptions import (
+    EscolaNaoEncontradaError,
+)
 from app.domain.models import Student
 from tests.application.conftest import MockUnitOfWork
-
-
-
 
 
 class MockStudentRepository:

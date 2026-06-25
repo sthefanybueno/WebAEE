@@ -1,18 +1,19 @@
-from pydantic import BaseModel
-from typing import List, Optional, Dict
 import uuid
 from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class CreateReportTemplateRequest(BaseModel):
     nome: str
     descricao: str
-    papeis_com_acesso: List[str] = []
+    papeis_com_acesso: list[str] = []
     secoes: dict
 
 class ReportTemplateCreate(BaseModel):
     nome: str
     descricao: str
-    papeis_com_acesso: List[str] = []
+    papeis_com_acesso: list[str] = []
     secoes: dict
 
 class ReportTemplateResponse(BaseModel):
@@ -20,7 +21,7 @@ class ReportTemplateResponse(BaseModel):
     nome: str
     descricao: str
     secoes: dict
-    papeis_com_acesso: List[str]
+    papeis_com_acesso: list[str]
     versao: int
     ativo: bool
 
@@ -40,7 +41,7 @@ class ReportResponse(BaseModel):
 
 class ReportDetailResponse(ReportResponse):
     """Retorna relatório com todos os detalhes incluindo o template para geração de PDF (RN-21)."""
-    template_snapshot: Optional[dict] = None
+    template_snapshot: dict | None = None
 
 class UpdateReportRequest(BaseModel):
     conteudo_json: dict
@@ -56,4 +57,4 @@ class SyncReportItemRequest(BaseModel):
     updated_at_local: datetime
 
 class SyncReportRequest(BaseModel):
-    items: List[SyncReportItemRequest]
+    items: list[SyncReportItemRequest]

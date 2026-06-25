@@ -1,10 +1,11 @@
-from dataclasses import dataclass
 import uuid
-from typing import Optional
-from app.application.ports.user_repository import UserRepository
+from dataclasses import dataclass
+
 from app.application.ports.email_service import EmailService
-from app.domain.entities.user import User, PapelUsuario
+from app.application.ports.user_repository import UserRepository
+from app.domain.entities.user import PapelUsuario, User
 from app.infrastructure.security.passwords import get_password_hash
+
 
 @dataclass
 class CreateUserInput:
@@ -14,13 +15,13 @@ class CreateUserInput:
     password: str
     nome: str
     papel: PapelUsuario
-    escola_id: Optional[uuid.UUID] = None
-    aluno_ids: Optional[list[uuid.UUID]] = None
+    escola_id: uuid.UUID | None = None
+    aluno_ids: list[uuid.UUID] | None = None
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.professor_assignment_repository import ProfessorAssignmentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.domain.exceptions import DomainException, EmailJaEmUsoError, PermissaoInsuficienteError
 
-from app.domain.exceptions import PermissaoInsuficienteError, EmailJaEmUsoError, DomainException
 
 class CreateUserUseCase:
     """Caso de uso para criação de novos usuários com validação de hierarquia (RBAC).

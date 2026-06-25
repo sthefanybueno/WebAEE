@@ -2,16 +2,14 @@
 Testes unitários para CreatePhotoUseCase e SyncPhotoUseCase.
 """
 import uuid
+
 import pytest
 
-from app.application.use_cases.photos.create_photo import CreatePhotoUseCase, CreatePhotoInput
-from app.application.use_cases.photos.sync_photo import SyncPhotoUseCase, SyncPhotoInput
+from app.application.use_cases.photos.create_photo import CreatePhotoInput, CreatePhotoUseCase
+from app.application.use_cases.photos.sync_photo import SyncPhotoInput, SyncPhotoUseCase
 from app.domain.entities.photo import Photo
-from app.domain.models import TagPedagogica, SyncStatus, Student
+from app.domain.models import Student, SyncStatus, TagPedagogica
 from tests.application.conftest import MockUnitOfWork
-
-
-
 
 
 class MockPhotoRepository:

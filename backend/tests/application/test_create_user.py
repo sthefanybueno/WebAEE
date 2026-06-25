@@ -3,11 +3,15 @@ Testes unitários para CreateUserUseCase.
 Cobre: RBAC por papel, duplicidade de e-mail, criação bem-sucedida.
 """
 import uuid
-from typing import Optional
+
 import pytest
 
-from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase, EmailJaEmUsoError
-from app.domain.entities.user import User, PapelUsuario
+from app.application.use_cases.users.create_user import (
+    CreateUserInput,
+    CreateUserUseCase,
+    EmailJaEmUsoError,
+)
+from app.domain.entities.user import PapelUsuario, User
 from app.domain.exceptions import PermissaoInsuficienteError
 from tests.application.conftest import MockUnitOfWork
 

@@ -1,12 +1,12 @@
-from dataclasses import dataclass
-from typing import Optional
 import uuid
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
-from app.domain.entities.user import User, PapelUsuario
-from app.domain.exceptions import UsuarioNaoEncontradoError, EmailJaEmUsoError, DomainException
 from app.application.ports.user_repository import UserRepository
-from datetime import datetime, timezone
+from app.domain.entities.user import User
+from app.domain.exceptions import EmailJaEmUsoError, UsuarioNaoEncontradoError
+
 
 @dataclass
 class UpdateProfileInput:
@@ -14,7 +14,7 @@ class UpdateProfileInput:
     tenant_id: uuid.UUID
     nome: str
     email: str
-    escola_id: Optional[uuid.UUID] = None
+    escola_id: uuid.UUID | None = None
 
 class UpdateProfileUseCase:
     """Caso de uso para usuário atualizar seu próprio perfil."""
@@ -40,7 +40,7 @@ class UpdateProfileUseCase:
             user_alvo.nome = input_dto.nome
             user_alvo.email = input_dto.email
             user_alvo.escola_id = input_dto.escola_id
-            user_alvo.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            user_alvo.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
             await self.user_repo.save(user_alvo)
 

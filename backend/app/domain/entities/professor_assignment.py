@@ -8,8 +8,7 @@ Controla o vínculo temporal de cada professor com um aluno específico.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +16,7 @@ from app.domain.entities.user import PapelUsuario
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class ProfessorAssignment(BaseModel):
@@ -36,7 +35,7 @@ class ProfessorAssignment(BaseModel):
     aluno_id: uuid.UUID = Field(description="FK lógica para students.id.")
     tipo_papel: PapelUsuario = Field(description="Papel do professor neste vínculo específico.")
     data_inicio: datetime = Field(default_factory=_utcnow, description="Início do vínculo.")
-    data_fim: Optional[datetime] = Field(default=None, description="Fim do vínculo. None = ativo. Definido na transferência ou encerramento.")
+    data_fim: datetime | None = Field(default=None, description="Fim do vínculo. None = ativo. Definido na transferência ou encerramento.")
 
     @property
     def ativo(self) -> bool:

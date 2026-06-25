@@ -1,11 +1,13 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
+
 from sqlmodel import Field, SQLModel
-from app.domain.models import TagPedagogica, SyncStatus
+
+from app.domain.models import SyncStatus, TagPedagogica
+
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class PhotoORM(SQLModel, table=True):
     __tablename__ = "photos"  # type: ignore[assignment]
@@ -16,5 +18,5 @@ class PhotoORM(SQLModel, table=True):
     url: str = Field(max_length=500, nullable=False)
     tag: TagPedagogica = Field(nullable=False)
     sync_status: SyncStatus = Field(default=SyncStatus.LOCAL, nullable=False)
-    descricao: Optional[str] = Field(default=None, max_length=500)
+    descricao: str | None = Field(default=None, max_length=500)
     created_at: datetime = Field(default_factory=_utcnow, nullable=False)

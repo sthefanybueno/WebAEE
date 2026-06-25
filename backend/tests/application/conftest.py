@@ -7,10 +7,8 @@ usem a mesma implementação sem duplicação.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
-
-import pytest
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 

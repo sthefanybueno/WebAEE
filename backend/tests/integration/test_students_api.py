@@ -1,17 +1,13 @@
 import uuid
-from app.infrastructure.security.tokens import create_access_token
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
+from app.infrastructure.database import engine
 from app.infrastructure.orm_models.school_orm import SchoolORM
-from app.infrastructure.database import engine, init_db
+from app.infrastructure.security.tokens import create_access_token
 from app.main import app
-
-
-from typing import AsyncGenerator
-
 
 
 @pytest.mark.asyncio

@@ -13,6 +13,7 @@ class CreateSchoolInput:
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 
+
 class CreateSchoolUseCase:
     def __init__(self, uow: AbstractUnitOfWork, school_repo: SchoolRepository) -> None:
         self.uow = uow

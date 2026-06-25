@@ -1,17 +1,12 @@
 import uuid
-from app.infrastructure.security.tokens import create_access_token
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.domain.entities.school import School
-from app.infrastructure.database import engine, init_db
+from app.infrastructure.database import engine
+from app.infrastructure.security.tokens import create_access_token
 from app.main import app
-
-
-from typing import AsyncGenerator
-
 
 
 @pytest.mark.asyncio
@@ -22,7 +17,6 @@ async def test_multi_tenant_isolation() -> None:
     escola_b_id = uuid.uuid4()
 
     from app.infrastructure.orm_models.school_orm import SchoolORM
-    from app.infrastructure.orm_models.student_orm import StudentORM
     async with AsyncSession(engine, expire_on_commit=False) as session:
         school_a = SchoolORM(id=escola_a_id, tenant_id=tenant_a_id, nome="Escola Tenant A", is_active=True)
         school_b = SchoolORM(id=escola_b_id, tenant_id=tenant_b_id, nome="Escola Tenant B", is_active=True)

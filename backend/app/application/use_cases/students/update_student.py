@@ -8,13 +8,12 @@ Orquestra a atualização dos dados básicos (não-sensíveis) de um aluno.
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.student_repository import StudentRepository
-from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError
 from app.domain.models import Student
 
 
@@ -24,11 +23,11 @@ class UpdateStudentInput:
     tenant_id: uuid.UUID
     papel: PapelUsuario
     user_id: uuid.UUID
-    nome: Optional[str] = None
-    data_nascimento: Optional[datetime] = None
-    escola_atual_id: Optional[uuid.UUID] = None
-    apoio_id: Optional[uuid.UUID] = None
-    diagnostico: Optional[str] = None
+    nome: str | None = None
+    data_nascimento: datetime | None = None
+    escola_atual_id: uuid.UUID | None = None
+    apoio_id: uuid.UUID | None = None
+    diagnostico: str | None = None
 
 
 class UpdateStudentUseCase:
@@ -70,7 +69,7 @@ class UpdateStudentUseCase:
             if input_dto.diagnostico is not None:
                 student.diagnostico = input_dto.diagnostico
 
-            student.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            student.updated_at = datetime.now(UTC).replace(tzinfo=None)
             student.updated_by = input_dto.user_id
 
             return await self.student_repo.save(student)

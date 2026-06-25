@@ -8,8 +8,11 @@ from app.application.ports.report_template_repository import (
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.report import Report
 from app.domain.entities.user import PapelUsuario
-from app.domain.exceptions import AlunoNaoEncontradoError, PermissaoInsuficienteError
-from app.domain.exceptions import DomainException
+from app.domain.exceptions import (
+    AlunoNaoEncontradoError,
+    DomainException,
+    PermissaoInsuficienteError,
+)
 
 
 @dataclass
@@ -23,6 +26,7 @@ class CreateReportInput:
 
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
+
 
 class CreateReportUseCase:
     """Caso de uso para criação de relatórios pedagógicos (PEI, Plano de AEE, etc).

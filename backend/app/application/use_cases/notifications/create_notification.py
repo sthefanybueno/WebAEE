@@ -10,7 +10,6 @@ O router apenas passa os dados; este Use Case encapsula a criação.
 
 import uuid
 from dataclasses import dataclass
-from typing import Optional
 
 from app.application.ports.notification_repository import NotificationRepository
 from app.domain.entities.notification import Notification
@@ -22,8 +21,8 @@ class CreateNotificationInput:
     autor_id: uuid.UUID
     tipo: str
     mensagem: str
-    relatorio_id: Optional[uuid.UUID] = None
-    aluno_id: Optional[uuid.UUID] = None
+    relatorio_id: uuid.UUID | None = None
+    aluno_id: uuid.UUID | None = None
 
 
 class CreateNotificationUseCase:

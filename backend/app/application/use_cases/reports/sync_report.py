@@ -1,20 +1,20 @@
 import uuid
 from dataclasses import dataclass
-from typing import List
+from datetime import UTC, datetime
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.report import Report
-from datetime import datetime, timezone
 
 
 def _to_naive_utc(dt: datetime) -> datetime:
     if dt.tzinfo is not None:
-        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt.astimezone(UTC).replace(tzinfo=None)
     return dt
 
 
 from app.domain.exceptions import ConflitoSincronizacaoError
+
 
 @dataclass
 class SyncReportInput:
@@ -27,6 +27,7 @@ class SyncReportInput:
     updated_at_local: datetime
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
+
 
 class SyncReportUseCase:
     """Caso de uso para sincronização offline-first de relatórios (Resiliência Distribuída).
@@ -52,7 +53,7 @@ class SyncReportUseCase:
         self.report_repo = report_repo
         self.student_repo = student_repo
 
-    async def execute(self, inputs: List[SyncReportInput]) -> List[Report]:
+    async def execute(self, inputs: list[SyncReportInput]) -> list[Report]:
         """Sincroniza uma lista de relatórios vindos do cliente sob uma transação atômica.
         """
         async with self.uow.transaction():

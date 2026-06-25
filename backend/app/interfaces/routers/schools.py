@@ -1,6 +1,4 @@
-import uuid
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.use_cases.schools.create_school import (
@@ -9,10 +7,10 @@ from app.application.use_cases.schools.create_school import (
 )
 from app.application.use_cases.schools.list_schools import ListSchoolsUseCase
 from app.infrastructure.database import get_session
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.school_repository_impl import (
     SQLModelSchoolRepository,
 )
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.school import CreateSchoolRequest, SchoolResponse
 
@@ -41,7 +39,7 @@ async def create_school(
     return school
 
 
-@router.get("/", response_model=List[SchoolResponse])
+@router.get("/", response_model=list[SchoolResponse])
 async def list_schools(
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListSchoolsUseCase = Depends(get_list_schools_use_case),

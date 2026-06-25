@@ -9,9 +9,8 @@ Orquestra a transferência de escola de um aluno (operação atômica).
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.professor_assignment_repository import (
     ProfessorAssignmentRepository,
 )
@@ -20,13 +19,14 @@ from app.application.ports.student_history_repository import (
     StudentSchoolHistoryRepository,
 )
 from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.student_history import StudentSchoolHistory
+from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import (
     AlunoNaoEncontradoError,
     EscolaNaoEncontradaError,
     TenantMismatchError,
 )
-from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
 
@@ -73,7 +73,7 @@ class TransferStudentUseCase:
                 raise TenantMismatchError("escola de destino")
 
             # Revogar vínculos ativos via método rico da entidade
-            now = datetime.now(timezone.utc).replace(tzinfo=None)
+            now = datetime.now(UTC).replace(tzinfo=None)
             active_assignments = await self.assignment_repo.list_active_by_student(
                 input_dto.student_id
             )

@@ -1,24 +1,22 @@
 import uuid
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-import os
-import shutil
-from sqlmodel.ext.asyncio.session import AsyncSession
-from app.domain.models import TagPedagogica
+
 import cloudinary.uploader
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.use_cases.photos.create_photo import (
     CreatePhotoInput,
     CreatePhotoUseCase,
 )
+from app.domain.models import TagPedagogica
 from app.infrastructure.database import get_session
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.photo_repository_impl import (
     SQLModelPhotoRepository,
 )
 from app.infrastructure.repositories.student_repository_impl import (
     SQLModelStudentRepository,
 )
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.photo import CreatePhotoRequest, PhotoResponse
 
@@ -81,7 +79,7 @@ async def upload_photo(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/aluno/{student_id}", response_model=List[PhotoResponse])
+@router.get("/aluno/{student_id}", response_model=list[PhotoResponse])
 async def list_photos_by_student(
     student_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
@@ -97,8 +95,9 @@ async def list_photos_by_student(
     photos = await repo.list_by_student(student_id)
     return photos
 
-from app.application.use_cases.photos.sync_photo import SyncPhotoUseCase, SyncPhotoInput
+from app.application.use_cases.photos.sync_photo import SyncPhotoInput, SyncPhotoUseCase
 from app.interfaces.schemas.photo import SyncPhotoRequest
+
 
 def get_sync_photo_use_case(session: AsyncSession = Depends(get_session)) -> SyncPhotoUseCase:
     return SyncPhotoUseCase(
@@ -107,7 +106,7 @@ def get_sync_photo_use_case(session: AsyncSession = Depends(get_session)) -> Syn
         student_repo=SQLModelStudentRepository(session),
     )
 
-@router.post("/sync", response_model=List[PhotoResponse])
+@router.post("/sync", response_model=list[PhotoResponse])
 async def sync_photos(
     request: SyncPhotoRequest,
     current_user: CurrentUser = Depends(get_current_user),

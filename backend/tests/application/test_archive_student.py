@@ -1,20 +1,20 @@
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 import pytest
 
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.use_cases.students.archive_student import (
     ArchiveStudentInput,
     ArchiveStudentUseCase,
 )
 from app.domain.entities.audit_log import AuditLog
-from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError, TenantMismatchError
-from app.domain.models import StatusAluno, Student
 from app.domain.entities.user import PapelUsuario
-
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
-
-from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.domain.exceptions import (
+    AlunoNaoEncontradoError,
+)
+from app.domain.models import StatusAluno, Student
 
 
 class MockUnitOfWork(AbstractUnitOfWork):

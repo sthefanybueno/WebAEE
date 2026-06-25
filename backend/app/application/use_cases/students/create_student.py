@@ -19,12 +19,11 @@ Então MUST lançar EscolaNaoEncontradaError.
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.school_repository import SchoolRepository
 from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.exceptions import (
     ConsentimentoLGPDAusenteError,
     EscolaNaoEncontradaError,
@@ -33,12 +32,12 @@ from app.domain.exceptions import (
 from app.domain.models import StatusAluno, Student
 
 
-def _to_naive_utc(dt: Optional[datetime]) -> Optional[datetime]:
+def _to_naive_utc(dt: datetime | None) -> datetime | None:
     """Converte datetime timezone-aware para naive UTC."""
     if dt is None:
         return None
     if dt.tzinfo is not None:
-        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt.astimezone(UTC).replace(tzinfo=None)
     return dt
 
 
@@ -48,10 +47,10 @@ class CreateStudentInput:
     tenant_id: uuid.UUID
     escola_atual_id: uuid.UUID
     consentimento_lgpd: bool
-    data_nascimento: Optional[datetime] = None
-    diagnostico: Optional[str] = None
-    laudo: Optional[str] = None
-    apoio_id: Optional[uuid.UUID] = None
+    data_nascimento: datetime | None = None
+    diagnostico: str | None = None
+    laudo: str | None = None
+    apoio_id: uuid.UUID | None = None
     base_legal: str = "Art. 58 LDB"
 
 

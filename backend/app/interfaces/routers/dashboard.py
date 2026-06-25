@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Depends
-from sqlmodel import select, func, col
-from sqlmodel.ext.asyncio.session import AsyncSession
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
+from fastapi import APIRouter, Depends
+from sqlmodel import col, func, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.domain.models import StatusAluno
 from app.infrastructure.database import get_session
+from app.infrastructure.orm_models.photo_orm import PhotoORM
+from app.infrastructure.orm_models.report_orm import ReportORM
+from app.infrastructure.orm_models.student_orm import StudentORM
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.dashboard import DashboardResponse
-from app.domain.models import StatusAluno
-from app.infrastructure.orm_models.student_orm import StudentORM
-from app.infrastructure.orm_models.report_orm import ReportORM
-from app.infrastructure.orm_models.photo_orm import PhotoORM
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -32,7 +33,7 @@ async def get_dashboard(
     total_reports = (await session.exec(stmt_reports)).one()
 
     # Total de Fotos Criadas Hoje
-    hoje = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
+    hoje = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
     stmt_fotos = select(func.count(col(PhotoORM.id))).where(PhotoORM.created_at >= hoje)
     total_fotos = (await session.exec(stmt_fotos)).one()
 

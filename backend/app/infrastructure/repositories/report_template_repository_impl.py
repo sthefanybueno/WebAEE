@@ -1,5 +1,4 @@
 import uuid
-from typing import List, Optional
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -15,7 +14,7 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, template_id: uuid.UUID) -> Optional[ReportTemplate]:
+    async def get_by_id(self, template_id: uuid.UUID) -> ReportTemplate | None:
         statement = select(ReportTemplateORM).where(
             ReportTemplateORM.id == template_id, ReportTemplateORM.ativo == True
         )
@@ -25,7 +24,7 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
             return ReportTemplate(**orm.model_dump())
         return None
 
-    async def list_all(self) -> List[ReportTemplate]:
+    async def list_all(self) -> list[ReportTemplate]:
         """Retorna todos os templates do sistema (ativos e inativos)."""
         statement = select(ReportTemplateORM)
         result = await self.session.exec(statement)

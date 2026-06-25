@@ -1,7 +1,10 @@
-from pydantic import BaseModel
 import uuid
 from datetime import datetime
-from app.domain.models import TagPedagogica, SyncStatus
+
+from pydantic import BaseModel
+
+from app.domain.models import SyncStatus, TagPedagogica
+
 
 class CreatePhotoRequest(BaseModel):
     aluno_id: uuid.UUID
@@ -17,7 +20,7 @@ class PhotoResponse(BaseModel):
     sync_status: SyncStatus
     created_at: datetime
 
-from typing import List
+
 
 class SyncPhotoItemRequest(BaseModel):
     id: uuid.UUID
@@ -27,4 +30,4 @@ class SyncPhotoItemRequest(BaseModel):
     sync_status: SyncStatus
 
 class SyncPhotoRequest(BaseModel):
-    items: List[SyncPhotoItemRequest]
+    items: list[SyncPhotoItemRequest]

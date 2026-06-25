@@ -35,7 +35,7 @@ class Email(str):
     letras maiúsculas no domínio.
     """
 
-    def __new__(cls, value: str) -> "Email":
+    def __new__(cls, value: str) -> Email:
         normalized = value.strip().lower()
         if not _EMAIL_RE.match(normalized):
             raise ValueError(

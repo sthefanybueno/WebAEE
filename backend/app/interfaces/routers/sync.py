@@ -1,17 +1,17 @@
-import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import select, col
+from sqlmodel import col, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.domain.models import Student
 from app.domain.entities.report import Report
-from app.infrastructure.orm_models.student_orm import StudentORM
-from app.infrastructure.orm_models.report_orm import ReportORM
+from app.domain.models import Student
 from app.infrastructure.database import get_session
+from app.infrastructure.orm_models.report_orm import ReportORM
+from app.infrastructure.orm_models.student_orm import StudentORM
 from app.infrastructure.repositories.report_repository_impl import SQLModelReportRepository
 from app.interfaces.dependencies import CurrentUser, get_current_user
-from app.interfaces.schemas.sync import SyncPullResponse, ResolveConflictRequest
+from app.interfaces.schemas.sync import ResolveConflictRequest, SyncPullResponse
 
 router = APIRouter(prefix="/api/sync", tags=["sync"])
 
@@ -26,7 +26,7 @@ async def sync_pull(
     para o tenant do usuário, habilitando o carregamento rápido offline-first.
     """
     if last_sync.tzinfo is not None:
-        last_sync = last_sync.astimezone(timezone.utc).replace(tzinfo=None)
+        last_sync = last_sync.astimezone(UTC).replace(tzinfo=None)
         
     # Alunos
     stmt_alunos = select(StudentORM).where(
@@ -45,7 +45,7 @@ async def sync_pull(
     relatorios_atualizados = [Report(**orm.model_dump()) for orm in result_relatorios.all()]
 
     return {
-        "last_sync": datetime.now(timezone.utc).replace(tzinfo=None),
+        "last_sync": datetime.now(UTC).replace(tzinfo=None),
         "alunos": alunos_atualizados,
         "relatorios": relatorios_atualizados
     }
@@ -74,7 +74,7 @@ async def resolve_report_conflict(
     # Aplica o conteúdo resolvido
     report.conteudo_json = request.resolved_content
     # Atualiza o timestamp (vai pro pull depois e atualiza clientes passivos)
-    report.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    report.updated_at = datetime.now(UTC).replace(tzinfo=None)
     
     # Remove a tag de conflito
     report.conflict_flag = False

@@ -1,13 +1,15 @@
 import uuid
 from dataclasses import dataclass
-from typing import Any, Dict
-
-from app.application.ports.unit_of_work import AbstractUnitOfWork
+from typing import Any
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.report import Report
-from app.domain.exceptions import AlunoNaoEncontradoError, RelatorioNaoEncontradoError, RelatorioTravadoError
+from app.domain.exceptions import (
+    RelatorioNaoEncontradoError,
+    RelatorioTravadoError,
+)
 
 
 @dataclass
@@ -15,7 +17,7 @@ class UpdateReportInput:
     report_id: uuid.UUID
     tenant_id: uuid.UUID
     user_id: uuid.UUID
-    conteudo_json: Dict[str, Any]
+    conteudo_json: dict[str, Any]
 
 
 class UpdateReportUseCase:

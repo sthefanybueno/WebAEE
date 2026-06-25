@@ -10,20 +10,20 @@ Benefícios:
   - Adicionar novos routers requer mudança apenas aqui.
 """
 
-from fastapi import FastAPI, APIRouter, Depends
-from app.interfaces.dependencies import get_current_user
+from fastapi import APIRouter, Depends, FastAPI
 
+from app.interfaces.dependencies import get_current_user
 from app.interfaces.routers import (
     auth,
     dashboard,
     notifications,
     photos,
     reports,
+    schedules,
     schools,
     students,
     sync,
     users,
-    schedules
 )
 
 api_router = APIRouter()

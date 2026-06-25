@@ -1,4 +1,6 @@
 from enum import Enum
+
+
 class A(str, Enum):
     V = 'admin'
 

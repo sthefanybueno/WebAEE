@@ -12,7 +12,6 @@ Regras:
 
 import uuid
 from dataclasses import dataclass
-from typing import List, Optional
 
 from app.application.ports.student_repository import StudentRepository
 from app.domain.entities.user import PapelUsuario
@@ -24,9 +23,9 @@ class ListStudentsInput:
     tenant_id: uuid.UUID
     papel: PapelUsuario
     user_id: uuid.UUID
-    status: Optional[StatusAluno] = None
-    escola_id: Optional[uuid.UUID] = None
-    professor_id: Optional[uuid.UUID] = None
+    status: StatusAluno | None = None
+    escola_id: uuid.UUID | None = None
+    professor_id: uuid.UUID | None = None
 
 
 class ListStudentsUseCase:
@@ -35,7 +34,7 @@ class ListStudentsUseCase:
     def __init__(self, student_repo: StudentRepository) -> None:
         self.student_repo = student_repo
 
-    async def execute(self, input_dto: ListStudentsInput) -> List[Student]:
+    async def execute(self, input_dto: ListStudentsInput) -> list[Student]:
         """Retorna alunos aplicando regra RBAC conforme papel do usuário."""
         # ADMIN: acesso irrestrito a todos os tenants
         if input_dto.papel == PapelUsuario.ADMIN:

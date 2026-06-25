@@ -1,6 +1,9 @@
+from collections.abc import AsyncGenerator
+
 import pytest
-from typing import AsyncGenerator
+
 from app.infrastructure.database import engine, init_db
+
 
 @pytest.fixture(autouse=True)
 async def setup_db() -> AsyncGenerator[None, None]:

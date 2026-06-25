@@ -9,13 +9,10 @@ Endpoints:
 """
 
 import uuid
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.infrastructure.database import get_session
-from app.infrastructure.repositories.notification_repository_impl import SQLModelNotificationRepository
 from app.application.use_cases.notifications.list_notifications import (
     ListNotificationsInput,
     ListNotificationsUseCase,
@@ -24,7 +21,15 @@ from app.application.use_cases.notifications.mark_notification_read import (
     MarkNotificationReadInput,
     MarkNotificationReadUseCase,
 )
-from app.domain.exceptions import DomainException, NotificacaoNaoEncontradaError, TenantMismatchError
+from app.domain.exceptions import (
+    DomainException,
+    NotificacaoNaoEncontradaError,
+    TenantMismatchError,
+)
+from app.infrastructure.database import get_session
+from app.infrastructure.repositories.notification_repository_impl import (
+    SQLModelNotificationRepository,
+)
 from app.interfaces.dependencies import CurrentUser, get_current_user
 
 router = APIRouter(prefix="/api/notificacoes", tags=["notificações"])
@@ -40,7 +45,7 @@ def _domain_to_http(exc: DomainException) -> HTTPException:
     return HTTPException(status_code=http_status, detail=str(exc))
 
 
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=list[dict])
 async def listar_notificacoes(
     apenas_nao_lidas: bool = Query(default=False, description="Retorna apenas notificações não lidas."),
     current_user: CurrentUser = Depends(get_current_user),

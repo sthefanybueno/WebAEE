@@ -10,14 +10,13 @@ Destinadas a admins, coordenadores e AEEs.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Notification(BaseModel):
@@ -36,8 +35,8 @@ class Notification(BaseModel):
     autor_id: uuid.UUID = Field(description="FK lógica para users.id — quem gerou o evento.")
     tipo: str = Field(description="Tipo do evento: 'relatorio_criado' | 'aluno_cadastrado'.")
     mensagem: str = Field(max_length=500, description="Texto legível da notificação.")
-    relatorio_id: Optional[uuid.UUID] = Field(default=None, description="FK opcional para reports.id.")
-    aluno_id: Optional[uuid.UUID] = Field(default=None, description="FK opcional para students.id.")
+    relatorio_id: uuid.UUID | None = Field(default=None, description="FK opcional para reports.id.")
+    aluno_id: uuid.UUID | None = Field(default=None, description="FK opcional para students.id.")
     lida: bool = Field(default=False, description="False = não lida; True = usuário já visualizou.")
     created_at: datetime = Field(default_factory=_utcnow)
 

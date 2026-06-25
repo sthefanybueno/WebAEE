@@ -10,15 +10,12 @@ que importava ORM models diretamente na camada de interface.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
-
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.report_template_repository import ReportTemplateRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.report import ReportTemplate
-
-
 from app.domain.entities.user import PapelUsuario
+
 
 @dataclass
 class ListTemplatesInput:
@@ -41,7 +38,7 @@ class ListTemplatesUseCase:
         self.uow = uow
         self.template_repo = template_repo
 
-    async def execute(self, input_dto: ListTemplatesInput) -> List[ReportTemplate]:
+    async def execute(self, input_dto: ListTemplatesInput) -> list[ReportTemplate]:
         """Retorna todos os templates disponíveis para o papel informado."""
         all_templates = await self.template_repo.list_all()
         return [t for t in all_templates if t.papel_pode_visualizar(str(input_dto.papel_usuario.value))]

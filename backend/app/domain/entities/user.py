@@ -9,13 +9,13 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
+
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class PapelUsuario(str, enum.Enum):
@@ -62,7 +62,7 @@ class User(BaseModel):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     tenant_id: uuid.UUID = Field(description="FK lógica para tenants.id.")
-    escola_id: Optional[uuid.UUID] = Field(default=None, description="FK para schools.id, obrigatório para prof_apoio e prof_regente.")
+    escola_id: uuid.UUID | None = Field(default=None, description="FK para schools.id, obrigatório para prof_apoio e prof_regente.")
     email: str = Field(max_length=255, description="Email único no sistema (login).")
     hashed_password: str = Field(description="Senha do usuário hasheada com bcrypt.")
     nome: str = Field(min_length=2, max_length=255, description="Nome completo do usuário.")
@@ -80,7 +80,7 @@ class User(BaseModel):
         Um usuário já inativo não levanta erro — é operação idempotente.
         """
         self.ativo = False
-        self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
     def pode_criar_usuario(self, papel_alvo: PapelUsuario) -> bool:
         """Verifica se este usuário tem hierarquia para criar outro com o papel_alvo.

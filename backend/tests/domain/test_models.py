@@ -27,13 +27,12 @@ modelos como objetos Python puros sem sessão de banco de dados.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
-from app.domain.models import StatusAluno, Student, TagPedagogica
 from app.domain.exceptions import AlunoJaArquivadoError
-
+from app.domain.models import StatusAluno, Student, TagPedagogica
 
 # ─────────────────────────────────────────────────────────
 # Fixtures
@@ -66,7 +65,7 @@ def aluno_completo(tenant_id: uuid.UUID) -> Student:
         diagnostico="TEA nível 1",
         laudo="CID-11: 6A02.0",
         consentimento_lgpd=True,
-        data_consentimento=datetime.now(timezone.utc),
+        data_consentimento=datetime.now(UTC),
         base_legal="Lei 13.146/2015 — LBI",
     )
 

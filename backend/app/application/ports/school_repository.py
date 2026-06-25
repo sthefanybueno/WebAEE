@@ -1,11 +1,11 @@
 import uuid
-from typing import Optional, Protocol
+from typing import Protocol
 
 from app.domain.entities.school import School
 
 
 class SchoolRepository(Protocol):
-    async def get_by_id(self, id: uuid.UUID) -> Optional[School]:
+    async def get_by_id(self, id: uuid.UUID) -> School | None:
         ...
         
     async def save(self, school: School) -> School:

@@ -1,11 +1,12 @@
 import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from app.application.ports.report_repository import ReportRepository
 from app.domain.entities.report import Report
 from app.domain.entities.user import PapelUsuario
-from datetime import datetime, timezone
-from app.domain.exceptions import RelatorioNaoEncontradoError, PermissaoInsuficienteError
+from app.domain.exceptions import PermissaoInsuficienteError, RelatorioNaoEncontradoError
+
 
 @dataclass
 class AddCommentInput:
@@ -15,6 +16,7 @@ class AddCommentInput:
     texto: str
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
+
 
 class AddCommentUseCase:
     """Caso de uso para adição de comentários da coordenação em relatórios.
@@ -46,7 +48,7 @@ class AddCommentUseCase:
             comentarios.append({
                 "texto": input_dto.texto,
                 "autor_id": str(input_dto.autor_id),
-                "created_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+                "created_at": datetime.now(UTC).replace(tzinfo=None).isoformat()
             })
             
             # Faz uma cópia rasa ou funda para garantir que o SQLAlchemy detecte a mutação em JSON(B)

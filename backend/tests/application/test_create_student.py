@@ -1,19 +1,21 @@
 import uuid
-import pytest
-from datetime import datetime, timezone
-
-from app.application.use_cases.students.create_student import (
-    CreateStudentUseCase,
-    CreateStudentInput,
-)
-from app.domain.exceptions import ConsentimentoLGPDAusenteError, EscolaNaoEncontradaError, TenantMismatchError
-from app.domain.models import Student
-from app.domain.entities.school import School
-
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+
+import pytest
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.application.use_cases.students.create_student import (
+    CreateStudentInput,
+    CreateStudentUseCase,
+)
+from app.domain.entities.school import School
+from app.domain.exceptions import (
+    ConsentimentoLGPDAusenteError,
+    EscolaNaoEncontradaError,
+    TenantMismatchError,
+)
+from app.domain.models import Student
 
 
 class MockUnitOfWork(AbstractUnitOfWork):

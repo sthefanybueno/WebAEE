@@ -15,7 +15,7 @@ def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: 
 """
 
 for f in files:
-    with open(f, 'r', encoding='utf-8') as file:
+    with open(f, encoding='utf-8') as file:
         content = file.read()
     
     new_content = re.sub(r'from app\.infrastructure\.security\.tokens import create_access_token\nimport uuid\n\ndef auth_headers[\s\S]*?return\s+\{"Authorization":\s*f?"Bearer\s*\{token\}"\}\n', repl, content)

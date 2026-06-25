@@ -1,12 +1,17 @@
 import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, HTTPException, status, Depends, Request
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.infrastructure.database import get_session
-from app.interfaces.schemas.auth import LoginRequest, LoginResponse, TokenRefreshRequest, TokenRefreshResponse
-from app.domain.entities.user import PapelUsuario
 from app.infrastructure.rate_limit import limiter
 from app.infrastructure.security.tokens import create_access_token, decode_access_token
+from app.interfaces.schemas.auth import (
+    LoginResponse,
+    TokenRefreshRequest,
+    TokenRefreshResponse,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 

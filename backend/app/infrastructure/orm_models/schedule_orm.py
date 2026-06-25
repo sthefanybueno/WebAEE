@@ -1,12 +1,11 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from sqlmodel import Field, SQLModel
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class ScheduleORM(SQLModel, table=True):
@@ -27,4 +26,4 @@ class ScheduleORM(SQLModel, table=True):
     tipo_slot: str = Field(default="normal", nullable=False)
     created_at: datetime = Field(default_factory=_utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=_utcnow, nullable=False)
-    created_by: Optional[uuid.UUID] = Field(default=None)
+    created_by: uuid.UUID | None = Field(default=None)

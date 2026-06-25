@@ -10,7 +10,6 @@ Regras RBAC:
 
 import uuid
 from dataclasses import dataclass
-from typing import List
 
 from app.application.ports.notification_repository import NotificationRepository
 from app.domain.entities.notification import Notification
@@ -36,7 +35,7 @@ class ListNotificationsUseCase:
     def __init__(self, notification_repo: NotificationRepository) -> None:
         self.notification_repo = notification_repo
 
-    async def execute(self, input_dto: ListNotificationsInput) -> List[Notification]:
+    async def execute(self, input_dto: ListNotificationsInput) -> list[Notification]:
         """Retorna notificações; lista vazia para papéis sem acesso."""
         if input_dto.papel not in _PAPEIS_COM_NOTIFICACAO:
             return []

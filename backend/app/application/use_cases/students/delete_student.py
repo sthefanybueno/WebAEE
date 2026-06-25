@@ -12,20 +12,21 @@ adicionar ports desnecessários para um Use Case raro e administrativo.
 Esse acesso direto à sessão é aceitável APENAS aqui e está documentado.
 """
 import uuid
-from pydantic import BaseModel
 
-from app.application.ports.student_repository import StudentRepository
-from app.application.ports.unit_of_work import AbstractUnitOfWork
-from app.domain.exceptions import AlunoNaoEncontradoError, PermissaoInsuficienteError
-from app.domain.entities.user import PapelUsuario
+from pydantic import BaseModel
 
 # Imports de infraestrutura — justificativa: hard_delete em cascata de entidades
 # relacionadas requer acesso direto à sessão. Isso é documentado e intencional.
 from sqlmodel import select
-from app.infrastructure.orm_models.schedule_orm import ScheduleORM
-from app.infrastructure.orm_models.professor_assignment_orm import ProfessorAssignmentORM
-from app.infrastructure.orm_models.student_history_orm import StudentSchoolHistoryORM
+
+from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import AlunoNaoEncontradoError, PermissaoInsuficienteError
 from app.infrastructure.orm_models.photo_orm import PhotoORM
+from app.infrastructure.orm_models.professor_assignment_orm import ProfessorAssignmentORM
+from app.infrastructure.orm_models.schedule_orm import ScheduleORM
+from app.infrastructure.orm_models.student_history_orm import StudentSchoolHistoryORM
 
 
 class DeleteStudentInput(BaseModel):

@@ -1,6 +1,5 @@
 import uuid
 from dataclasses import dataclass
-from typing import List
 
 from app.application.ports.photo_repository import PhotoRepository
 from app.application.ports.student_repository import StudentRepository
@@ -21,6 +20,7 @@ class SyncPhotoInput:
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 
+
 class SyncPhotoUseCase:
     """Caso de uso para sincronizar fotos enviadas via PWA offline"""
 
@@ -34,7 +34,7 @@ class SyncPhotoUseCase:
         self.photo_repo = photo_repo
         self.student_repo = student_repo
 
-    async def execute(self, inputs: List[SyncPhotoInput]) -> List[Photo]:
+    async def execute(self, inputs: list[SyncPhotoInput]) -> list[Photo]:
         synced_photos = []
         async with self.uow.transaction():
             for input_dto in inputs:

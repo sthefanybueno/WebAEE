@@ -1,20 +1,21 @@
 import uuid
-from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 from app.application.ports.user_repository import UserRepository
 from app.domain.entities.user import User
 from app.domain.exceptions import UsuarioNaoEncontradoError
 
+
 class ListUsersInput(BaseModel):
     tenant_id: uuid.UUID
-    nome: Optional[str] = None
-    papel: Optional[str] = None
+    nome: str | None = None
+    papel: str | None = None
     page: int = Field(default=1, ge=1)
     size: int = Field(default=50, ge=1, le=100)
 
 class PaginatedUsers(BaseModel):
-    items: List[User]
+    items: list[User]
     total: int
     page: int
     size: int

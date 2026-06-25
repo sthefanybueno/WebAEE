@@ -1,9 +1,8 @@
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 
 # Em produção, essa chave deve vir de variável de ambiente (ex: pydantic-settings)
 # Estamos hardcoding um fallback por enquanto para manter o sistema rodando simples
@@ -14,7 +13,7 @@ ACCESS_TOKEN_EXPIRE_HOURS = int(os.getenv("JWT_TTL_HOURS", "8"))
 
 def create_access_token(user_id: uuid.UUID, tenant_id: uuid.UUID, papel: str, nome: str) -> str:
     """Cria um JWT para sessão de usuário (login)."""
-    expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+    expire = datetime.now(UTC) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
     to_encode = {
         "sub": str(user_id),
         "tenant_id": str(tenant_id),
@@ -26,7 +25,7 @@ def create_access_token(user_id: uuid.UUID, tenant_id: uuid.UUID, papel: str, no
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def decode_access_token(token: str) -> Optional[dict]:
+def decode_access_token(token: str) -> dict | None:
     """Decodifica um JWT de acesso e retorna o payload completo.
     Retorna None se o token for inválido, expirado ou não for de acesso."""
     try:
@@ -46,7 +45,7 @@ def decode_access_token(token: str) -> Optional[dict]:
 
 def create_invite_token(user_id: uuid.UUID) -> str:
     """Cria um JWT para convite de usuário."""
-    expire = datetime.now(timezone.utc) + timedelta(hours=INVITE_TOKEN_EXPIRE_HOURS)
+    expire = datetime.now(UTC) + timedelta(hours=INVITE_TOKEN_EXPIRE_HOURS)
     to_encode = {
         "sub": str(user_id),
         "type": "invite",
@@ -55,7 +54,7 @@ def create_invite_token(user_id: uuid.UUID) -> str:
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def decode_invite_token(token: str) -> Optional[uuid.UUID]:
+def decode_invite_token(token: str) -> uuid.UUID | None:
     """Decodifica um JWT de convite de usuário e retorna o user_id. 
     Retorna None se o token for inválido, expirado ou não for de convite."""
     try:

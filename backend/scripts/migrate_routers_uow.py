@@ -2,8 +2,8 @@
 Script: migrar routers de session= para uow= com SQLAlchemyUnitOfWork.
 Execução: python scripts/migrate_routers_uow.py (a partir do backend/)
 """
-import re
 import pathlib
+import re
 
 routers_dir = pathlib.Path("app/interfaces/routers")
 modified = []

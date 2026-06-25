@@ -1,13 +1,12 @@
 import uuid
-from typing import List, Optional
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.ports.student_repository import StudentRepository
 from app.domain.models import StatusAluno, Student
-from app.infrastructure.orm_models.student_orm import StudentORM
 from app.infrastructure.orm_models.professor_assignment_orm import ProfessorAssignmentORM
+from app.infrastructure.orm_models.student_orm import StudentORM
 
 
 class SQLModelStudentRepository(StudentRepository):
@@ -23,7 +22,7 @@ class SQLModelStudentRepository(StudentRepository):
         """
         return Student(**orm.model_dump())
 
-    async def get_by_id(self, id: uuid.UUID, professor_id: Optional[uuid.UUID] = None) -> Optional[Student]:
+    async def get_by_id(self, id: uuid.UUID, professor_id: uuid.UUID | None = None) -> Student | None:
         if professor_id is None:
             orm = await self._session.get(StudentORM, id)
         else:
@@ -41,8 +40,8 @@ class SQLModelStudentRepository(StudentRepository):
         return self._to_entity(orm) if orm else None
 
     async def list_by_tenant(
-        self, tenant_id: Optional[uuid.UUID], status: Optional[StatusAluno] = None, professor_id: Optional[uuid.UUID] = None, escola_id: Optional[uuid.UUID] = None
-    ) -> List[Student]:
+        self, tenant_id: uuid.UUID | None, status: StatusAluno | None = None, professor_id: uuid.UUID | None = None, escola_id: uuid.UUID | None = None
+    ) -> list[Student]:
         stmt = select(StudentORM).distinct()
         if tenant_id is not None:
             stmt = stmt.where(StudentORM.tenant_id == tenant_id)

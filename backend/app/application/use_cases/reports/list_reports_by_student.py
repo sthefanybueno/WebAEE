@@ -12,7 +12,6 @@ o Router apenas monta o DTO e traduz a DomainException em HTTP.
 
 import uuid
 from dataclasses import dataclass
-from typing import List, Optional
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
@@ -24,7 +23,7 @@ from app.domain.exceptions import AlunoNaoEncontradoError, TenantMismatchError
 class ListReportsByStudentInput:
     student_id: uuid.UUID
     tenant_id: uuid.UUID
-    template_id: Optional[uuid.UUID] = None
+    template_id: uuid.UUID | None = None
 
 
 class ListReportsByStudentUseCase:
@@ -44,7 +43,7 @@ class ListReportsByStudentUseCase:
         self.report_repo = report_repo
         self.student_repo = student_repo
 
-    async def execute(self, input_dto: ListReportsByStudentInput) -> List[Report]:
+    async def execute(self, input_dto: ListReportsByStudentInput) -> list[Report]:
         """Valida tenant e retorna relatórios do aluno.
 
         Raises:

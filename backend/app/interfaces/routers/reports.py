@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -7,33 +7,45 @@ from app.application.use_cases.reports.create_report import (
     CreateReportInput,
     CreateReportUseCase,
 )
-from app.application.use_cases.reports.list_templates import ListTemplatesUseCase, ListTemplatesInput
 from app.application.use_cases.reports.create_report_template import (
     CreateReportTemplateInput,
     CreateReportTemplateUseCase,
 )
 from app.application.use_cases.reports.list_reports_by_template import ListReportsByTemplateUseCase
+from app.application.use_cases.reports.list_templates import (
+    ListTemplatesInput,
+    ListTemplatesUseCase,
+)
+from app.domain.exceptions import (
+    AlunoNaoEncontradoError,
+    ConflitoSincronizacaoError,
+    DomainException,
+    PermissaoInsuficienteError,
+    RelatorioNaoEncontradoError,
+    RelatorioTravadoError,
+    TenantMismatchError,
+)
 from app.infrastructure.database import get_session
 from app.infrastructure.repositories.report_repository_impl import (
     SQLModelReportRepository,
 )
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.infrastructure.repositories.report_template_repository_impl import (
     SQLModelReportTemplateRepository,
 )
 from app.infrastructure.repositories.student_repository_impl import (
     SQLModelStudentRepository,
 )
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.interfaces.dependencies import CurrentUser, get_current_user
-from app.interfaces.schemas.report import CreateReportRequest, ReportResponse, ReportTemplateResponse, ReportDetailResponse, UpdateReportRequest, SyncReportRequest, AddCommentRequest, CreateReportTemplateRequest
-from app.domain.exceptions import (
-    DomainException,
-    AlunoNaoEncontradoError,
-    RelatorioNaoEncontradoError,
-    TenantMismatchError,
-    PermissaoInsuficienteError,
-    RelatorioTravadoError,
-    ConflitoSincronizacaoError,
+from app.interfaces.schemas.report import (
+    AddCommentRequest,
+    CreateReportRequest,
+    CreateReportTemplateRequest,
+    ReportDetailResponse,
+    ReportResponse,
+    ReportTemplateResponse,
+    SyncReportRequest,
+    UpdateReportRequest,
 )
 
 router = APIRouter(prefix="/api/relatorios", tags=["relatorios"])
@@ -83,8 +95,8 @@ async def create_report(
         raise HTTPException(status_code=400, detail=str(e))
 
 from app.application.use_cases.reports.list_reports_by_student import (
-    ListReportsByStudentUseCase,
     ListReportsByStudentInput,
+    ListReportsByStudentUseCase,
 )
 
 
@@ -97,10 +109,10 @@ def get_list_reports_by_student_use_case(
     )
 
 
-@router.get("/aluno/{student_id}", response_model=List[ReportResponse])
+@router.get("/aluno/{student_id}", response_model=list[ReportResponse])
 async def list_reports_by_student(
     student_id: uuid.UUID,
-    template_id: Optional[uuid.UUID] = None,
+    template_id: uuid.UUID | None = None,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListReportsByStudentUseCase = Depends(get_list_reports_by_student_use_case),
 ):
@@ -114,8 +126,6 @@ async def list_reports_by_student(
     except DomainException as e:
         _handle_domain_exception(e)
 
-from datetime import datetime, timezone
-from app.domain.entities.report import ReportTemplate
 
 def get_list_templates_use_case(
     session: AsyncSession = Depends(get_session),
@@ -126,7 +136,7 @@ def get_list_templates_use_case(
     )
 
 
-@router.get("/templates", response_model=List[ReportTemplateResponse])
+@router.get("/templates", response_model=list[ReportTemplateResponse])
 async def list_templates(
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListTemplatesUseCase = Depends(get_list_templates_use_case),
@@ -183,7 +193,7 @@ def get_list_reports_by_template_use_case(
         repository=SQLModelReportRepository(session),
     )
 
-@router.get("/template/{template_id}/relatorios", response_model=List[ReportResponse])
+@router.get("/template/{template_id}/relatorios", response_model=list[ReportResponse])
 async def list_reports_by_template(
     template_id: uuid.UUID,
     use_case: ListReportsByTemplateUseCase = Depends(get_list_reports_by_template_use_case),
@@ -191,7 +201,11 @@ async def list_reports_by_template(
     """Lista todos os relatórios de um template específico."""
     return await use_case.execute(template_id=template_id)
 
-from app.application.use_cases.reports.get_report_detail import GetReportDetailUseCase, GetReportDetailInput
+from app.application.use_cases.reports.get_report_detail import (
+    GetReportDetailInput,
+    GetReportDetailUseCase,
+)
+
 
 def get_report_detail_use_case(session: AsyncSession = Depends(get_session)) -> GetReportDetailUseCase:
     return GetReportDetailUseCase(
@@ -216,7 +230,8 @@ async def get_report(
     except DomainException as e:
         _handle_domain_exception(e)
 
-from app.application.use_cases.reports.update_report import UpdateReportUseCase, UpdateReportInput
+from app.application.use_cases.reports.update_report import UpdateReportInput, UpdateReportUseCase
+
 
 def get_update_report_use_case(session: AsyncSession = Depends(get_session)) -> UpdateReportUseCase:
     return UpdateReportUseCase(
@@ -246,8 +261,9 @@ async def update_report(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-from app.application.use_cases.reports.sync_report import SyncReportUseCase, SyncReportInput
-from app.application.use_cases.reports.add_comment import AddCommentUseCase, AddCommentInput
+from app.application.use_cases.reports.add_comment import AddCommentInput, AddCommentUseCase
+from app.application.use_cases.reports.sync_report import SyncReportInput, SyncReportUseCase
+
 
 def get_sync_report_use_case(session: AsyncSession = Depends(get_session)) -> SyncReportUseCase:
     return SyncReportUseCase(
@@ -258,7 +274,8 @@ def get_sync_report_use_case(session: AsyncSession = Depends(get_session)) -> Sy
 
 from app.infrastructure.rate_limit import limiter
 
-@router.post("/sync", response_model=List[ReportResponse])
+
+@router.post("/sync", response_model=list[ReportResponse])
 @limiter.exempt
 async def sync_reports(
     request: SyncReportRequest,

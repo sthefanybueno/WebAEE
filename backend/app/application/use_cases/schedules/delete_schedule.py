@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from app.application.ports.schedule_repository import ScheduleRepository
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 
+
 @dataclass
 class DeleteScheduleInput:
     id: uuid.UUID

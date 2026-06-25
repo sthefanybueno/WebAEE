@@ -4,6 +4,7 @@ com payload real contendo datetime ISO com timezone.
 """
 import asyncio
 import uuid
+
 import httpx
 
 BASE = "http://localhost:8000"

@@ -11,8 +11,8 @@ regras de finalização (travar), edição e conflito offline.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Any, Optional, Dict, List, Union
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,7 @@ from app.domain.value_objects.sync_status import SyncStatus  # fonte única de v
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class ReportTemplate(BaseModel):
@@ -38,8 +38,8 @@ class ReportTemplate(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     nome: str = Field(description="Nome do tipo de relatório (ex: PDI, Diário).")
     descricao: str = Field(description="Descrição detalhada sobre o que é este relatório.")
-    secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
-    papeis_com_acesso: List[str] = Field(default_factory=list, description="Lista de papéis que podem visualizar relatórios deste tipo. Vazio = todos.")
+    secoes: list[dict[str, Any]] | dict[str, Any] | None = Field(default=None, description="Array JSONB de seções e campos configuráveis.")
+    papeis_com_acesso: list[str] = Field(default_factory=list, description="Lista de papéis que podem visualizar relatórios deste tipo. Vazio = todos.")
     versao: int = Field(default=1, description="Versão do template. Incrementa a cada alteração estrutural.")
     ativo: bool = Field(default=True)
     created_at: datetime = Field(default_factory=_utcnow)
@@ -78,14 +78,14 @@ class Report(BaseModel):
     template_id: uuid.UUID = Field(description="FK lógica para report_templates.id indicando o tipo do relatório.")
     aluno_id: uuid.UUID = Field(description="FK lógica para students.id.")
     autor_id: uuid.UUID = Field(description="FK lógica para users.id.")
-    template_snapshot: Optional[Dict[str, Any]] = Field(default=None, description="Snapshot do template no momento da criação (imutável).")
-    conteudo_json: Optional[Dict[str, Any]] = Field(default=None, description="Conteúdo preenchido pelo usuário (mutável até travar).")
+    template_snapshot: dict[str, Any] | None = Field(default=None, description="Snapshot do template no momento da criação (imutável).")
+    conteudo_json: dict[str, Any] | None = Field(default=None, description="Conteúdo preenchido pelo usuário (mutável até travar).")
     travado: bool = Field(default=False, description="True = relatório finalizado; nenhuma edição permitida.")
     sync_status: SyncStatus = Field(default=SyncStatus.SYNCED, description="Estado de sincronização offline.")
     conflict_flag: bool = Field(default=False, description="True quando merge offline detectou conflito de versão.")
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow, description="Usado para detecção de conflito no sync offline.")
-    updated_by: Optional[uuid.UUID] = Field(default=None, description="FK lógica para users.id — último editor.")
+    updated_by: uuid.UUID | None = Field(default=None, description="FK lógica para users.id — último editor.")
 
     # ── Comportamentos de domínio (Entidade Rica) ─────────
 
@@ -116,7 +116,7 @@ class Report(BaseModel):
 
         self.travado = True
         self.updated_by = user_id
-        self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
     def registrar_conflito(self) -> None:
         """Sinaliza que houve conflito de versão no merge offline.
@@ -144,7 +144,7 @@ class Report(BaseModel):
         self.conteudo_json = conteudo_resolvido
         self.conflict_flag = False
         self.updated_by = user_id
-        self.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        self.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
     def atualizar_conteudo(self, conteudo: dict, user_id: uuid.UUID) -> None:
         """Atualiza o conteúdo do relatório com rastreabilidade completa.

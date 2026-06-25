@@ -1,14 +1,16 @@
 import uuid
-from typing import Optional
+
 import pytest
+
 from app.application.use_cases.users.queries import (
-    ListUsersInput,
-    ListUsersUseCase,
     GetUserInput,
     GetUserUseCase,
+    ListUsersInput,
+    ListUsersUseCase,
 )
-from app.domain.entities.user import User, PapelUsuario
+from app.domain.entities.user import PapelUsuario, User
 from app.domain.exceptions import UsuarioNaoEncontradoError
+
 
 class MockUserRepository:
     def __init__(self, users=None):
@@ -30,8 +32,8 @@ class MockUserRepository:
     async def list_by_tenant(
         self,
         tenant_id: uuid.UUID,
-        nome: Optional[str] = None,
-        papel: Optional[str] = None,
+        nome: str | None = None,
+        papel: str | None = None,
         page: int = 1,
         size: int = 50,
     ):

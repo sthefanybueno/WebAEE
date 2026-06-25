@@ -14,10 +14,11 @@ funcionando sem nenhuma alteração nos importadores.
 
 from __future__ import annotations
 
+from app.domain.entities.student import Student  # noqa: F401
+
 # ── Re-exports canônicos ───────────────────────────────────────────────────
 from app.domain.models_enums import StatusAluno, TagPedagogica  # noqa: F401
 from app.domain.value_objects.sync_status import SyncStatus  # noqa: F401
-from app.domain.entities.student import Student  # noqa: F401
 
 __all__ = [
     "StatusAluno",

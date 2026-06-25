@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Protocol
+from typing import Protocol
 
 from app.domain.entities.professor_assignment import ProfessorAssignment
 
@@ -7,12 +7,12 @@ from app.domain.entities.professor_assignment import ProfessorAssignment
 class ProfessorAssignmentRepository(Protocol):
     async def list_active_by_student(
         self, student_id: uuid.UUID
-    ) -> List[ProfessorAssignment]:
+    ) -> list[ProfessorAssignment]:
         ...
 
     async def list_active_by_user(
         self, user_id: uuid.UUID
-    ) -> List[ProfessorAssignment]:
+    ) -> list[ProfessorAssignment]:
         ...
 
     async def save(

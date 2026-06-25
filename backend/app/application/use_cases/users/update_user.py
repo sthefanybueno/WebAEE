@@ -1,14 +1,18 @@
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Optional
 import uuid
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
-from app.domain.entities.professor_assignment import ProfessorAssignment
-from app.domain.entities.user import User, PapelUsuario
-from app.domain.exceptions import DomainException, UsuarioNaoEncontradoError, PermissaoInsuficienteError
-from app.application.ports.user_repository import UserRepository
 from app.application.ports.professor_assignment_repository import ProfessorAssignmentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.application.ports.user_repository import UserRepository
+from app.domain.entities.professor_assignment import ProfessorAssignment
+from app.domain.entities.user import PapelUsuario, User
+from app.domain.exceptions import (
+    DomainException,
+    PermissaoInsuficienteError,
+    UsuarioNaoEncontradoError,
+)
+
 
 @dataclass
 class UpdateUserInput:
@@ -17,8 +21,8 @@ class UpdateUserInput:
     tenant_id: uuid.UUID
     nome: str
     papel: PapelUsuario
-    escola_id: Optional[uuid.UUID] = None
-    aluno_ids: Optional[list[uuid.UUID]] = None
+    escola_id: uuid.UUID | None = None
+    aluno_ids: list[uuid.UUID] | None = None
 
 class UpdateUserUseCase:
     """Caso de uso para atualizar as informações de um usuário existente."""
@@ -62,7 +66,7 @@ class UpdateUserUseCase:
             user_alvo.escola_id = input_dto.escola_id
             
             # updated_at é gerenciado pelo sqlalchemy ou método de entidade, mas para segurança podemos atualizar
-            user_alvo.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            user_alvo.updated_at = datetime.now(UTC).replace(tzinfo=None)
 
             await self.user_repo.save(user_alvo)
 
@@ -70,7 +74,7 @@ class UpdateUserUseCase:
             if input_dto.papel in (PapelUsuario.PROF_REGENTE, PapelUsuario.PROF_APOIO) and input_dto.escola_id is not None:
                 # Revoga as atribuições anteriores
                 active_assignments = await self.assignment_repo.list_active_by_user(user_alvo.id)
-                now = datetime.now(timezone.utc).replace(tzinfo=None)
+                now = datetime.now(UTC).replace(tzinfo=None)
                 for assignment in active_assignments:
                     assignment.revogar(now)
                     await self.assignment_repo.save(assignment)

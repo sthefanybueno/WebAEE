@@ -1,10 +1,11 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
+
 from sqlmodel import Field, SQLModel
 
+
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class AuditLogORM(SQLModel, table=True):
     __tablename__ = "audit_log"  # type: ignore[assignment]
@@ -14,4 +15,4 @@ class AuditLogORM(SQLModel, table=True):
     student_id: uuid.UUID = Field(nullable=False, index=True)
     field_accessed: str = Field(max_length=100, nullable=False)
     accessed_at: datetime = Field(default_factory=_utcnow, nullable=False)
-    ip_address: Optional[str] = Field(default=None, max_length=45)
+    ip_address: str | None = Field(default=None, max_length=45)

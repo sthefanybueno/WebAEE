@@ -18,6 +18,7 @@ class CreatePhotoInput:
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
 
+
 class CreatePhotoUseCase:
     """Caso de uso para registro de fotos pedagógicas.
     

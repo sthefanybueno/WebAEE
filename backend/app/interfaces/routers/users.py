@@ -9,46 +9,55 @@ Responsabilidade única: traduzir HTTP → DTO → Use Case → Resposta HTTP.
 - A tradução de DomainException → HTTPException está centralizada em _handle_domain_exception().
 """
 import uuid
-from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 # ── Casos de Uso ──────────────────────────────────────────────────────────────
 from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase
-from app.application.use_cases.users.queries import ListUsersUseCase, ListUsersInput, GetUserUseCase, GetUserInput
-from app.application.use_cases.users.update_profile import UpdateProfileUseCase, UpdateProfileInput
-from app.application.use_cases.users.update_user import UpdateUserUseCase, UpdateUserInput
-from app.application.use_cases.users.toggle_user_status import ToggleUserStatusUseCase, ToggleUserStatusInput
-
-# ── Infraestrutura ─────────────────────────────────────────────────────────────
-from app.infrastructure.database import get_session
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
-from app.infrastructure.repositories.user_repository_impl import SQLModelUserRepository
-from app.infrastructure.repositories.professor_assignment_repository_impl import SQLModelProfessorAssignmentRepository
-from app.infrastructure.services.email_service_impl import ConsoleEmailService
-from app.infrastructure.security.tokens import create_access_token
-
-# ── Interfaces ─────────────────────────────────────────────────────────────────
-from app.interfaces.dependencies import CurrentUser, get_current_user
-from app.interfaces.schemas.user import (
-    CreateUserRequest,
-    UserResponse,
-    UpdateProfileRequest,
-    UpdateProfileResponse,
-    UpdateUserRequest,
-    ToggleStatusRequest,
+from app.application.use_cases.users.queries import (
+    GetUserInput,
+    GetUserUseCase,
+    ListUsersInput,
+    ListUsersUseCase,
 )
-from app.interfaces.schemas.pagination import PaginatedResponse
+from app.application.use_cases.users.toggle_user_status import (
+    ToggleUserStatusInput,
+    ToggleUserStatusUseCase,
+)
+from app.application.use_cases.users.update_profile import UpdateProfileInput, UpdateProfileUseCase
+from app.application.use_cases.users.update_user import UpdateUserInput, UpdateUserUseCase
 
 # ── Domínio ────────────────────────────────────────────────────────────────────
 from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import (
     DomainException,
     EmailJaEmUsoError,
-    UsuarioNaoEncontradoError,
-    TenantMismatchError,
     PermissaoInsuficienteError,
+    TenantMismatchError,
+    UsuarioNaoEncontradoError,
+)
+
+# ── Infraestrutura ─────────────────────────────────────────────────────────────
+from app.infrastructure.database import get_session
+from app.infrastructure.repositories.professor_assignment_repository_impl import (
+    SQLModelProfessorAssignmentRepository,
+)
+from app.infrastructure.repositories.user_repository_impl import SQLModelUserRepository
+from app.infrastructure.security.tokens import create_access_token
+from app.infrastructure.services.email_service_impl import ConsoleEmailService
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
+
+# ── Interfaces ─────────────────────────────────────────────────────────────────
+from app.interfaces.dependencies import CurrentUser, get_current_user
+from app.interfaces.schemas.pagination import PaginatedResponse
+from app.interfaces.schemas.user import (
+    CreateUserRequest,
+    ToggleStatusRequest,
+    UpdateProfileRequest,
+    UpdateProfileResponse,
+    UpdateUserRequest,
+    UserResponse,
 )
 
 router = APIRouter(prefix="/api/usuarios", tags=["usuarios"])
@@ -140,8 +149,8 @@ async def create_user(
 
 @router.get("/", response_model=PaginatedResponse[UserResponse])
 async def list_users(
-    nome: Optional[str] = Query(None, description="Filtrar por nome"),
-    papel: Optional[PapelUsuario] = Query(None, description="Filtrar por papel"),
+    nome: str | None = Query(None, description="Filtrar por nome"),
+    papel: PapelUsuario | None = Query(None, description="Filtrar por papel"),
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(50, ge=1, le=100, description="Tamanho da página"),
     current_user: CurrentUser = Depends(get_current_user),
@@ -250,7 +259,7 @@ async def toggle_user_status(
         _handle_domain_exception(e)
 
 
-@router.get("/{user_id}/alunos", response_model=List[uuid.UUID])
+@router.get("/{user_id}/alunos", response_model=list[uuid.UUID])
 async def get_user_alunos(
     user_id: uuid.UUID,
     current_user: CurrentUser = Depends(get_current_user),

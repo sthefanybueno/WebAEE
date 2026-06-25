@@ -1,11 +1,13 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
+
 from sqlmodel import Field, SQLModel
+
 from app.domain.models import StatusAluno
 
+
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class StudentORM(SQLModel, table=True):
     __tablename__ = "students"  # type: ignore[assignment]
@@ -18,14 +20,14 @@ class StudentORM(SQLModel, table=True):
     )
     tenant_id: uuid.UUID = Field(nullable=False)
     nome: str = Field(min_length=2, max_length=255, nullable=False)
-    data_nascimento: Optional[datetime] = Field(default=None)
-    escola_atual_id: Optional[uuid.UUID] = Field(default=None)
-    apoio_id: Optional[uuid.UUID] = Field(default=None, description="FK para users.id — professor de apoio designado.")
-    diagnostico: Optional[str] = Field(default=None)
-    laudo: Optional[str] = Field(default=None)
+    data_nascimento: datetime | None = Field(default=None)
+    escola_atual_id: uuid.UUID | None = Field(default=None)
+    apoio_id: uuid.UUID | None = Field(default=None, description="FK para users.id — professor de apoio designado.")
+    diagnostico: str | None = Field(default=None)
+    laudo: str | None = Field(default=None)
     consentimento_lgpd: bool = Field(default=False, nullable=False)
-    data_consentimento: Optional[datetime] = Field(default=None)
-    base_legal: Optional[str] = Field(default=None, max_length=255)
+    data_consentimento: datetime | None = Field(default=None)
+    base_legal: str | None = Field(default=None, max_length=255)
     status: StatusAluno = Field(default=StatusAluno.ATIVO, nullable=False, index=True)
     created_at: datetime = Field(default_factory=_utcnow, nullable=False)
     updated_at: datetime = Field(
@@ -33,5 +35,5 @@ class StudentORM(SQLModel, table=True):
         nullable=False,
         sa_column_kwargs={"onupdate": _utcnow},
     )
-    updated_by: Optional[uuid.UUID] = Field(default=None)
+    updated_by: uuid.UUID | None = Field(default=None)
     conflict_flag: bool = Field(default=False, nullable=False)

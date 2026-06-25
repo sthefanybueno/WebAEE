@@ -1,18 +1,25 @@
 import uuid
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.infrastructure.database import get_session
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
-from app.infrastructure.repositories.schedule_repository_impl import SQLModelScheduleRepository
-
+from app.application.use_cases.schedules.create_schedule import (
+    ConflitoHorarioError,
+    CreateScheduleInput,
+    CreateScheduleUseCase,
+)
+from app.application.use_cases.schedules.delete_schedule import (
+    DeleteScheduleInput,
+    DeleteScheduleUseCase,
+)
+from app.application.use_cases.schedules.list_schedules import (
+    ListSchedulesInput,
+    ListSchedulesUseCase,
+)
 from app.domain.exceptions import DomainException
-from app.application.use_cases.schedules.create_schedule import CreateScheduleUseCase, CreateScheduleInput, ConflitoHorarioError
-from app.application.use_cases.schedules.list_schedules import ListSchedulesUseCase, ListSchedulesInput
-from app.application.use_cases.schedules.delete_schedule import DeleteScheduleUseCase, DeleteScheduleInput
-
+from app.infrastructure.database import get_session
+from app.infrastructure.repositories.schedule_repository_impl import SQLModelScheduleRepository
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.schedule import CreateScheduleRequest, ScheduleResponse
 
@@ -52,7 +59,7 @@ async def create_schedule(
     except DomainException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message) from e
 
-@router.get("/", response_model=List[ScheduleResponse])
+@router.get("/", response_model=list[ScheduleResponse])
 async def list_schedules(
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListSchedulesUseCase = Depends(get_list_schedules_use_case),

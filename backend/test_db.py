@@ -1,7 +1,10 @@
 import asyncio
-from app.infrastructure.database import engine
+
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.infrastructure.database import engine
 from app.infrastructure.repositories.user_repository_impl import SQLModelUserRepository
+
 
 async def main():
     async with AsyncSession(engine) as s:

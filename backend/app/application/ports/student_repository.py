@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional, Protocol
+from typing import Protocol
 
 from app.domain.models import StatusAluno, Student
 
@@ -13,12 +13,12 @@ class StudentRepository(Protocol):
     e deve ser restrito ao papel ADMIN com auditoria obrigatória.
     """
 
-    async def get_by_id(self, id: uuid.UUID, professor_id: Optional[uuid.UUID] = None) -> Optional[Student]:
+    async def get_by_id(self, id: uuid.UUID, professor_id: uuid.UUID | None = None) -> Student | None:
         ...
 
     async def list_by_tenant(
-        self, tenant_id: Optional[uuid.UUID], status: Optional[StatusAluno] = None, professor_id: Optional[uuid.UUID] = None, escola_id: Optional[uuid.UUID] = None
-    ) -> List[Student]:
+        self, tenant_id: uuid.UUID | None, status: StatusAluno | None = None, professor_id: uuid.UUID | None = None, escola_id: uuid.UUID | None = None
+    ) -> list[Student]:
         ...
 
     async def save(self, student: Student) -> Student:

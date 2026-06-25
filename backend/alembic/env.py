@@ -2,14 +2,12 @@ import asyncio
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
+from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlmodel import SQLModel
 
 from alembic import context
-
-from sqlmodel import SQLModel
 
 # Import all models to make sure they are attached to the SQLModel.metadata
 from app.infrastructure.orm_models import *
@@ -18,8 +16,9 @@ from app.infrastructure.orm_models import *
 # access to the values within the .ini file in use.
 config = context.config
 
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
 if env_path.exists():

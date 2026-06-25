@@ -1,7 +1,6 @@
 import uuid
-from typing import Optional
 
-from sqlmodel import select, func, col
+from sqlmodel import col, func, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.application.ports.user_repository import UserRepository
@@ -13,13 +12,13 @@ class SQLModelUserRepository(UserRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_id(self, id: uuid.UUID) -> Optional[User]:
+    async def get_by_id(self, id: uuid.UUID) -> User | None:
         orm = await self.session.get(UserORM, id)
         if orm:
             return User(**orm.model_dump())
         return None
 
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_by_email(self, email: str) -> User | None:
         statement = select(UserORM).where(UserORM.email == email)
         result = await self.session.exec(statement)
         orm = result.first()
@@ -36,8 +35,8 @@ class SQLModelUserRepository(UserRepository):
     async def list_by_tenant(
         self, 
         tenant_id: uuid.UUID,
-        nome: Optional[str] = None,
-        papel: Optional[str] = None,
+        nome: str | None = None,
+        papel: str | None = None,
         page: int = 1,
         size: int = 50
     ) -> tuple[list[User], int]:

@@ -1,11 +1,9 @@
-import uuid
-from datetime import datetime, timezone
-from typing import Optional
 import os
+import uuid
+from datetime import UTC, datetime
 
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 _DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -16,7 +14,7 @@ else:
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class NotificationORM(SQLModel, table=True):
@@ -32,7 +30,7 @@ class NotificationORM(SQLModel, table=True):
     autor_id: uuid.UUID = Field(nullable=False, description="FK para users.id — quem gerou o evento.")
     tipo: str = Field(nullable=False, description="Tipo do evento: relatorio_criado | aluno_cadastrado.")
     mensagem: str = Field(nullable=False, max_length=500)
-    relatorio_id: Optional[uuid.UUID] = Field(default=None, index=True)
-    aluno_id: Optional[uuid.UUID] = Field(default=None, index=True)
+    relatorio_id: uuid.UUID | None = Field(default=None, index=True)
+    aluno_id: uuid.UUID | None = Field(default=None, index=True)
     lida: bool = Field(default=False, nullable=False, index=True)
     created_at: datetime = Field(default_factory=_utcnow, nullable=False)

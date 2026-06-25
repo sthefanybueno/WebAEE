@@ -3,19 +3,13 @@ Testes de integração para routers: auth, users, schools, dashboard.
 Cobre as rotas com menor cobertura identificadas no relatório de cobertura.
 """
 import uuid
+
 import pytest
-from typing import AsyncGenerator
 from httpx import ASGITransport, AsyncClient
-from sqlmodel.ext.asyncio.session import AsyncSession
-
-from app.infrastructure.database import engine, init_db
-from app.main import app
-
-
-
 
 from app.infrastructure.security.tokens import create_access_token
-import uuid
+from app.main import app
+
 
 def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
     if not user_id:

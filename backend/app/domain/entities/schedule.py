@@ -8,15 +8,14 @@ O campo `aee_id` garante que cada slot pertence a uma AEE específica.
 """
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
 
 def _utcnow() -> datetime:
     """Retorna o instante atual em UTC (naive, sem tzinfo)."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Schedule(BaseModel):
@@ -38,7 +37,7 @@ class Schedule(BaseModel):
 
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
-    created_by: Optional[uuid.UUID] = Field(default=None, description="FK lógica para users.id — quem criou o registro.")
+    created_by: uuid.UUID | None = Field(default=None, description="FK lógica para users.id — quem criou o registro.")
 
     # ── Comportamentos de domínio (Entidade Rica) ─────────
 

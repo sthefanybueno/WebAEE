@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -7,11 +6,12 @@ from app.application.ports.school_repository import SchoolRepository
 from app.domain.entities.school import School
 from app.infrastructure.orm_models.school_orm import SchoolORM
 
+
 class SQLModelSchoolRepository(SchoolRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get_by_id(self, id: uuid.UUID) -> Optional[School]:
+    async def get_by_id(self, id: uuid.UUID) -> School | None:
         orm = await self._session.get(SchoolORM, id)
         if orm:
             return School(**orm.model_dump())

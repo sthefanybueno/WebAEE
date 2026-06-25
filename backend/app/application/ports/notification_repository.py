@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC, abstractmethod
-from typing import List
 
 from app.domain.entities.notification import Notification
 
@@ -23,7 +22,7 @@ class NotificationRepository(ABC):
         ...
 
     @abstractmethod
-    async def list_by_tenant(self, tenant_id: uuid.UUID, apenas_nao_lidas: bool = False) -> List[Notification]:
+    async def list_by_tenant(self, tenant_id: uuid.UUID, apenas_nao_lidas: bool = False) -> list[Notification]:
         """Lista notificações de um tenant, opcionalmente apenas as não lidas."""
         ...
 

@@ -1,4 +1,5 @@
 import logging
+
 from app.application.ports.email_service import EmailService
 
 logger = logging.getLogger(__name__)

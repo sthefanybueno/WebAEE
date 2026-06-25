@@ -2,9 +2,8 @@
 Script de refatoração: migra Use Cases restantes de AsyncSession → AbstractUnitOfWork.
 Execução: python scripts/migrate_use_cases_uow.py (a partir do diretório backend/)
 """
-import os
-import re
 import pathlib
+import re
 
 use_cases_root = pathlib.Path("app/application/use_cases")
 modified = []

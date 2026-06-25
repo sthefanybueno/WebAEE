@@ -6,30 +6,31 @@ Testes unitários para:
 - AssignProfessorUseCase
 """
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 import pytest
 
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.application.use_cases.reports.add_comment import AddCommentInput, AddCommentUseCase
 from app.application.use_cases.schools.create_school import CreateSchoolInput, CreateSchoolUseCase
 from app.application.use_cases.schools.list_schools import ListSchoolsUseCase
-from app.application.use_cases.reports.add_comment import AddCommentInput, AddCommentUseCase
-from app.application.use_cases.students.assign_professor import AssignProfessorInput, AssignProfessorUseCase
-from app.domain.entities.school import School
-from app.domain.entities.report import Report
-from app.domain.entities.professor_assignment import ProfessorAssignment
-from app.domain.entities.user import PapelUsuario
-from app.domain.models import Student, StatusAluno
-from unittest.mock import AsyncMock, MagicMock
-from app.domain.exceptions import (
-    RelatorioNaoEncontradoError,
-    PermissaoInsuficienteError,
-    AlunoNaoEncontradoError,
-    AlunoSemEscolaError,
-    EscolaNaoEncontradaError,
-    TenantMismatchError,
-    VinculoDuplicadoError
+from app.application.use_cases.students.assign_professor import (
+    AssignProfessorInput,
+    AssignProfessorUseCase,
 )
-from contextlib import asynccontextmanager
-from typing import AsyncIterator
-from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.domain.entities.professor_assignment import ProfessorAssignment
+from app.domain.entities.report import Report
+from app.domain.entities.school import School
+from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import (
+    AlunoSemEscolaError,
+    PermissaoInsuficienteError,
+    RelatorioNaoEncontradoError,
+    TenantMismatchError,
+    VinculoDuplicadoError,
+)
+from app.domain.models import StatusAluno, Student
 
 
 class MockUnitOfWork(AbstractUnitOfWork):

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -7,17 +7,14 @@ from app.application.use_cases.reports.sync_report import (
     SyncReportInput,
     SyncReportUseCase,
 )
-from app.domain.exceptions import ConflitoSincronizacaoError
 from app.domain.entities.report import Report
+from app.domain.exceptions import ConflitoSincronizacaoError
 from tests.application.conftest import MockUnitOfWork
-
-
-
 
 
 def _naive_now() -> datetime:
     """datetime naive UTC, como o banco de dados armazena."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class MockReportRepository:

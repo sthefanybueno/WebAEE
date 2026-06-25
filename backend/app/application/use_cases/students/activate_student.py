@@ -11,17 +11,17 @@ em vez de manipular status/updated_at diretamente.
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.application.ports.audit_log_repository import AuditLogRepository
 from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.audit_log import AuditLog
+from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import (
     AlunoNaoEncontradoError,
     TenantMismatchError,
 )
-from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 
 
@@ -67,7 +67,7 @@ class ActivateStudentUseCase:
                 user_id=input_dto.user_id,
                 student_id=input_dto.student_id,
                 field_accessed="status (reativação)",
-                accessed_at=datetime.now(timezone.utc).replace(tzinfo=None),
+                accessed_at=datetime.now(UTC).replace(tzinfo=None),
             )
             await self.audit_repo.save(audit_log)
 

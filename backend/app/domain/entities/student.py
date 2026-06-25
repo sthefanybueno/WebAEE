@@ -22,19 +22,19 @@ garantem que as regras de negócio residam aqui e não nos Use Cases.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional, Any
+from datetime import UTC, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.domain.value_objects.sync_status import SyncStatus  # noqa: F401 — re-exportado via models
-from app.domain.models_enums import StatusAluno, TagPedagogica
 from app.domain.exceptions import AlunoJaArquivadoError
+from app.domain.models_enums import StatusAluno
+from app.domain.value_objects.sync_status import SyncStatus  # noqa: F401 — re-exportado via models
 
 
 def _utcnow() -> datetime:
     """Retorna o instante atual em UTC (naive, sem tzinfo)."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def _validate_status_aluno(value: object) -> StatusAluno:
@@ -69,22 +69,22 @@ class Student(BaseModel):
 
     # ── Dados pessoais ────────────────────────────────────
     nome: str = Field(min_length=2, max_length=255, description="Nome completo do aluno.")
-    data_nascimento: Optional[datetime] = Field(default=None, description="Data de nascimento. Opcional no cadastro inicial.")
+    data_nascimento: datetime | None = Field(default=None, description="Data de nascimento. Opcional no cadastro inicial.")
 
     # ── Vínculo escolar ───────────────────────────────────────
-    escola_atual_id: Optional[uuid.UUID] = Field(default=None, description="FK lógica para schools.id.")
+    escola_atual_id: uuid.UUID | None = Field(default=None, description="FK lógica para schools.id.")
 
     # ── Vínculo com professor de apoio (1:1) ─────────────────
-    apoio_id: Optional[uuid.UUID] = Field(default=None, description="FK lógica para users.id — professor de apoio designado.")
+    apoio_id: uuid.UUID | None = Field(default=None, description="FK lógica para users.id — professor de apoio designado.")
 
     # ── Campos sensíveis (⚠️ LGPD) ───────────────────────
-    diagnostico: Optional[str] = Field(default=None, description="⚠️ SENSÍVEL — diagnóstico clínico.")
-    laudo: Optional[str] = Field(default=None, description="⚠️ SENSÍVEL — laudo médico/psicológico.")
+    diagnostico: str | None = Field(default=None, description="⚠️ SENSÍVEL — diagnóstico clínico.")
+    laudo: str | None = Field(default=None, description="⚠️ SENSÍVEL — laudo médico/psicológico.")
 
     # ── Consentimento LGPD ────────────────────────────────
     consentimento_lgpd: bool = Field(default=False, description="Consentimento do responsável.")
-    data_consentimento: Optional[datetime] = Field(default=None)
-    base_legal: Optional[str] = Field(default=None, max_length=255)
+    data_consentimento: datetime | None = Field(default=None)
+    base_legal: str | None = Field(default=None, max_length=255)
 
     # ── Ciclo de vida (soft-delete) ───────────────────────
     status: StatusAluno = Field(default=StatusAluno.ATIVO, description="Soft-delete: ATIVO ou ARQUIVADO.")
@@ -92,7 +92,7 @@ class Student(BaseModel):
     # ── Auditoria e sync offline ──────────────────────────
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
-    updated_by: Optional[uuid.UUID] = Field(default=None)
+    updated_by: uuid.UUID | None = Field(default=None)
     conflict_flag: bool = Field(default=False)
 
     # ── Validação de domínio ──────────────────────────────

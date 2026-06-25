@@ -1,13 +1,11 @@
 import uuid
 from dataclasses import dataclass
-from typing import Optional
-
-from app.application.ports.unit_of_work import AbstractUnitOfWork
 
 from app.application.ports.report_repository import ReportRepository
 from app.application.ports.student_repository import StudentRepository
+from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.report import Report
-from app.domain.exceptions import AlunoNaoEncontradoError, RelatorioNaoEncontradoError
+from app.domain.exceptions import RelatorioNaoEncontradoError
 
 
 @dataclass

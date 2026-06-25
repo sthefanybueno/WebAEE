@@ -1,7 +1,7 @@
 import uuid
 from dataclasses import dataclass
 
-from fastapi import Header, HTTPException, status, Depends
+from fastapi import Depends, HTTPException
 
 from app.domain.entities.user import PapelUsuario
 
@@ -13,8 +13,9 @@ class CurrentUser:
     papel: PapelUsuario
 
 
-from app.infrastructure.security.tokens import decode_access_token
 from fastapi.security import OAuth2PasswordBearer
+
+from app.infrastructure.security.tokens import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 

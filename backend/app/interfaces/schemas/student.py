@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -9,10 +8,10 @@ class CreateStudentRequest(BaseModel):
     nome: str = Field(min_length=2, max_length=255)
     escola_atual_id: uuid.UUID
     consentimento_lgpd: bool = Field(description="Exigido LGPD")
-    data_nascimento: Optional[datetime] = None
-    diagnostico: Optional[str] = Field(default=None, description="Dado sensível")
-    laudo: Optional[str] = Field(default=None, description="Dado sensível")
-    apoio_id: Optional[uuid.UUID] = None
+    data_nascimento: datetime | None = None
+    diagnostico: str | None = Field(default=None, description="Dado sensível")
+    laudo: str | None = Field(default=None, description="Dado sensível")
+    apoio_id: uuid.UUID | None = None
     base_legal: str = "Art. 58 LDB"
 
 
@@ -37,8 +36,8 @@ class StudentPlain(BaseModel):
     id: uuid.UUID
     nome: str
     tenant_id: uuid.UUID
-    escola_atual_id: Optional[uuid.UUID]
-    apoio_id: Optional[uuid.UUID] = None
+    escola_atual_id: uuid.UUID | None
+    apoio_id: uuid.UUID | None = None
     status: str
     consentimento_lgpd: bool
     created_at: datetime
@@ -72,18 +71,18 @@ class StudentSensitiveDataResponse(BaseModel):
     Movido do router para cá: schemas devem viver em schemas/, não em routers/.
     """
 
-    diagnostico: Optional[str]
-    laudo: Optional[str]
+    diagnostico: str | None
+    laudo: str | None
 
 
 class UpdateStudentRequest(BaseModel):
     """Payload para edição básica de alunos."""
 
-    nome: Optional[str] = None
-    data_nascimento: Optional[datetime] = None
-    escola_atual_id: Optional[uuid.UUID] = None
-    apoio_id: Optional[uuid.UUID] = None
-    diagnostico: Optional[str] = None
+    nome: str | None = None
+    data_nascimento: datetime | None = None
+    escola_atual_id: uuid.UUID | None = None
+    apoio_id: uuid.UUID | None = None
+    diagnostico: str | None = None
 
 
 from app.domain.entities.user import PapelUsuario
@@ -101,4 +100,4 @@ class ProfessorAssignmentResponse(BaseModel):
     aluno_id: uuid.UUID
     tipo_papel: PapelUsuario
     data_inicio: datetime
-    data_fim: Optional[datetime]
+    data_fim: datetime | None

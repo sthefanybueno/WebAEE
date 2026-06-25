@@ -1,11 +1,11 @@
 import os
-from typing import AsyncGenerator, Any
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-from sqlalchemy.pool import StaticPool
 
 # URL do banco. Fallback para sqlite in memory para testes rápidos se não for fornecido.
 DATABASE_URL = os.environ.get(

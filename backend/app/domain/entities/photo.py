@@ -8,8 +8,7 @@ Suporte ao fluxo offline: criadas localmente e sincronizadas depois.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field
 
@@ -17,7 +16,7 @@ from app.domain.models import SyncStatus, TagPedagogica  # reutiliza enums exist
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Photo(BaseModel):
@@ -34,5 +33,5 @@ class Photo(BaseModel):
     url: str = Field(max_length=500, description="Path relativo ou URL assinada do arquivo.")
     tag: TagPedagogica = Field(description="Categoria pedagógica da foto.")
     sync_status: SyncStatus = Field(default=SyncStatus.LOCAL, description="LOCAL = criada offline ainda não enviada.")
-    descricao: Optional[str] = Field(default=None, max_length=500, description="Legenda ou observação livre da foto.")
+    descricao: str | None = Field(default=None, max_length=500, description="Legenda ou observação livre da foto.")
     created_at: datetime = Field(default_factory=_utcnow)

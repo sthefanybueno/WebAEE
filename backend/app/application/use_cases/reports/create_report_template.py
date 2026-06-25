@@ -6,6 +6,7 @@ from app.domain.entities.report import ReportTemplate
 from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import PermissaoInsuficienteError
 
+
 @dataclass
 class CreateReportTemplateInput:
     nome: str

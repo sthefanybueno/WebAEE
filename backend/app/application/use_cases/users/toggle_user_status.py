@@ -1,11 +1,12 @@
-from dataclasses import dataclass
 import uuid
+from dataclasses import dataclass
 
-from app.application.ports.unit_of_work import AbstractUnitOfWork
-from app.domain.entities.user import PapelUsuario
-from app.domain.exceptions import UsuarioNaoEncontradoError, PermissaoInsuficienteError
-from app.application.ports.user_repository import UserRepository
 from app.application.ports.email_service import EmailService
+from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.application.ports.user_repository import UserRepository
+from app.domain.entities.user import PapelUsuario
+from app.domain.exceptions import PermissaoInsuficienteError, UsuarioNaoEncontradoError
+
 
 @dataclass
 class ToggleUserStatusInput:

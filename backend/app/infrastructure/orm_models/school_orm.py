@@ -1,9 +1,11 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from sqlmodel import Field, SQLModel
 
+
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class SchoolORM(SQLModel, table=True):
     __tablename__ = "schools"  # type: ignore[assignment]

@@ -1,11 +1,13 @@
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
+
 from sqlmodel import Field, SQLModel
+
 from app.domain.entities.user import PapelUsuario
 
+
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class ProfessorAssignmentORM(SQLModel, table=True):
     __tablename__ = "professor_assignments"  # type: ignore[assignment]
@@ -16,4 +18,4 @@ class ProfessorAssignmentORM(SQLModel, table=True):
     aluno_id: uuid.UUID = Field(nullable=False, index=True)
     tipo_papel: PapelUsuario = Field(nullable=False)
     data_inicio: datetime = Field(default_factory=_utcnow, nullable=False)
-    data_fim: Optional[datetime] = Field(default=None)
+    data_fim: datetime | None = Field(default=None)

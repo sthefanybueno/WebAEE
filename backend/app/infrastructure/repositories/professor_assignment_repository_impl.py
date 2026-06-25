@@ -1,5 +1,4 @@
 import uuid
-from typing import List
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -17,7 +16,7 @@ class SQLModelProfessorAssignmentRepository(ProfessorAssignmentRepository):
 
     async def list_active_by_student(
         self, student_id: uuid.UUID
-    ) -> List[ProfessorAssignment]:
+    ) -> list[ProfessorAssignment]:
         stmt = select(ProfessorAssignmentORM).where(
             ProfessorAssignmentORM.aluno_id == student_id,
             ProfessorAssignmentORM.data_fim == None,
@@ -27,7 +26,7 @@ class SQLModelProfessorAssignmentRepository(ProfessorAssignmentRepository):
 
     async def list_active_by_user(
         self, user_id: uuid.UUID
-    ) -> List[ProfessorAssignment]:
+    ) -> list[ProfessorAssignment]:
         stmt = select(ProfessorAssignmentORM).where(
             ProfessorAssignmentORM.usuario_id == user_id,
             ProfessorAssignmentORM.data_fim == None,

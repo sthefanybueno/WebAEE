@@ -11,21 +11,36 @@ Responsabilidade única: traduzir HTTP → DTO → Use Case → Resposta HTTP.
 """
 
 import uuid
-from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.infrastructure.rate_limit import limiter
-from app.infrastructure.database import get_session
-from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
-from app.infrastructure.repositories.audit_log_repository_impl import SQLModelAuditLogRepository
-from app.infrastructure.repositories.professor_assignment_repository_impl import SQLModelProfessorAssignmentRepository
-from app.infrastructure.repositories.school_repository_impl import SQLModelSchoolRepository
-from app.infrastructure.repositories.student_history_repository_impl import SQLModelStudentHistoryRepository
-from app.infrastructure.repositories.student_repository_impl import SQLModelStudentRepository
-
-from app.domain.models import StatusAluno
+from app.application.use_cases.students.archive_student import (
+    ArchiveStudentInput,
+    ArchiveStudentUseCase,
+)
+from app.application.use_cases.students.assign_professor import (
+    AssignProfessorInput,
+    AssignProfessorUseCase,
+)
+from app.application.use_cases.students.create_student import (
+    CreateStudentInput,
+    CreateStudentUseCase,
+)
+from app.application.use_cases.students.get_sensitive_data import (
+    GetSensitiveDataInput,
+    GetSensitiveDataUseCase,
+)
+from app.application.use_cases.students.get_student import GetStudentInput, GetStudentUseCase
+from app.application.use_cases.students.list_students import ListStudentsInput, ListStudentsUseCase
+from app.application.use_cases.students.transfer_student import (
+    TransferStudentInput,
+    TransferStudentUseCase,
+)
+from app.application.use_cases.students.update_student import (
+    UpdateStudentInput,
+    UpdateStudentUseCase,
+)
 from app.domain.exceptions import (
     AlunoJaArquivadoError,
     AlunoNaoEncontradoError,
@@ -36,16 +51,19 @@ from app.domain.exceptions import (
     PermissaoInsuficienteError,
     TenantMismatchError,
 )
-
-from app.application.use_cases.students.archive_student import ArchiveStudentInput, ArchiveStudentUseCase
-from app.application.use_cases.students.assign_professor import AssignProfessorInput, AssignProfessorUseCase
-from app.application.use_cases.students.create_student import CreateStudentInput, CreateStudentUseCase
-from app.application.use_cases.students.get_sensitive_data import GetSensitiveDataInput, GetSensitiveDataUseCase
-from app.application.use_cases.students.get_student import GetStudentInput, GetStudentUseCase
-from app.application.use_cases.students.list_students import ListStudentsInput, ListStudentsUseCase
-from app.application.use_cases.students.transfer_student import TransferStudentInput, TransferStudentUseCase
-from app.application.use_cases.students.update_student import UpdateStudentInput, UpdateStudentUseCase
-
+from app.domain.models import StatusAluno
+from app.infrastructure.database import get_session
+from app.infrastructure.rate_limit import limiter
+from app.infrastructure.repositories.audit_log_repository_impl import SQLModelAuditLogRepository
+from app.infrastructure.repositories.professor_assignment_repository_impl import (
+    SQLModelProfessorAssignmentRepository,
+)
+from app.infrastructure.repositories.school_repository_impl import SQLModelSchoolRepository
+from app.infrastructure.repositories.student_history_repository_impl import (
+    SQLModelStudentHistoryRepository,
+)
+from app.infrastructure.repositories.student_repository_impl import SQLModelStudentRepository
+from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
 from app.interfaces.dependencies import CurrentUser, get_current_user
 from app.interfaces.schemas.student import (
     CreateProfessorAssignmentRequest,
@@ -97,7 +115,11 @@ def get_create_student_use_case(
     )
 
 
-from app.application.use_cases.students.activate_student import ActivateStudentInput, ActivateStudentUseCase
+from app.application.use_cases.students.activate_student import (
+    ActivateStudentInput,
+    ActivateStudentUseCase,
+)
+
 
 def get_archive_student_use_case(
     session: AsyncSession = Depends(get_session),
@@ -181,7 +203,11 @@ def get_sensitive_data_use_case(
     )
 
 
-from app.application.use_cases.students.delete_student import DeleteStudentInput, DeleteStudentUseCase
+from app.application.use_cases.students.delete_student import (
+    DeleteStudentInput,
+    DeleteStudentUseCase,
+)
+
 
 def get_delete_student_use_case(
     session: AsyncSession = Depends(get_session),
@@ -316,16 +342,16 @@ async def assign_professor(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
-@router.get("/", response_model=List[StudentResponse])
+@router.get("/", response_model=list[StudentResponse])
 async def list_students(
-    status_aluno: Optional[str] = None,
-    escola_id: Optional[uuid.UUID] = None,
-    professor_id: Optional[uuid.UUID] = None,
+    status_aluno: str | None = None,
+    escola_id: uuid.UUID | None = None,
+    professor_id: uuid.UUID | None = None,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListStudentsUseCase = Depends(get_list_students_use_case),
-) -> List[StudentResponse]:
+) -> list[StudentResponse]:
     """Lista todos os estudantes do tenant do usuário. Não retorna dados sensíveis."""
-    st_enum: Optional[StatusAluno] = None
+    st_enum: StatusAluno | None = None
     if status_aluno:
         try:
             st_enum = StatusAluno(status_aluno)

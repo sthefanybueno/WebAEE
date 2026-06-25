@@ -1,10 +1,12 @@
-import uuid
-from datetime import datetime, timezone
-from typing import Any, Optional, Dict, List, Union
 import os
-from sqlalchemy import Column, JSON
+import uuid
+from datetime import UTC, datetime
+from typing import Any
+
+from sqlalchemy import JSON, Column
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
+
 from app.domain.entities.report import SyncStatus
 
 _DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -14,7 +16,7 @@ else:
     _JSON_TYPE = JSONB
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class ReportTemplateORM(SQLModel, table=True):
     __tablename__ = "report_templates"  # type: ignore[assignment]
@@ -22,11 +24,11 @@ class ReportTemplateORM(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, nullable=False)
     nome: str = Field(nullable=False, index=True)
     descricao: str = Field(nullable=False)
-    secoes: Optional[Union[List[Dict[str, Any]], Dict[str, Any]]] = Field(
+    secoes: list[dict[str, Any]] | dict[str, Any] | None = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
     )
-    papeis_com_acesso: Optional[List[str]] = Field(
+    papeis_com_acesso: list[str] | None = Field(
         default=None,
         sa_column=Column(_JSON_TYPE, nullable=True),
     )
@@ -46,10 +48,10 @@ class ReportORM(SQLModel, table=True):
     template_id: uuid.UUID = Field(foreign_key="report_templates.id", nullable=False, index=True)
     aluno_id: uuid.UUID = Field(nullable=False, index=True)
     autor_id: uuid.UUID = Field(nullable=False)
-    template_snapshot: Optional[Dict[str, Any]] = Field(
+    template_snapshot: dict[str, Any] | None = Field(
         default=None, sa_column=Column(_JSON_TYPE, nullable=True)
     )
-    conteudo_json: Optional[Dict[str, Any]] = Field(
+    conteudo_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(_JSON_TYPE, nullable=True)
     )
     travado: bool = Field(default=False, nullable=False)
@@ -61,4 +63,4 @@ class ReportORM(SQLModel, table=True):
         nullable=False,
         sa_column_kwargs={"onupdate": _utcnow},
     )
-    updated_by: Optional[uuid.UUID] = Field(default=None)
+    updated_by: uuid.UUID | None = Field(default=None)

@@ -8,28 +8,28 @@ De fora do pacote domain, importe sempre desta raiz:
     from app.domain import AlunoNaoEncontradoError, DomainException
 """
 
-from app.domain.models import StatusAluno, Student, SyncStatus, TagPedagogica
-from app.domain.entities.tenant import Tenant
-from app.domain.entities.user import PapelUsuario, User
-from app.domain.entities.school import School
-from app.domain.entities.report import Report, ReportTemplate
+from app.domain.entities.audit_log import SENSITIVE_FIELDS, AuditLog
 from app.domain.entities.photo import Photo
 from app.domain.entities.professor_assignment import ProfessorAssignment
-from app.domain.entities.audit_log import AuditLog, SENSITIVE_FIELDS
+from app.domain.entities.report import Report, ReportTemplate
+from app.domain.entities.school import School
+from app.domain.entities.tenant import Tenant
+from app.domain.entities.user import PapelUsuario, User
+from app.domain.exceptions import (
+    AlunoJaArquivadoError,
+    AlunoNaoEncontradoError,
+    ConsentimentoLGPDAusenteError,
+    DomainException,
+    EscolaNaoEncontradaError,
+    JustificativaInsuficienteError,
+    PermissaoInsuficienteError,
+    RelatorioTravadoError,
+    TenantMismatchError,
+    UsuarioNaoEncontradoError,
+)
+from app.domain.models import StatusAluno, Student, SyncStatus, TagPedagogica
 from app.domain.value_objects.email import Email
 from app.domain.value_objects.sync_status import SyncStatus  # re-export canônico
-from app.domain.exceptions import (
-    DomainException,
-    AlunoNaoEncontradoError,
-    UsuarioNaoEncontradoError,
-    EscolaNaoEncontradaError,
-    TenantMismatchError,
-    PermissaoInsuficienteError,
-    AlunoJaArquivadoError,
-    RelatorioTravadoError,
-    ConsentimentoLGPDAusenteError,
-    JustificativaInsuficienteError,
-)
 
 __all__ = [
     # models.py (entidade principal + enums)

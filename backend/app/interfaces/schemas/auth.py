@@ -1,6 +1,9 @@
 import uuid
+
 from pydantic import BaseModel
+
 from app.domain.entities.user import PapelUsuario
+
 
 class LoginRequest(BaseModel):
     email: str

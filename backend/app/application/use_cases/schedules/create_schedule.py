@@ -6,6 +6,7 @@ from app.application.ports.unit_of_work import AbstractUnitOfWork
 from app.domain.entities.schedule import Schedule
 from app.domain.exceptions import DomainException
 
+
 class ConflitoHorarioError(DomainException):
     def __init__(self, message="Já existe um atendimento neste horário para este dia."):
         super().__init__(message)

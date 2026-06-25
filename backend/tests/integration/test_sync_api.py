@@ -2,21 +2,14 @@
 Testes de integração para router de sync.
 """
 import uuid
+from datetime import UTC, datetime, timedelta
+
 import pytest
-from typing import AsyncGenerator
 from httpx import ASGITransport, AsyncClient
-from datetime import datetime, timezone, timedelta
-
-from sqlmodel.ext.asyncio.session import AsyncSession
-from app.infrastructure.database import engine, init_db, get_session
-from app.domain.models import Student
-from app.domain.entities.report import Report
-from app.domain.models import StatusAluno
-from app.main import app
-
 
 from app.infrastructure.security.tokens import create_access_token
-import uuid
+from app.main import app
+
 
 def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
     if not user_id:
@@ -65,7 +58,7 @@ async def test_sync_pull_and_resolve() -> None:
 
         # Call Sync PULL
         # Let's set a date from yesterday
-        yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+        yesterday = (datetime.now(UTC) - timedelta(days=1)).isoformat()
         yesterday = yesterday.replace("+", "%2B") # encode plus sign
         pull_res = await ac.get(f"/api/sync/pull?last_sync={yesterday}", headers=headers)
         assert pull_res.status_code == 200

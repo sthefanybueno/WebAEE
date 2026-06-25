@@ -9,11 +9,7 @@ from app.application.use_cases.reports.create_report import (
 from app.domain.entities.report import Report, ReportTemplate
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
-from app.domain.exceptions import PermissaoInsuficienteError
 from tests.application.conftest import MockUnitOfWork
-
-
-
 
 
 class MockReportRepository:

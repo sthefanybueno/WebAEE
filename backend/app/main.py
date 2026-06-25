@@ -11,15 +11,15 @@ O que NÃO está aqui: imports de routers individuais.
 Toda a composição de rotas fica em app/interfaces/api_router.py.
 """
 
+import os
+from contextlib import asynccontextmanager
+
+import cloudinary
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
-import cloudinary
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-
-from contextlib import asynccontextmanager
 
 from app.infrastructure.database import init_db
 from app.infrastructure.rate_limit import limiter
