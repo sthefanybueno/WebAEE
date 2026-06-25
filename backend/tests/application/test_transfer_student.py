@@ -23,7 +23,7 @@ class MockStudentRepository:
     def __init__(self) -> None:
         self.students: dict[uuid.UUID, Student] = {}
 
-    async def get_by_id(self, id: uuid.UUID) -> Student | None:
+    async def get_by_id(self, id: uuid.UUID, professor_id: uuid.UUID | None = None) -> Student | None:
         return self.students.get(id)
 
     async def save(self, student: Student) -> Student:
@@ -133,6 +133,7 @@ async def test_transfer_student_success(
         nova_escola_id=nova_escola_id,
         tenant_id=tenant_id,
         user_id=user_id,
+        papel=PapelUsuario.ADMIN,
     )
 
     updated_student = await use_case.execute(input_dto)
@@ -177,6 +178,7 @@ async def test_transfer_student_to_invalid_school(
         nova_escola_id=uuid.uuid4(),
         tenant_id=tenant_id,
         user_id=uuid.uuid4(),
+        papel=PapelUsuario.ADMIN,
     )
 
     with pytest.raises(EscolaNaoEncontradaError):

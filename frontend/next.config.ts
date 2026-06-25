@@ -10,6 +10,8 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 'standalone' é necessário para o Dockerfile multi-stage (Docker build)
+  output: 'standalone',
   experimental: {},
   turbopack: {
     root: __dirname,

@@ -14,7 +14,7 @@ from app.application.ports.student_repository import StudentRepository
 from app.application.ports.professor_assignment_repository import ProfessorAssignmentRepository
 from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.user import PapelUsuario
-from app.domain.exceptions import AlunoNaoEncontradoError, AlunoSemEscolaError, VinculoDuplicadoError
+from app.domain.exceptions import AlunoNaoEncontradoError, AlunoSemEscolaError, VinculoDuplicadoError, TenantMismatchError
 
 
 @dataclass

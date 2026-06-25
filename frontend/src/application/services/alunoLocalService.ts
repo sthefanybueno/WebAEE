@@ -1,67 +1,60 @@
 /**
- * lib/services/alunoLocalService.ts
- * ===================================
- * ServiÃ§o de domÃ­nio local para operaÃ§Ãµes offline-first sobre Alunos.
+ * alunoLocalService.ts — Serviço de Aplicação para operações offline-first sobre Alunos.
  *
- * Responsabilidades:
- *  - Persistir alunos no IndexedDB (Dexie).
- *  - Enfileirar operaÃ§Ãµes de sync com a prioridade correta.
+ * [Clean Architecture] Camada de Aplicação.
+ * - Usa IAlunoRepository (não Dexie diretamente) para persistência.
+ * - Usa enqueue() para fila de sincronização.
  *
- * NUNCA instancie db diretamente em hooks ou componentes para
- * operaÃ§Ãµes de escrita â€” use este serviÃ§o.
+ * NUNCA acesse db.alunos.add() diretamente em hooks ou componentes —
+ * use este serviço para operações de escrita.
  *
- * Regra de prioridade (definida em lib/db.ts):
- *   1 = relatÃ³rios (maior prioridade)
- *   2 = fotos e alunos (menor prioridade)
+ * Regra de prioridade de sync (definida em db.ts):
+ *   1 = relatórios (maior prioridade)
+ *   2 = alunos e fotos (menor prioridade)
  */
 
-import { db, enqueue, type AlunoLocal } from '@/infrastructure/db/db'
+import { alunoRepository } from '@/infrastructure/db/DexieAlunoRepository'
+import { enqueue } from '@/infrastructure/db/db'
+import type { Aluno } from '@/domain/entities/Aluno'
 
 /**
- * Salva um aluno localmente no IndexedDB e enfileira sincronizaÃ§Ã£o.
+ * Salva um aluno localmente no IndexedDB via repositório e enfileira sincronização.
  *
- * Usa `enqueue()` de lib/db.ts, que conhece a regra de prioridade â€”
- * garantindo que alunos recebam prioridade 2 (nÃ£o 1, que Ã© de relatÃ³rios).
+ * Dado que dados válidos de aluno são passados,
+ * Quando salvarAlunoLocal é chamado,
+ * Então MUST persistir com sync_status='local' e enfileirar com prioridade=2.
  *
- * @returns O ID local (numÃ©rico, auto-incrementado pelo Dexie) do aluno criado.
+ * @returns O ID local (numérico, auto-incrementado pelo Dexie) do aluno criado.
  */
 export async function salvarAlunoLocal(
-  dados: Omit<AlunoLocal, 'id' | 'sync_status' | 'updated_at'>
+  dados: Omit<Aluno, 'id' | 'sync_status' | 'updated_at'>
 ): Promise<number> {
-  const agora = new Date().toISOString()
+  // Persiste via repositório concreto (inversão de dependência)
+  const id = await alunoRepository.save(dados)
 
-  // Persiste no IndexedDB com status pendente
-  const id = await db.alunos.add({
-    ...dados,
-    sync_status: 'local',
-    updated_at: agora,
-  })
-
-  // Enfileira com prioridade correta via enqueue()
+  // Enfileira sync com prioridade correta via enqueue()
   // enqueue() define prioridade=1 para 'relatorio' e prioridade=2 para demais
   await enqueue('aluno', 'create', { ...dados, local_id: id })
 
-  return id as number
+  return id
 }
 
 /**
- * Atualiza um aluno local e enfileira sync de atualizaÃ§Ã£o.
+ * Atualiza um aluno local via repositório e enfileira sync de atualização.
+ *
+ * Dado que o aluno com localId existe no IndexedDB,
+ * Quando atualizarAlunoLocal é chamado,
+ * Então MUST atualizar campos e enfileirar sync se houver server_id.
  */
 export async function atualizarAlunoLocal(
   localId: number,
-  dados: Partial<Omit<AlunoLocal, 'id' | 'sync_status' | 'updated_at'>>
+  dados: Partial<Omit<Aluno, 'id' | 'sync_status' | 'updated_at'>>
 ): Promise<void> {
-  const agora = new Date().toISOString()
+  await alunoRepository.update(localId, dados)
 
-  await db.alunos.update(localId, {
-    ...dados,
-    sync_status: 'local',
-    updated_at: agora,
-  })
-
-  const aluno = await db.alunos.get(localId)
+  // Verifica se tem server_id para enfileirar sync de update
+  const aluno = await alunoRepository.getById(localId.toString())
   if (aluno?.server_id) {
     await enqueue('aluno', 'update', { ...dados, server_id: aluno.server_id, local_id: localId })
   }
 }
-

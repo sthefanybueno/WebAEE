@@ -9,11 +9,17 @@ from app.main import app
 from app.infrastructure.database import init_db, engine
 
 
-def auth_headers(papel: str = "coordenacao", tenant_id: str|None=None) -> dict[str, str]:
-    user_id = uuid.uuid4()
+from app.infrastructure.security.tokens import create_access_token
+import uuid
+
+def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
+    if not user_id:
+        user_id = str(uuid.uuid4())
     if not tenant_id:
-        tenant_id = uuid.uuid4()
-    return {"Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_{papel}"}
+        tenant_id = str(uuid.uuid4())
+    token = create_access_token(user_id, tenant_id, papel, "Test User")
+    return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.mark.asyncio
 async def test_photos_api_flow() -> None:

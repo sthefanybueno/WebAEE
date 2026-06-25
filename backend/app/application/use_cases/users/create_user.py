@@ -51,6 +51,9 @@ class CreateUserUseCase:
             if input_dto.executor_papel.value == PapelUsuario.PROF_AEE.value and input_dto.papel.value != PapelUsuario.PROF_APOIO.value:
                 raise PermissaoInsuficienteError(acao="criar usuário", papel_requerido="ADMIN ou COORDENACAO")
 
+            if input_dto.executor_papel.value == PapelUsuario.COORDENACAO.value and input_dto.papel.value == PapelUsuario.ADMIN.value:
+                raise PermissaoInsuficienteError(acao="criar administrador", papel_requerido="ADMIN")
+
             if input_dto.executor_papel.value not in (PapelUsuario.ADMIN.value, PapelUsuario.COORDENACAO.value, PapelUsuario.PROF_AEE.value):
                 raise PermissaoInsuficienteError(acao="cadastrar usuários")
                 

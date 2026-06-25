@@ -8,7 +8,7 @@ from app.application.use_cases.reports.sync_report import (
     SyncReportUseCase,
 )
 from app.domain.exceptions import ConflitoSincronizacaoError
-from app.domain.entities.report import Report, TipoRelatorio
+from app.domain.entities.report import Report
 from tests.application.conftest import MockUnitOfWork
 
 
@@ -59,7 +59,7 @@ async def test_sync_report_success(repo_report: MockReportRepository, repo_stude
     
     report = Report(
         id=report_id,
-        tipo=TipoRelatorio.AEE,
+        template_id=uuid.uuid4(),
         aluno_id=aluno_id,
         autor_id=autor_id,
         conteudo_json={"secao_1": "v1"},
@@ -70,7 +70,7 @@ async def test_sync_report_success(repo_report: MockReportRepository, repo_stude
     use_case = SyncReportUseCase(uow=MockUnitOfWork(), report_repo=repo_report, student_repo=repo_student)
     input_dto = SyncReportInput(
         id=report_id,
-        tipo=TipoRelatorio.AEE,
+        template_id=uuid.uuid4(),
         aluno_id=aluno_id,
         autor_id=autor_id,
         tenant_id=uuid.UUID(int=0), # Mock student is UUID 0
@@ -97,7 +97,7 @@ async def test_sync_report_conflict(repo_report: MockReportRepository, repo_stud
     
     report = Report(
         id=report_id,
-        tipo=TipoRelatorio.AEE,
+        template_id=uuid.uuid4(),
         aluno_id=aluno_id,
         autor_id=autor_id,
         conteudo_json={"secao_1": "db_version"},
@@ -110,7 +110,7 @@ async def test_sync_report_conflict(repo_report: MockReportRepository, repo_stud
     # Cliente envia payload baseado em um timestamp antigo (now)
     input_dto = SyncReportInput(
         id=report_id,
-        tipo=TipoRelatorio.AEE,
+        template_id=uuid.uuid4(),
         aluno_id=aluno_id,
         autor_id=autor_id,
         tenant_id=uuid.UUID(int=0),

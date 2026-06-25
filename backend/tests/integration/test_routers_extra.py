@@ -14,10 +14,17 @@ from app.main import app
 
 
 
-def auth_headers(papel: str = "coordenacao") -> dict[str, str]:
-    user_id = uuid.uuid4()
-    tenant_id = uuid.uuid4()
-    return {"Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_{papel}"}
+from app.infrastructure.security.tokens import create_access_token
+import uuid
+
+def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
+    if not user_id:
+        user_id = str(uuid.uuid4())
+    if not tenant_id:
+        tenant_id = str(uuid.uuid4())
+    token = create_access_token(user_id, tenant_id, papel, "Test User")
+    return {"Authorization": f"Bearer {token}"}
+
 
 
 # ──────────────────────────────────────────────
@@ -26,10 +33,18 @@ def auth_headers(papel: str = "coordenacao") -> dict[str, str]:
 
 @pytest.mark.asyncio
 async def test_login_com_papel_valido() -> None:
+    # First create user
+    tenant_id = uuid.uuid4()
+    headers = auth_headers("coordenacao", tenant_id=str(tenant_id))
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:  # type: ignore[arg-type]
+        await ac.post(
+            "/api/usuarios/",
+            json={"email": "prof@escola.edu.br", "nome": "Prof", "papel": "prof_aee", "password": "validpassword"},
+            headers=headers
+        )
         res = await ac.post(
             "/api/auth/login",
-            data={"username": "prof@escola.edu.br", "password": "prof_aee"},
+            data={"username": "prof@escola.edu.br", "password": "validpassword"},
         )
     assert res.status_code == 200
     data = res.json()
@@ -38,20 +53,20 @@ async def test_login_com_papel_valido() -> None:
 
 
 @pytest.mark.asyncio
-async def test_login_papel_invalido_usa_coordenacao() -> None:
+async def test_login_invalido() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:  # type: ignore[arg-type]
         res = await ac.post(
             "/api/auth/login",
             data={"username": "x@y.com", "password": "papel_inexistente"},
         )
-    assert res.status_code == 200
-    assert res.json()["papel"] == "coordenacao"
+    assert res.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_refresh_token_valido() -> None:
+    valid_token = create_access_token(uuid.uuid4(), uuid.uuid4(), "coordenacao", "Test User")
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:  # type: ignore[arg-type]
-        res = await ac.post("/api/auth/refresh", json={"refresh_token": "mock_valid_token"})
+        res = await ac.post("/api/auth/refresh", json={"refresh_token": valid_token})
     assert res.status_code == 200
     assert "access_token" in res.json()
 
@@ -118,6 +133,13 @@ async def test_list_users() -> None:
     assert "items" in res.json()
     assert isinstance(res.json()["items"], list)
 
+@pytest.mark.asyncio
+async def test_get_user_alunos() -> None:
+    headers = auth_headers("coordenacao")
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:  # type: ignore[arg-type]
+        res = await ac.get(f"/api/usuarios/{uuid.uuid4()}/alunos", headers=headers)
+    assert res.status_code == 200
+    assert isinstance(res.json(), list)
 
 # ──────────────────────────────────────────────
 # Dashboard router

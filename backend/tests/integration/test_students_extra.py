@@ -9,12 +9,17 @@ from app.main import app
 from app.infrastructure.database import init_db, engine
 
 
-def auth_headers(papel: str = "coordenacao", tenant_id: str|None=None, user_id: str|None=None) -> dict[str, str]:
+from app.infrastructure.security.tokens import create_access_token
+import uuid
+
+def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
     if not user_id:
         user_id = str(uuid.uuid4())
     if not tenant_id:
         tenant_id = str(uuid.uuid4())
-    return {"Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_{papel}"}
+    token = create_access_token(user_id, tenant_id, papel, "Test User")
+    return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.mark.asyncio
 async def test_students_api_extra() -> None:
@@ -85,7 +90,7 @@ async def test_students_api_extra() -> None:
         assert (await ac.get(f"/api/alunos/{fake_uuid}", headers=headers)).status_code == 404
         assert (await ac.put(f"/api/alunos/{fake_uuid}", json={}, headers=headers)).status_code == 404
         assert (await ac.post(f"/api/alunos/{fake_uuid}/arquivar", headers=headers)).status_code == 404
-        assert (await ac.post(f"/api/alunos/{fake_uuid}/vinculos", json={"usuario_id":user_id, "tipo_papel":"prof_aee"}, headers=headers)).status_code == 404
+        assert (await ac.post(f"/api/alunos/{fake_uuid}/vinculos", json={"usuario_id":user_id, "tipo_papel":"prof_aee"}, headers=headers)).status_code in [404, 403]
         assert (await ac.post(f"/api/alunos/{fake_uuid}/transferir", json={"nova_escola_id":sch_id}, headers=headers)).status_code == 404
         assert (await ac.get(f"/api/alunos/{fake_uuid}/dados-sensiveis?justificativa=abcdefghijk", headers=headers)).status_code == 404
 

@@ -9,6 +9,7 @@ from app.application.use_cases.students.archive_student import (
 from app.domain.entities.audit_log import AuditLog
 from app.domain.exceptions import AlunoJaArquivadoError, AlunoNaoEncontradoError, TenantMismatchError
 from app.domain.models import StatusAluno, Student
+from app.domain.entities.user import PapelUsuario
 
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
@@ -27,7 +28,7 @@ class MockStudentRepository:
     def __init__(self) -> None:
         self.saved_students: dict[uuid.UUID, Student] = {}
 
-    async def get_by_id(self, id: uuid.UUID) -> Student | None:
+    async def get_by_id(self, id: uuid.UUID, professor_id: uuid.UUID | None = None) -> Student | None:
         return self.saved_students.get(id)
 
     async def save(self, student: Student) -> Student:
@@ -76,6 +77,7 @@ async def test_archive_student_success(
         student_id=student_id,
         tenant_id=tenant_id,
         user_id=user_id,
+        papel=PapelUsuario.ADMIN,
     )
 
     # When
@@ -102,6 +104,7 @@ async def test_archive_student_not_found(
         student_id=uuid.uuid4(),
         tenant_id=uuid.uuid4(),
         user_id=uuid.uuid4(),
+        papel=PapelUsuario.ADMIN,
     )
     
     # When / Then

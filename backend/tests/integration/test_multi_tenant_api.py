@@ -1,4 +1,5 @@
 import uuid
+from app.infrastructure.security.tokens import create_access_token
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -29,11 +30,16 @@ async def test_multi_tenant_isolation() -> None:
         session.add(school_b)
         await session.commit()
 
+    user_a_id = uuid.uuid4()
+    user_b_id = uuid.uuid4()
+    token_a = create_access_token(user_a_id, tenant_a_id, "coordenacao", "Coord A")
+    token_b = create_access_token(user_b_id, tenant_b_id, "coordenacao", "Coord B")
+
     headers_a = {
-        "Authorization": f"Bearer mock_token_{uuid.uuid4()}_{tenant_a_id}_coordenacao"
+        "Authorization": f"Bearer {token_a}"
     }
     headers_b = {
-        "Authorization": f"Bearer mock_token_{uuid.uuid4()}_{tenant_b_id}_coordenacao"
+        "Authorization": f"Bearer {token_b}"
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac: # type: ignore[arg-type]

@@ -69,7 +69,8 @@ class SQLModelStudentRepository(StudentRepository):
         await self._session.flush()
         return self._to_entity(orm)
 
-    async def delete(self, id: uuid.UUID) -> None:
+    async def hard_delete(self, id: uuid.UUID) -> None:
+        """Deleção física — chamada exclusivamente pelo DeleteStudentUseCase (ADMIN)."""
         orm = await self._session.get(StudentORM, id)
         if orm:
             await self._session.delete(orm)

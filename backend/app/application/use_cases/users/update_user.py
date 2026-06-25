@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Optional
 import uuid
-from typing import Optional
 
 from app.application.ports.unit_of_work import AbstractUnitOfWork
+from app.domain.entities.professor_assignment import ProfessorAssignment
 from app.domain.entities.user import User, PapelUsuario
-from app.domain.exceptions import UsuarioNaoEncontradoError, PermissaoInsuficienteError
+from app.domain.exceptions import DomainException, UsuarioNaoEncontradoError, PermissaoInsuficienteError
 from app.application.ports.user_repository import UserRepository
 from app.application.ports.professor_assignment_repository import ProfessorAssignmentRepository
 
@@ -61,15 +62,12 @@ class UpdateUserUseCase:
             user_alvo.escola_id = input_dto.escola_id
             
             # updated_at é gerenciado pelo sqlalchemy ou método de entidade, mas para segurança podemos atualizar
-            from datetime import datetime, timezone
             user_alvo.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
             await self.user_repo.save(user_alvo)
 
             # 4. Atualizar professor_assignments se for PROF_REGENTE
             if input_dto.papel in (PapelUsuario.PROF_REGENTE, PapelUsuario.PROF_APOIO) and input_dto.escola_id is not None:
-                from app.domain.entities.professor_assignment import ProfessorAssignment
-                
                 # Revoga as atribuições anteriores
                 active_assignments = await self.assignment_repo.list_active_by_user(user_alvo.id)
                 now = datetime.now(timezone.utc).replace(tzinfo=None)

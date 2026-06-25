@@ -4,7 +4,9 @@ import { useMemo } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type AlunoLocal } from '@/infrastructure/db/db'
 
-// Re-export do serviÃ§o para conveniÃªncia dos consumidores que importam daqui
+// Re-exportação de conveniência do serviço de aplicação — permite que
+// importadores deste módulo acessem ambos hook e serviço com um único import.
+// A lógica de escrita reside em alunoLocalService, não aqui.
 export { salvarAlunoLocal } from '@/application/services/alunoLocalService'
 
 type FiltroSync = 'todos' | 'local' | 'synced'

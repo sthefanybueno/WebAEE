@@ -1,4 +1,5 @@
 import uuid
+from app.infrastructure.security.tokens import create_access_token
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -25,8 +26,9 @@ async def test_create_and_list_student_api() -> None:
         session.add(school)
         await session.commit()
 
+    token = create_access_token(user_id, tenant_id, "prof_aee", "Prof AEE")
     headers = {
-        "Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_prof_aee"
+        "Authorization": f"Bearer {token}"
     }
 
     payload = {

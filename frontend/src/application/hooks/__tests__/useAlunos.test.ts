@@ -23,6 +23,9 @@ const mockWhere = vi.fn(() => ({ equals: mockEquals }))
 const mockAdd = vi.fn().mockResolvedValue(1)     // add() Ã© async â€” ok como Promise
 const mockSyncQueueCount = vi.fn().mockReturnValue(0)
 const mockEnqueue = vi.fn().mockResolvedValue(undefined)
+const mockRepositorySave = vi.fn().mockResolvedValue(1)
+const mockRepositoryUpdate = vi.fn().mockResolvedValue(undefined)
+const mockRepositoryGetById = vi.fn()
 
 vi.mock('@/infrastructure/db/db', () => ({
   db: {
@@ -36,6 +39,14 @@ vi.mock('@/infrastructure/db/db', () => ({
     },
   },
   enqueue: mockEnqueue,
+}))
+
+vi.mock('@/infrastructure/db/DexieAlunoRepository', () => ({
+  alunoRepository: {
+    save: (...args: any[]) => mockRepositorySave(...args),
+    update: (...args: any[]) => mockRepositoryUpdate(...args),
+    getById: (...args: any[]) => mockRepositoryGetById(...args),
+  },
 }))
 
 // â”€â”€ Mock do dexie-react-hooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -183,9 +194,16 @@ describe('salvarAlunoLocal', () => {
       },
       enqueue: mockEnqueue,
     }))
+    vi.doMock('@/infrastructure/db/DexieAlunoRepository', () => ({
+      alunoRepository: {
+        save: mockRepositorySave,
+        update: mockRepositoryUpdate,
+        getById: mockRepositoryGetById,
+      },
+    }))
   })
 
-  it('deve salvar aluno localmente e enfileirar sync via enqueue() com prioridade correta', async () => {
+  it('deve salvar aluno via repositório e enfileirar sync via enqueue() com prioridade correta', async () => {
     // Given: dados de um novo aluno
     const dadosAluno = {
       nome: 'Beatriz Santos',
@@ -193,36 +211,36 @@ describe('salvarAlunoLocal', () => {
       escola_atual: 'EMEF Flores',
       status: 'ativo' as const,
     }
+    mockRepositorySave.mockResolvedValue(1)
 
-    // When: salvarAlunoLocal chamado via serviÃ§o (nÃ£o direto no hook)
+    // When: salvarAlunoLocal chamado via serviço (não direto no hook)
     const { salvarAlunoLocal } = await import('@/application/services/alunoLocalService')
     const id = await salvarAlunoLocal(dadosAluno)
 
-    // Then: aluno adicionado ao IndexedDB com sync_status='pending'
-    expect(mockAdd).toHaveBeenCalledWith(
+    // Then: aluno adicionado via repositório
+    expect(mockRepositorySave).toHaveBeenCalledWith(
       expect.objectContaining({
         nome: 'Beatriz Santos',
-        sync_status: 'local',
       }),
     )
 
-    // Then: enqueue() chamado (ele aplica prioridade=2 para 'aluno', nÃ£o 1)
-    // prioridade 1 = relatÃ³rios (maior urgÃªncia), prioridade 2 = alunos/fotos
+    // Then: enqueue() chamado (ele aplica prioridade=2 para 'aluno', não 1)
+    // prioridade 1 = relatórios (maior urgência), prioridade 2 = alunos/fotos
     expect(mockEnqueue).toHaveBeenCalledWith(
       'aluno',
       'create',
       expect.objectContaining({
         nome: 'Beatriz Santos',
-        local_id: 1, // ID retornado pelo mockAdd
+        local_id: 1, // ID retornado pelo mockRepositorySave
       }),
     )
 
-    // Then: retorna o ID gerado pelo Dexie
+    // Then: retorna o ID gerado pelo repositório
     expect(id).toBe(1)
   })
 
-  it('NÃƒO deve chamar sync_queue.add() diretamente (responsabilidade do enqueue)', async () => {
-    // Given: mock que confirma que sync_queue.add nÃ£o Ã© chamado diretamente
+  it('NÃO deve chamar sync_queue.add() diretamente (responsabilidade do enqueue)', async () => {
+    // Given: mock que confirma que sync_queue.add não é chamado diretamente
     const mockSyncQueueAdd = vi.fn()
     vi.doMock('@/infrastructure/db/db', () => ({
       db: {
@@ -231,12 +249,13 @@ describe('salvarAlunoLocal', () => {
       },
       enqueue: mockEnqueue,
     }))
+    mockRepositorySave.mockResolvedValue(1)
 
     // When
     const { salvarAlunoLocal } = await import('@/application/services/alunoLocalService')
     await salvarAlunoLocal({ nome: 'Teste', status: 'ativo' as const, escola_atual: 'X', data_nascimento: '2010-01-01' })
 
-    // Then: enqueue() Ã© chamado, nÃ£o sync_queue.add() diretamente
+    // Then: enqueue() é chamado, não sync_queue.add() diretamente
     expect(mockEnqueue).toHaveBeenCalled()
     expect(mockSyncQueueAdd).not.toHaveBeenCalled()
   })

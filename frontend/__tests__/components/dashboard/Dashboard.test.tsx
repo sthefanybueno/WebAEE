@@ -50,7 +50,7 @@ describe('Dashboards Rendering based on Role', () => {
     expect(screen.getByText('Atividades Recentes')).toBeInTheDocument()
 
     // Required button
-    expect(screen.getByText('Registrar Momento')).toBeInTheDocument()
+    expect(screen.getAllByText('Registrar Momento')[0]).toBeInTheDocument()
   })
 
   it('renders Apoio Dashboard correctly with required cards', () => {

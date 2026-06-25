@@ -6,7 +6,7 @@ from app.application.use_cases.reports.create_report import (
     CreateReportInput,
     CreateReportUseCase,
 )
-from app.domain.entities.report import Report, ReportTemplate, TipoRelatorio
+from app.domain.entities.report import Report, ReportTemplate
 from app.domain.entities.user import PapelUsuario
 from app.domain.models import Student
 from app.domain.exceptions import PermissaoInsuficienteError
@@ -27,10 +27,10 @@ class MockReportRepository:
 
 class MockReportTemplateRepository:
     def __init__(self) -> None:
-        self.templates: dict[TipoRelatorio, ReportTemplate] = {}
+        self.templates: dict[uuid.UUID, ReportTemplate] = {}
 
-    async def get_active_by_tipo(self, tipo: TipoRelatorio) -> ReportTemplate | None:
-        return self.templates.get(tipo)
+    async def get_by_id(self, id: uuid.UUID) -> ReportTemplate | None:
+        return self.templates.get(id)
 
 
 class MockStudentRepository:
@@ -71,17 +71,18 @@ async def test_create_report_success(
         id=student_id, nome="Maria", tenant_id=tenant_id, consentimento_lgpd=True
     )
 
+    template_id = uuid.uuid4()
     template = ReportTemplate(
-        id=uuid.uuid4(), tipo=TipoRelatorio.AEE, secoes=[{"nome": "secao_1", "campos": ["campo_1"]}]
+        id=template_id, nome="AEE", descricao="Teste", secoes=[{"nome": "secao_1", "campos": ["campo_1"]}]
     )
-    repo_template.templates[TipoRelatorio.AEE] = template
+    repo_template.templates[template_id] = template
 
     use_case = CreateReportUseCase(
         uow=MockUnitOfWork(),
         report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
     )
     input_dto = CreateReportInput(
-        tipo=TipoRelatorio.AEE,
+        template_id=template_id,
         aluno_id=student_id,
         autor_id=autor_id,
         tenant_id=tenant_id,
@@ -93,44 +94,9 @@ async def test_create_report_success(
     report = await use_case.execute(input_dto)
     
     # Then
-    assert report.tipo == TipoRelatorio.AEE
+    assert report.template_id == template_id
     # Usa mode="json" para comparar UUIDs como strings
     assert report.template_snapshot == template.model_dump(mode="json")
     assert report.conteudo_json == {"secao_1": "valor"}
 
 
-@pytest.mark.asyncio
-async def test_create_report_invalid_role(
-    repo_report: MockReportRepository,
-    repo_template: MockReportTemplateRepository,
-    repo_student: MockStudentRepository,
-) -> None:
-    # Given
-    student_id = uuid.uuid4()
-    tenant_id = uuid.uuid4()
-    autor_id = uuid.uuid4()
-
-    repo_student.students[student_id] = Student(
-        id=student_id, nome="Maria", tenant_id=tenant_id, consentimento_lgpd=True
-    )
-
-    repo_template.templates[TipoRelatorio.AEE] = ReportTemplate(
-        id=uuid.uuid4(), tipo=TipoRelatorio.AEE
-    )
-
-    use_case = CreateReportUseCase(
-        uow=MockUnitOfWork(),
-        report_repo=repo_report, template_repo=repo_template, student_repo=repo_student
-    )
-    input_dto = CreateReportInput(
-        tipo=TipoRelatorio.AEE,
-        aluno_id=student_id,
-        autor_id=autor_id,
-        tenant_id=tenant_id,
-        papel_autor=PapelUsuario.PROF_REGENTE,  # Papel inválido para relatório AEE
-        conteudo_json={},
-    )
-
-    # When / Then
-    with pytest.raises(PermissaoInsuficienteError):
-        await use_case.execute(input_dto)

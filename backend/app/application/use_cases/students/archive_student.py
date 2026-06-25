@@ -28,6 +28,20 @@ from app.domain.models import Student
 
 @dataclass
 class ArchiveStudentInput:
+    """DTO de entrada para arquivamento de aluno.
+
+    Dado que o aluno existe e está ativo,
+    Quando ArchiveStudentUseCase.execute() é chamado,
+    Então MUST arquivar o aluno (status='arquivado') e gerar entrada de auditoria.
+
+    Dado que o aluno já está arquivado,
+    Quando execute() é chamado,
+    Então MUST lançar AlunoJaArquivadoError sem modificar o estado.
+
+    Dado que o tenant_id do aluno é diferente do executor (não-ADMIN),
+    Quando execute() é chamado,
+    Então MUST lançar TenantMismatchError.
+    """
     student_id: uuid.UUID
     tenant_id: uuid.UUID
     papel: PapelUsuario
@@ -48,7 +62,14 @@ class ArchiveStudentUseCase:
         self.audit_repo = audit_repo
 
     async def execute(self, input_dto: ArchiveStudentInput) -> Student:
-        """Executa o arquivamento do aluno dentro de uma transação."""
+        """Executa o arquivamento do aluno dentro de uma transação atômica.
+
+        Etapas:
+        1. Valida existência e tenant do aluno.
+        2. Delega o soft-delete ao método rico student.arquivar(user_id).
+        3. Persiste via student_repo.save().
+        4. Registra entrada de auditoria LGPD obrigatoriamente.
+        """
         async with self.uow.transaction():
             professor_id = input_dto.user_id if input_dto.papel in (PapelUsuario.PROF_APOIO, PapelUsuario.PROF_REGENTE) else None
             student = await self.student_repo.get_by_id(input_dto.student_id, professor_id=professor_id)

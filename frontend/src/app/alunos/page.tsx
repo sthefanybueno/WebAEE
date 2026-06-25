@@ -7,9 +7,8 @@ import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
 import { useAlunos, useEscolas } from '@/application/hooks/useAlunos'
 import { usePapel } from '@/application/hooks/usePapel'
+import { useUsuarios } from '@/application/hooks/useUsuarios'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { apiClient } from '@/infrastructure/http/client'
 
 type Filtro = 'todos' | 'local' | 'synced'
 
@@ -23,19 +22,12 @@ export default function AlunosPage() {
   const [busca, setBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState<'ativo' | 'arquivado' | 'todos'>('ativo')
   const [filtroEscola, setFiltroEscola] = useState('todas')
-  const [professoresMap, setProfessoresMap] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    apiClient.get<any>('/api/usuarios/')
-      .then(res => {
-        const map: Record<string, string> = {}
-        ;(res?.items || []).forEach((u: any) => {
-          map[u.id] = u.nome
-        })
-        setProfessoresMap(map)
-      })
-      .catch(err => console.error('Erro ao buscar usuários:', err))
-  }, [])
+  // Professores carregados via hook — sem apiClient direto no componente
+  const { usuarios } = useUsuarios()
+  const professoresMap: Record<string, string> = Object.fromEntries(
+    usuarios.map(u => [u.id, u.nome])
+  )
   
   const { alunos, loading } = useAlunos(filtroStatus, busca, 'todos', filtroEscola)
   const escolas = useEscolas()

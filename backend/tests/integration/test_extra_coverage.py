@@ -7,12 +7,17 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import app
 
+from app.infrastructure.security.tokens import create_access_token
+import uuid
+
 def auth_headers(papel: str = "coordenacao", user_id: str|None=None, tenant_id: str|None=None) -> dict[str, str]:
     if not user_id:
         user_id = str(uuid.uuid4())
     if not tenant_id:
         tenant_id = str(uuid.uuid4())
-    return {"Authorization": f"Bearer mock_token_{user_id}_{tenant_id}_{papel}"}
+    token = create_access_token(user_id, tenant_id, papel, "Test User")
+    return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.mark.asyncio
 async def test_auth_token_invalido() -> None:
@@ -26,7 +31,7 @@ async def test_auth_token_velho() -> None:
     # Cobertura de dependencies.py token antigo
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         res = await ac.get("/api/dashboard/", headers={"Authorization": "Bearer just_a_random_token"})
-    assert res.status_code == 200
+    assert res.status_code == 401
 
 @pytest.mark.asyncio
 async def test_get_me_user_found() -> None:
@@ -38,7 +43,7 @@ async def test_get_me_user_found() -> None:
             "email": f"me_{tenant_id}@edu.br",
             "nome": "My Name",
             "papel": "coordenacao",
-            "escola_ids": []
+            "password": "strongpassword123"
         }, headers=headers)
         assert res_post.status_code == 201
         user_data = res_post.json()

@@ -78,35 +78,39 @@ services:
         condition: service_healthy
     networks:
       - backend_network
-  # ── Frontend Next.js (stub — Fase 5) ─────────
-  # web:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: aee_web
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - api
-  #   networks:
-  #     - frontend_network
 
-  # ── Volumes ───────────────────────────────────
+  # ── Frontend Next.js ──────────────────────────────────────────────────────
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: aee_web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - backend_network
+
+  # ── Volumes ───────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
     driver: local
 
-# ── Redes ─────────────────────────────────────
+# ── Redes ─────────────────────────────────────────────────────────────────
 networks:
   backend_network:
     driver: bridge
-  # frontend_network:
-  #   driver: bridge
 
   #docker compose up -d --build
   #docker ps
   #docker exec -it nome uv run pytest
   #docker compose exec api pytest tests/ -v
-  #docker exec aee_api python -m pytest --cov=app --cov-report=term-missing
 
 

@@ -1,24 +1,48 @@
+"""
+Sistema AEE — Router: Usuários
+================================
+Responsabilidade única: traduzir HTTP → DTO → Use Case → Resposta HTTP.
+
+[Clean Architecture]
+- NENHUM repositório concreto é instanciado nos endpoints.
+- NENHUMA lógica de negócio reside nos handlers.
+- A tradução de DomainException → HTTPException está centralizada em _handle_domain_exception().
+"""
+import uuid
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.application.use_cases.users.create_user import (
-    CreateUserInput,
-    CreateUserUseCase,
-)
+# ── Casos de Uso ──────────────────────────────────────────────────────────────
+from app.application.use_cases.users.create_user import CreateUserInput, CreateUserUseCase
+from app.application.use_cases.users.queries import ListUsersUseCase, ListUsersInput, GetUserUseCase, GetUserInput
+from app.application.use_cases.users.update_profile import UpdateProfileUseCase, UpdateProfileInput
+from app.application.use_cases.users.update_user import UpdateUserUseCase, UpdateUserInput
+from app.application.use_cases.users.toggle_user_status import ToggleUserStatusUseCase, ToggleUserStatusInput
+
+# ── Infraestrutura ─────────────────────────────────────────────────────────────
 from app.infrastructure.database import get_session
 from app.infrastructure.unit_of_work_impl import SQLAlchemyUnitOfWork
-from app.infrastructure.repositories.user_repository_impl import (
-    SQLModelUserRepository,
-)
+from app.infrastructure.repositories.user_repository_impl import SQLModelUserRepository
 from app.infrastructure.repositories.professor_assignment_repository_impl import SQLModelProfessorAssignmentRepository
 from app.infrastructure.services.email_service_impl import ConsoleEmailService
-from app.interfaces.dependencies import CurrentUser, get_current_user
-from app.interfaces.schemas.user import CreateUserRequest, UserResponse
-from app.interfaces.schemas.pagination import PaginatedResponse
-from app.domain.entities.user import User, PapelUsuario
+from app.infrastructure.security.tokens import create_access_token
 
+# ── Interfaces ─────────────────────────────────────────────────────────────────
+from app.interfaces.dependencies import CurrentUser, get_current_user
+from app.interfaces.schemas.user import (
+    CreateUserRequest,
+    UserResponse,
+    UpdateProfileRequest,
+    UpdateProfileResponse,
+    UpdateUserRequest,
+    ToggleStatusRequest,
+)
+from app.interfaces.schemas.pagination import PaginatedResponse
+
+# ── Domínio ────────────────────────────────────────────────────────────────────
+from app.domain.entities.user import PapelUsuario
 from app.domain.exceptions import (
     DomainException,
     EmailJaEmUsoError,
@@ -41,6 +65,9 @@ def _handle_domain_exception(e: DomainException) -> None:
     status_code = _DOMAIN_TO_HTTP.get(type(e), status.HTTP_400_BAD_REQUEST)
     raise HTTPException(status_code=status_code, detail=str(e))
 
+
+# ── Factories de Injeção de Dependências ──────────────────────────────────────
+
 def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> CreateUserUseCase:
     return CreateUserUseCase(
         uow=SQLAlchemyUnitOfWork(session),
@@ -48,6 +75,40 @@ def get_create_user_use_case(session: AsyncSession = Depends(get_session)) -> Cr
         email_service=ConsoleEmailService(),
         assignment_repo=SQLModelProfessorAssignmentRepository(session)
     )
+
+
+def get_list_users_use_case(session: AsyncSession = Depends(get_session)) -> ListUsersUseCase:
+    return ListUsersUseCase(user_repo=SQLModelUserRepository(session))
+
+
+def get_get_user_use_case(session: AsyncSession = Depends(get_session)) -> GetUserUseCase:
+    return GetUserUseCase(user_repo=SQLModelUserRepository(session))
+
+
+def get_update_profile_use_case(session: AsyncSession = Depends(get_session)) -> UpdateProfileUseCase:
+    return UpdateProfileUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        user_repo=SQLModelUserRepository(session)
+    )
+
+
+def get_update_user_use_case(session: AsyncSession = Depends(get_session)) -> UpdateUserUseCase:
+    return UpdateUserUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        user_repo=SQLModelUserRepository(session),
+        assignment_repo=SQLModelProfessorAssignmentRepository(session)
+    )
+
+
+def get_toggle_status_use_case(session: AsyncSession = Depends(get_session)) -> ToggleUserStatusUseCase:
+    return ToggleUserStatusUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        user_repo=SQLModelUserRepository(session),
+        email_service=ConsoleEmailService()
+    )
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
@@ -72,17 +133,10 @@ async def create_user(
         _handle_domain_exception(e)
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
 
-from app.application.use_cases.users.queries import ListUsersUseCase, ListUsersInput, GetUserUseCase, GetUserInput
-
-def get_list_users_use_case(session: AsyncSession = Depends(get_session)) -> ListUsersUseCase:
-    return ListUsersUseCase(user_repo=SQLModelUserRepository(session))
-
-def get_get_user_use_case(session: AsyncSession = Depends(get_session)) -> GetUserUseCase:
-    return GetUserUseCase(user_repo=SQLModelUserRepository(session))
 
 @router.get("/", response_model=PaginatedResponse[UserResponse])
 async def list_users(
@@ -107,14 +161,13 @@ async def list_users(
     except DomainException as e:
         _handle_domain_exception(e)
 
+
 @router.get("/me", response_model=UserResponse)
 async def get_me(
     current_user: CurrentUser = Depends(get_current_user),
     use_case: GetUserUseCase = Depends(get_get_user_use_case),
 ):
-    """
-    Retorna os dados do usuário autenticado atual, com seu papel validado.
-    """
+    """Retorna os dados do usuário autenticado atual, com seu papel validado."""
     try:
         input_dto = GetUserInput(user_id=current_user.id, tenant_id=current_user.tenant_id)
         return await use_case.execute(input_dto)
@@ -122,25 +175,13 @@ async def get_me(
         _handle_domain_exception(e)
 
 
-from app.application.use_cases.users.update_profile import UpdateProfileUseCase, UpdateProfileInput
-from app.interfaces.schemas.user import UpdateProfileRequest, UpdateProfileResponse
-from app.infrastructure.security.tokens import create_access_token
-
-def get_update_profile_use_case(session: AsyncSession = Depends(get_session)) -> UpdateProfileUseCase:
-    return UpdateProfileUseCase(
-        uow=SQLAlchemyUnitOfWork(session),
-        user_repo=SQLModelUserRepository(session)
-    )
-
 @router.patch("/me", response_model=UpdateProfileResponse)
 async def update_my_profile(
     request: UpdateProfileRequest,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: UpdateProfileUseCase = Depends(get_update_profile_use_case),
 ):
-    """
-    Atualiza os dados do perfil do usuário logado.
-    """
+    """Atualiza os dados do perfil do usuário logado."""
     try:
         input_dto = UpdateProfileInput(
             user_id=current_user.id,
@@ -150,7 +191,7 @@ async def update_my_profile(
             escola_id=request.escola_id
         )
         updated_user = await use_case.execute(input_dto)
-        
+
         # Gerar novo token com o nome atualizado
         access_token = create_access_token(
             user_id=updated_user.id,
@@ -158,7 +199,7 @@ async def update_my_profile(
             papel=updated_user.papel.value,
             nome=updated_user.nome
         )
-        
+
         return {
             "user": updated_user,
             "access_token": access_token
@@ -166,25 +207,6 @@ async def update_my_profile(
     except DomainException as e:
         _handle_domain_exception(e)
 
-from app.application.use_cases.users.update_user import UpdateUserUseCase, UpdateUserInput
-from app.application.use_cases.users.toggle_user_status import ToggleUserStatusUseCase, ToggleUserStatusInput
-import uuid
-
-def get_update_user_use_case(session: AsyncSession = Depends(get_session)) -> UpdateUserUseCase:
-    return UpdateUserUseCase(
-        uow=SQLAlchemyUnitOfWork(session), 
-        user_repo=SQLModelUserRepository(session),
-        assignment_repo=SQLModelProfessorAssignmentRepository(session)
-    )
-
-def get_toggle_status_use_case(session: AsyncSession = Depends(get_session)) -> ToggleUserStatusUseCase:
-    return ToggleUserStatusUseCase(
-        uow=SQLAlchemyUnitOfWork(session),
-        user_repo=SQLModelUserRepository(session),
-        email_service=ConsoleEmailService()
-    )
-
-from app.interfaces.schemas.user import UpdateUserRequest, ToggleStatusRequest
 
 @router.put("/{user_id}", response_model=UserResponse)
 async def update_user(
@@ -207,6 +229,7 @@ async def update_user(
     except DomainException as e:
         _handle_domain_exception(e)
 
+
 @router.patch("/{user_id}/status", status_code=status.HTTP_204_NO_CONTENT)
 async def toggle_user_status(
     user_id: uuid.UUID,
@@ -225,6 +248,7 @@ async def toggle_user_status(
         await use_case.execute(input_dto)
     except DomainException as e:
         _handle_domain_exception(e)
+
 
 @router.get("/{user_id}/alunos", response_model=List[uuid.UUID])
 async def get_user_alunos(
