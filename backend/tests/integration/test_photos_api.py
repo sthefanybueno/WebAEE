@@ -44,7 +44,6 @@ async def test_photos_api_flow() -> None:
         assert photo_res.status_code == 201
         photo_data = photo_res.json()
         assert photo_data["url"] == "http://img.io"
-        photo_id = photo_data["id"]
 
         # List photos specific to student
         list_res = await ac.get(f"/api/fotos/aluno/{student_id}", headers=headers)
