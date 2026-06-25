@@ -248,6 +248,7 @@ async def create_student(
             diagnostico=request.diagnostico,
             laudo=request.laudo,
             base_legal=request.base_legal,
+            apoio_id=request.apoio_id,
         ))
         return student  # type: ignore[return-value]
     except DomainException as e:
@@ -319,6 +320,7 @@ async def assign_professor(
 async def list_students(
     status_aluno: Optional[str] = None,
     escola_id: Optional[uuid.UUID] = None,
+    professor_id: Optional[uuid.UUID] = None,
     current_user: CurrentUser = Depends(get_current_user),
     use_case: ListStudentsUseCase = Depends(get_list_students_use_case),
 ) -> List[StudentResponse]:
@@ -336,6 +338,7 @@ async def list_students(
         user_id=current_user.id,
         status=st_enum,
         escola_id=escola_id,
+        professor_id=professor_id,
     ))
     return students  # type: ignore[return-value]
 
@@ -380,6 +383,7 @@ async def update_student(
             data_nascimento=request.data_nascimento,
             escola_atual_id=request.escola_atual_id,
             diagnostico=request.diagnostico,
+            apoio_id=request.apoio_id,
         ))
     except DomainException as e:
         raise _domain_to_http(e) from e

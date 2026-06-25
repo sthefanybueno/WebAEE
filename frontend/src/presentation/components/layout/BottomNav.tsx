@@ -36,8 +36,7 @@ export function BottomNav({ role = 'prof_aee' }: BottomNavProps) {
   const pathname = usePathname()
   
   let items = navAEE
-  if (role === 'prof_apoio') items = navApoio
-  if (role === 'prof_regente') items = navRegente
+  if (role === 'prof_apoio' || role === 'prof_regente') items = navRegente
 
   return (
     <nav

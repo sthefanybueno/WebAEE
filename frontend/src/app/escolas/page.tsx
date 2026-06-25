@@ -4,8 +4,20 @@ import { AppShell } from '@/presentation/components/layout/AppShell'
 import Link from 'next/link'
 import { Plus, Building2, Loader2, ArrowLeft } from 'lucide-react'
 import { useEscolas } from '@/application/hooks/useEscolas'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function EscolasPage() {
+  const router = useRouter()
+  const usuario = usePapel()
+  
+  useEffect(() => {
+    if (usuario?.papel === 'prof_apoio' || usuario?.papel === 'prof_regente') {
+      router.replace('/dashboard')
+    }
+  }, [usuario, router])
+
   const { escolas, isLoading, error } = useEscolas()
 
   return (

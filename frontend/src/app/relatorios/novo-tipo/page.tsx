@@ -5,14 +5,31 @@ import Link from 'next/link'
 import { ArrowLeft, Loader2, Save, Plus, Trash2 } from 'lucide-react'
 import { useReportTemplateForm } from '@/application/hooks/useReportTemplateForm'
 import { cn } from '@/presentation/utils/utils'
+import { useRouter } from 'next/navigation'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useEffect } from 'react'
 
 export default function NovoTipoRelatorioPage() {
   const {
     nome, setNome,
     descricao, setDescricao,
+    papeisComAcesso, setPapeisComAcesso,
     campos, addCampo, removeCampo, updateCampo,
     isSubmitting, erroGlobal, onSubmit
   } = useReportTemplateForm()
+
+  const dadosUsuario = usePapel()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (dadosUsuario?.papel === 'prof_apoio' || dadosUsuario?.papel === 'prof_regente') {
+      router.replace('/dashboard')
+    }
+  }, [dadosUsuario, router])
+
+  if (dadosUsuario?.papel === 'prof_apoio' || dadosUsuario?.papel === 'prof_regente') {
+    return null
+  }
 
   return (
     <AppShell title="Novo Tipo de Relatório">
@@ -71,6 +88,47 @@ export default function NovoTipoRelatorioPage() {
                 placeholder="Ex: Adaptações feitas pelos professores..."
                 className="w-full p-4 rounded-xl border border-slate-300 bg-white text-slate-900 outline-none transition-shadow resize-y focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
               />
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-slate-900">
+                Usuários que podem acessar <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: 'admin', label: 'Administrador' },
+                  { value: 'coordenacao', label: 'Coordenador' },
+                  { value: 'prof_aee', label: 'Professor de AEE' },
+                  { value: 'prof_regente', label: 'Professor Regente' },
+                  { value: 'prof_apoio', label: 'Professor de Apoio' },
+                ].map(papel => {
+                  const isSelected = papeisComAcesso.includes(papel.value)
+                  return (
+                    <button
+                      key={papel.value}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setPapeisComAcesso(papeisComAcesso.filter(p => p !== papel.value))
+                        } else {
+                          setPapeisComAcesso([...papeisComAcesso, papel.value])
+                        }
+                      }}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-sm font-medium transition-all border",
+                        isSelected
+                          ? "bg-primary text-white border-primary shadow-sm"
+                          : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                      )}
+                    >
+                      {papel.label}
+                    </button>
+                  )
+                })}
+              </div>
+              {papeisComAcesso.length === 0 && (
+                <p className="text-xs text-red-500">Selecione ao menos um perfil de acesso.</p>
+              )}
             </div>
 
             <div className="pt-4 border-t border-slate-100">

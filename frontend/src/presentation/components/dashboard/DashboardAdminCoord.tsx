@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, School, Users } from 'lucide-react'
 import { useAlunos } from '@/application/hooks/useAlunos'
 import { useEscolas } from '@/application/hooks/useEscolas'
+import { useUsuarios } from '@/application/hooks/useUsuarios'
 
 export function DashboardAdminCoord() {
   const { alunos } = useAlunos()
   const { escolas } = useEscolas()
+  const { total: totalUsuarios } = useUsuarios()
 
   const totalAtivos = alunos?.filter((a) => a.status === 'ativo').length ?? 0
   const totalEscolas = escolas?.length ?? 0
@@ -31,7 +33,7 @@ export function DashboardAdminCoord() {
     },
     {
       label: 'Usuários',
-      value: '—',
+      value: totalUsuarios,
       Icon: BookOpen,
       color: '#d97706',
       href: '/admin/usuarios',

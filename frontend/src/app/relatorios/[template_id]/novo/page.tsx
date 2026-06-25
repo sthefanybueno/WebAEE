@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useDynamicRelatorioForm } from '@/application/hooks/useDynamicRelatorioForm'
 import { cn } from '@/presentation/utils/utils'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useEffect } from 'react'
 
 export default function NovoRelatorioDinamicoPage() {
   const params = useParams()
@@ -17,6 +19,11 @@ export default function NovoRelatorioDinamicoPage() {
     formData, handleChange, handleConteudoChange,
     isSubmitting, erroGlobal, onSubmit
   } = useDynamicRelatorioForm(template_id)
+
+  const dadosUsuario = usePapel()
+  const router = useRouter()
+
+
 
   if (templateLoading) {
     return (

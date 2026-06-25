@@ -9,8 +9,20 @@ import { AppShell } from '@/presentation/components/layout/AppShell'
 import { ArrowLeft, Save, Info, Loader2, AlertCircle, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useNovoAlunoForm } from '@/application/hooks/useNovoAlunoForm'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function NovoAlunoPage() {
+  const router = useRouter()
+  const usuario = usePapel()
+
+  useEffect(() => {
+    if (usuario?.papel === 'prof_apoio' || usuario?.papel === 'prof_regente') {
+      router.replace('/alunos')
+    }
+  }, [usuario, router])
+
   const { register, errors, onSubmit, isSubmitting, erroGlobal, escolas, escolasLoading, professoresApoio, professoresLoading, escolaIdSelecionada } = useNovoAlunoForm()
 
   return (

@@ -20,7 +20,9 @@ const TAGS: { value: Tag; label: string; emoji: string }[] = [
   { value: 'outro',        label: 'Outro',        emoji: '📌' },
 ]
 
-export default function RegistrarMomentoPage() {
+import { Suspense } from 'react'
+
+function RegistrarMomentoContent() {
   const router = useRouter()
   const { alunos, loading: loadingAlunos } = useAlunos()
   const [step, setStep] = useState(1)
@@ -35,6 +37,10 @@ export default function RegistrarMomentoPage() {
 
   const searchParams = useSearchParams()
   const prefilledAlunoId = searchParams.get('aluno_id')
+  const nomeParam = searchParams.get('nome')
+  
+  const alunoSelecionado = alunos.find(a => String(a.id) === alunoId || String(a.server_id) === alunoId)
+  const alunoNome = nomeParam || alunoSelecionado?.nome
 
   useEffect(() => {
     if (prefilledAlunoId) {
@@ -102,15 +108,16 @@ export default function RegistrarMomentoPage() {
               <ArrowLeft size={18} />
             </Link>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight">
-              Registrar Momento
+              Registrar Momento {alunoNome ? `- ${alunoNome}` : ''}
             </h1>
           </div>
-          <span className="text-sm font-bold text-primary bg-primary-light/50 px-3 py-1 rounded-full">{step}/3</span>
+          <span className="text-sm font-bold text-primary bg-primary-light/50 px-3 py-1 rounded-full">
+            {prefilledAlunoId ? (step === 3 ? 2 : 1) : step}/{prefilledAlunoId ? 2 : 3}
+          </span>
         </div>
 
-        {/* Progress Bar */}
         <div className="flex gap-1">
-          {[1, 2, 3].map((s) => (
+          {(prefilledAlunoId ? [1, 3] : [1, 2, 3]).map((s) => (
             <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", s <= step ? 'bg-primary' : 'bg-slate-200')} />
           ))}
         </div>
@@ -218,13 +225,13 @@ export default function RegistrarMomentoPage() {
 
           <div className="flex gap-3 pt-8 mt-4 border-t border-slate-100">
             {step > 1 && (
-              <button onClick={() => setStep(s => (s === 3 && (alunoId || prefilledAlunoId) && prefilledAlunoId === alunoId) ? 1 : s - 1)}
+              <button onClick={() => setStep(s => (s === 3 && prefilledAlunoId) ? 1 : s - 1)}
                 className="flex-1 py-3 border border-slate-200 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm active:scale-[0.98]">
                 Anterior
               </button>
             )}
             {step < 3 ? (
-              <button onClick={() => setStep(s => s + 1)} disabled={step === 1 && !previewUrl}
+              <button onClick={() => setStep(s => (s === 1 && prefilledAlunoId) ? 3 : s + 1)} disabled={step === 1 && !previewUrl}
                 className="flex-[2] py-3 bg-primary hover:bg-primary-hover text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
                 Próximo →
               </button>
@@ -239,5 +246,13 @@ export default function RegistrarMomentoPage() {
         </div>
       </div>
     </AppShell>
+  )
+}
+
+export default function RegistrarMomentoPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin text-primary" size={32} /></div>}>
+      <RegistrarMomentoContent />
+    </Suspense>
   )
 }

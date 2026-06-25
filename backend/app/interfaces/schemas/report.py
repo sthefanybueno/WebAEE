@@ -6,11 +6,13 @@ from datetime import datetime
 class CreateReportTemplateRequest(BaseModel):
     nome: str
     descricao: str
+    papeis_com_acesso: List[str] = []
     secoes: dict
 
 class ReportTemplateCreate(BaseModel):
     nome: str
     descricao: str
+    papeis_com_acesso: List[str] = []
     secoes: dict
 
 class ReportTemplateResponse(BaseModel):
@@ -18,6 +20,7 @@ class ReportTemplateResponse(BaseModel):
     nome: str
     descricao: str
     secoes: dict
+    papeis_com_acesso: List[str]
     versao: int
     ativo: bool
 

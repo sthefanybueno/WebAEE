@@ -67,7 +67,7 @@ class UpdateUserUseCase:
             await self.user_repo.save(user_alvo)
 
             # 4. Atualizar professor_assignments se for PROF_REGENTE
-            if input_dto.papel == PapelUsuario.PROF_REGENTE and input_dto.escola_id is not None:
+            if input_dto.papel in (PapelUsuario.PROF_REGENTE, PapelUsuario.PROF_APOIO) and input_dto.escola_id is not None:
                 from app.domain.entities.professor_assignment import ProfessorAssignment
                 
                 # Revoga as atribuições anteriores
@@ -84,7 +84,7 @@ class UpdateUserUseCase:
                             usuario_id=user_alvo.id,
                             escola_id=input_dto.escola_id,
                             aluno_id=aluno_id,
-                            tipo_papel=PapelUsuario.PROF_REGENTE
+                            tipo_papel=input_dto.papel
                         )
                         await self.assignment_repo.save(new_assignment)
 

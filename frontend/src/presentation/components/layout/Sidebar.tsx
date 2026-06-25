@@ -108,10 +108,10 @@ export function Sidebar({ collapsed, mobileOpen, onMobileClose }: Props) {
 
           <div className="space-y-1">
             {MAIN_NAV.filter(item => {
-              if (usuario === 'prof_apoio') {
-                return !['/alunos', '/horarios'].includes(item.href)
+              if (usuario?.papel === 'prof_apoio') {
+                return !['/horarios'].includes(item.href)
               }
-              if (usuario === 'prof_regente') {
+              if (usuario?.papel === 'prof_regente') {
                 return item.href !== '/horarios'
               }
               return true
@@ -148,7 +148,7 @@ export function Sidebar({ collapsed, mobileOpen, onMobileClose }: Props) {
 
           <div className="space-y-1">
             {SYS_NAV.filter(item => {
-              if (usuario === 'prof_apoio' || usuario === 'prof_regente') {
+              if (usuario?.papel === 'prof_apoio' || usuario?.papel === 'prof_regente') {
                 return item.href === '/login' // Só vê Sair
               }
               return true
@@ -203,15 +203,26 @@ export function Sidebar({ collapsed, mobileOpen, onMobileClose }: Props) {
 
         {/* Footer User */}
         <div className="p-2 border-t border-white/10 shrink-0">
-          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+          <Link href="/perfil" className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer group">
             <div className="w-8 h-8 rounded-full shrink-0 bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-white text-xs font-bold tracking-wide">
               {usuario?.nome ? usuario.nome.substring(0, 2).toUpperCase() : 'US'}
             </div>
-            <div className={`overflow-hidden transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px]'}`}>
+            <div className={`overflow-hidden transition-all duration-200 ${collapsed ? 'opacity-0 max-w-0' : 'max-w-[180px] flex-1'}`}>
               <p className="text-xs font-semibold text-white whitespace-nowrap truncate pr-2">{usuario?.nome || 'Usuário'}</p>
-              <p className="text-[10px] text-white/50 whitespace-nowrap truncate pr-2">{usuario?.papel || 'Carregando...'}</p>
+              <p className="text-[10px] text-white/50 whitespace-nowrap truncate pr-2">
+                {usuario?.papel ? ({
+                  'admin': 'Administrador',
+                  'coordenacao': 'Coordenação',
+                  'prof_aee': 'Professor AEE',
+                  'prof_regente': 'Professor Regente',
+                  'prof_apoio': 'Professor de Apoio'
+                }[usuario.papel] || usuario.papel) : 'Carregando...'}
+              </p>
             </div>
-          </div>
+            {!collapsed && (
+              <UserCog size={14} className="text-white/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            )}
+          </Link>
         </div>
       </aside>
     </>

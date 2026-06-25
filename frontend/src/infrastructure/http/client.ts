@@ -36,7 +36,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const isFormData = options.body instanceof FormData
   const headers: Record<string, string> = {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
+    ...(options.headers as Record<string, string> || {}),
   }
 
   // Se for FormData, o navegador define o Content-Type com o boundary correto.
@@ -44,10 +44,18 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers['Content-Type'] = 'application/json'
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  })
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    })
+  } catch (error: any) {
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      throw new ApiError(0, 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.')
+    }
+    throw error
+  }
 
   // Token expirado: limpa sessão e redireciona imediatamente
   if (res.status === 401) {

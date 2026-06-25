@@ -127,3 +127,32 @@ async def sync_photos(
     photos = await use_case.execute(inputs)
     return photos
 
+@router.delete("/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_photo(
+    photo_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    repo = SQLModelPhotoRepository(session)
+    photo = await repo.get_by_id(photo_id)
+    if not photo:
+        raise HTTPException(status_code=404, detail="Foto não encontrada")
+    
+    # Extract public_id and delete from cloudinary
+    if photo.url and "cloudinary.com" in photo.url:
+        try:
+            parts = photo.url.split("/upload/")
+            if len(parts) == 2:
+                path = parts[1]
+                segments = path.split("/")
+                if segments[0].startswith("v") and segments[0][1:].isdigit():
+                    segments = segments[1:]
+                public_id_with_ext = "/".join(segments)
+                public_id = public_id_with_ext.rsplit(".", 1)[0]
+                cloudinary.uploader.destroy(public_id)
+        except Exception as e:
+            print(f"Error deleting from Cloudinary: {e}")
+
+    await repo.delete(photo_id)
+    await session.commit()
+

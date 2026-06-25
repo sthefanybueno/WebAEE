@@ -8,8 +8,8 @@ import { usePapel } from '@/application/hooks/usePapel'
 
 export default function RelatoriosPage() {
   const { templates, isLoading, error } = useReportTemplates()
-  const papel = usePapel()
-  const canCreate = papel !== 'prof_apoio' && papel !== 'prof_regente'
+  const dadosUsuario = usePapel()
+  const canCreate = dadosUsuario?.papel !== 'prof_apoio' && dadosUsuario?.papel !== 'prof_regente'
 
   return (
     <AppShell title="Relatórios">
@@ -55,10 +55,14 @@ export default function RelatoriosPage() {
           </div>
         ) : templates.length === 0 ? (
           <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200">
-            <p className="text-slate-500 mb-4">Nenhum tipo de relatório cadastrado.</p>
-            <Link href="/relatorios/novo-tipo" className="text-primary font-semibold hover:underline">
-              Criar o primeiro
-            </Link>
+            <p className="text-slate-500 mb-4">
+              {canCreate ? 'Nenhum tipo de relatório cadastrado.' : 'Nenhum relatório disponível no momento.'}
+            </p>
+            {canCreate && (
+              <Link href="/relatorios/novo-tipo" className="text-primary font-semibold hover:underline">
+                Criar o primeiro
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">

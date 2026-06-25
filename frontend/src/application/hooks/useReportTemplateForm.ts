@@ -17,6 +17,7 @@ export function useReportTemplateForm() {
   
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
+  const [papeisComAcesso, setPapeisComAcesso] = useState<string[]>([])
   const [campos, setCampos] = useState<CampoTemplate[]>([
     { id: crypto.randomUUID(), label: 'Nome do Aluno', tipo: 'text' }
   ])
@@ -42,6 +43,7 @@ export function useReportTemplateForm() {
       const payload = {
         nome,
         descricao,
+        papeis_com_acesso: papeisComAcesso,
         secoes: { campos }
       }
       await apiClient.post('/api/relatorios/templates', payload)
@@ -57,6 +59,7 @@ export function useReportTemplateForm() {
   return {
     nome, setNome,
     descricao, setDescricao,
+    papeisComAcesso, setPapeisComAcesso,
     campos, addCampo, removeCampo, updateCampo,
     isSubmitting,
     erroGlobal,

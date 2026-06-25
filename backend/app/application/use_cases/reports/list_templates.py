@@ -18,10 +18,12 @@ from app.application.ports.report_template_repository import ReportTemplateRepos
 from app.domain.entities.report import ReportTemplate
 
 
+from app.domain.entities.user import PapelUsuario
+
 @dataclass
 class ListTemplatesInput:
-    """DTO de entrada vazio — nenhum filtro por enquanto."""
-    pass
+    """DTO de entrada para listar templates."""
+    papel_usuario: PapelUsuario
 
 
 class ListTemplatesUseCase:
@@ -39,6 +41,7 @@ class ListTemplatesUseCase:
         self.uow = uow
         self.template_repo = template_repo
 
-    async def execute(self) -> List[ReportTemplate]:
-        """Retorna todos os templates disponíveis."""
-        return await self.template_repo.list_all()
+    async def execute(self, input_dto: ListTemplatesInput) -> List[ReportTemplate]:
+        """Retorna todos os templates disponíveis para o papel informado."""
+        all_templates = await self.template_repo.list_all()
+        return [t for t in all_templates if t.papel_pode_visualizar(str(input_dto.papel_usuario.value))]

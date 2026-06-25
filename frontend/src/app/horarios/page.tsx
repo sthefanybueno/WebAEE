@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { useAlunos } from '@/application/hooks/useAlunos'
 import { cn } from '@/presentation/utils/utils'
 import { apiClient } from '@/infrastructure/http/client'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useRouter } from 'next/navigation'
 
 type Slot = { id?: string; aluno_id?: string; nome: string; ativ: string; tipo: 'normal' | 'conflito' | 'especial' } | null
 
@@ -61,6 +63,15 @@ function SlotCell({ slot, onClickLivre, onDragStart, onDragOver, onDrop, onDelet
 }
 
 export default function HorariosPage() {
+  const router = useRouter()
+  const usuario = usePapel()
+  
+  useEffect(() => {
+    if (usuario?.papel === 'prof_apoio' || usuario?.papel === 'prof_regente') {
+      router.replace('/dashboard')
+    }
+  }, [usuario, router])
+
   const { alunos, loading: alunosLoading } = useAlunos()
   
   // Custom hours management

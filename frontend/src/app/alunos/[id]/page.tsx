@@ -5,6 +5,7 @@ import { ArrowLeft, Camera, FileText, Images, Loader2, Edit, Archive, PlayCircle
 import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
 import { useAluno } from '@/application/hooks/useAlunos'
+import { usePapel } from '@/application/hooks/usePapel'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { apiClient } from '@/infrastructure/http/client'
@@ -15,6 +16,8 @@ export default function AlunoPerfilPage() {
   const router = useRouter()
   const id = params.id as string
   const { aluno, loading } = useAluno(id)
+  const usuario = usePapel()
+  const canEditOrViewLaudo = usuario?.papel !== 'prof_apoio' && usuario?.papel !== 'prof_regente'
   
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
@@ -145,33 +148,29 @@ export default function AlunoPerfilPage() {
             </div>
 
             {/* Main CTA */}
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Link
-                href={`/alunos/${aluno.id}/editar`}
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
-              >
-                <Edit size={18} />
-                Editar Perfil
-              </Link>
-              <Link
-                href={`/momentos/registrar?aluno_id=${aluno.server_id || aluno.id}`}
-                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
-              >
-                <Camera size={18} />
-                Registrar Momento
-              </Link>
-              <button
-                onClick={() => setShowStatusModal(true)}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98] ml-auto ${
-                  isAtivo 
-                    ? 'bg-amber-50 hover:bg-amber-100 text-amber-700' 
-                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
-                }`}
-              >
-                {isAtivo ? <Archive size={18} /> : <PlayCircle size={18} />}
-                {isAtivo ? 'Desativar' : 'Ativar'}
-              </button>
-            </div>
+            {canEditOrViewLaudo && (
+              <div className="flex flex-wrap gap-3 mt-6">
+                <Link
+                  href={`/alunos/${aluno.id}/editar`}
+                  className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+                >
+                  <Edit size={18} />
+                  Editar Perfil
+                </Link>
+                
+                <button
+                  onClick={() => setShowStatusModal(true)}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${
+                    isAtivo 
+                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-700' 
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                  }`}
+                >
+                  {isAtivo ? <Archive size={18} /> : <PlayCircle size={18} />}
+                  {isAtivo ? 'Desativar' : 'Ativar'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -215,7 +214,7 @@ export default function AlunoPerfilPage() {
             </div>
 
             {/* Laudo */}
-            {aluno.diagnostico && (
+            {(aluno.diagnostico && canEditOrViewLaudo) && (
               <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                   <h3 className="font-bold text-slate-900">Laudo / Diagnóstico</h3>

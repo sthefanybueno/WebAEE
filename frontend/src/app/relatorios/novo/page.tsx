@@ -6,7 +6,9 @@ import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { useRelatorioForm } from '@/application/hooks/useRelatorioForm'
 import { cn } from '@/presentation/utils/utils'
 
-export default function NovoRelatorioPage() {
+import { Suspense } from 'react'
+
+function NovoRelatorioContent() {
   const { form, onSubmit, register, errors, isSubmitting, erroGlobal, alunos, alunosLoading } = useRelatorioForm()
 
   return (
@@ -151,5 +153,13 @@ export default function NovoRelatorioPage() {
         </div>
       </div>
     </AppShell>
+  )
+}
+
+export default function NovoRelatorioPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin text-primary" size={32} /></div>}>
+      <NovoRelatorioContent />
+    </Suspense>
   )
 }

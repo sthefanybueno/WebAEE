@@ -5,8 +5,7 @@ Consulta a lista de alunos com filtro RBAC por papel.
 
 Regras:
 - ADMIN: vê todos os alunos (sem filtro de tenant)
-- COORDENACAO: vê todos do tenant
-- PROF_AEE: vê apenas alunos vinculados a ela (professor_assignment)
+- COORDENACAO e PROF_AEE: vê todos do tenant
 - PROF_APOIO: vê apenas o aluno vinculado a ela (apoio_id)
 - PROF_REGENTE: vê apenas alunos vinculados a ela (professor_assignment)
 """
@@ -27,6 +26,7 @@ class ListStudentsInput:
     user_id: uuid.UUID
     status: Optional[StatusAluno] = None
     escola_id: Optional[uuid.UUID] = None
+    professor_id: Optional[uuid.UUID] = None
 
 
 class ListStudentsUseCase:
@@ -43,17 +43,19 @@ class ListStudentsUseCase:
                 tenant_id=None,
                 status=input_dto.status,
                 escola_id=input_dto.escola_id,
+                professor_id=input_dto.professor_id,
             )
 
-        # COORDENACAO: vê todos os alunos do tenant
-        if input_dto.papel == PapelUsuario.COORDENACAO:
+        # COORDENACAO e PROF_AEE: vê todos os alunos do tenant
+        if input_dto.papel in (PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE):
             return await self.student_repo.list_by_tenant(
                 tenant_id=input_dto.tenant_id,
                 status=input_dto.status,
                 escola_id=input_dto.escola_id,
+                professor_id=input_dto.professor_id,
             )
 
-        # PROF_AEE, PROF_APOIO, PROF_REGENTE: filtro por professor_assignment
+        # PROF_APOIO, PROF_REGENTE: filtro por professor_assignment
         return await self.student_repo.list_by_tenant(
             tenant_id=input_dto.tenant_id,
             status=input_dto.status,

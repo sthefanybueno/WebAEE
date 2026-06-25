@@ -57,6 +57,9 @@ class CreateReportUseCase:
             if input_dto.papel_autor not in (
                 PapelUsuario.PROF_AEE,
                 PapelUsuario.COORDENACAO,
+                PapelUsuario.PROF_REGENTE,
+                PapelUsuario.PROF_APOIO,
+                PapelUsuario.ADMIN,
             ):
                 raise PermissaoInsuficienteError(acao="criar relatório")
 

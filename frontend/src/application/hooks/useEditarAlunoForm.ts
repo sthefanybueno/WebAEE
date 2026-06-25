@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -64,6 +64,25 @@ export function useEditarAlunoForm(id: string) {
     
     fetchProfessoresApoio()
   }, [escolaIdSelecionada])
+
+  const hasRestoredApoio = useRef(false)
+
+  // Restaura o apoio_id quando as opções carregam e correspondem ao salvo
+  useEffect(() => {
+    if (aluno && aluno.apoio_id && professoresApoio.length > 0 && !hasRestoredApoio.current) {
+      // Verifica se a professora de apoio salva pertence à escola atual selecionada
+      const profEncontrada = professoresApoio.find(p => p.id === aluno.apoio_id)
+      
+      if (profEncontrada) {
+        // Zera rapidamente o valor para garantir que o DOM (select) seja forçado a atualizar visualmente
+        form.setValue('apoio_id', '')
+        setTimeout(() => {
+          form.setValue('apoio_id', profEncontrada.id)
+        }, 50)
+        hasRestoredApoio.current = true
+      }
+    }
+  }, [aluno, professoresApoio, form])
 
   // Popula o form quando o aluno é carregado e as escolas estiverem disponíveis
   useEffect(() => {

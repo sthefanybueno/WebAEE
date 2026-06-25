@@ -48,13 +48,10 @@ class CreateUserUseCase:
             # PROF_AEE   → só pode criar prof_apoio
             # outros     → não podem criar ninguém
 
-            if input_dto.papel == PapelUsuario.ADMIN and input_dto.executor_papel != PapelUsuario.ADMIN:
-                raise PermissaoInsuficienteError(acao="criar usuário ADMIN", papel_requerido="ADMIN")
-
-            if input_dto.executor_papel == PapelUsuario.PROF_AEE and input_dto.papel != PapelUsuario.PROF_APOIO:
+            if input_dto.executor_papel.value == PapelUsuario.PROF_AEE.value and input_dto.papel.value != PapelUsuario.PROF_APOIO.value:
                 raise PermissaoInsuficienteError(acao="criar usuário", papel_requerido="ADMIN ou COORDENACAO")
 
-            if input_dto.executor_papel not in (PapelUsuario.ADMIN, PapelUsuario.COORDENACAO, PapelUsuario.PROF_AEE):
+            if input_dto.executor_papel.value not in (PapelUsuario.ADMIN.value, PapelUsuario.COORDENACAO.value, PapelUsuario.PROF_AEE.value):
                 raise PermissaoInsuficienteError(acao="cadastrar usuários")
                 
             existing_user = await self.user_repo.get_by_email(input_dto.email)
@@ -75,14 +72,14 @@ class CreateUserUseCase:
             )
             saved_user = await self.user_repo.save(user)
             
-            if input_dto.papel == PapelUsuario.PROF_REGENTE and input_dto.aluno_ids and input_dto.escola_id:
+            if input_dto.papel in (PapelUsuario.PROF_REGENTE, PapelUsuario.PROF_APOIO) and input_dto.aluno_ids and input_dto.escola_id:
                 from app.domain.entities.professor_assignment import ProfessorAssignment
                 for aluno_id in input_dto.aluno_ids:
                     assignment = ProfessorAssignment(
                         usuario_id=saved_user.id,
                         escola_id=input_dto.escola_id,
                         aluno_id=aluno_id,
-                        tipo_papel=PapelUsuario.PROF_REGENTE
+                        tipo_papel=input_dto.papel
                     )
                     await self.assignment_repo.save(assignment)
             

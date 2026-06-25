@@ -29,3 +29,12 @@ class UpdateUserRequest(BaseModel):
 
 class ToggleStatusRequest(BaseModel):
     ativo: bool
+
+class UpdateProfileRequest(BaseModel):
+    nome: str
+    email: EmailStr
+    escola_id: Optional[uuid.UUID] = None
+
+class UpdateProfileResponse(BaseModel):
+    user: UserResponse
+    access_token: str

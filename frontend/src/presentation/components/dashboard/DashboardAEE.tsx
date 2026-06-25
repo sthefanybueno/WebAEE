@@ -4,20 +4,28 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, CalendarDays, Camera, FileText, School, Users } from 'lucide-react'
 import { useAlunos } from '@/application/hooks/useAlunos'
 import { useEscolas } from '@/application/hooks/useEscolas'
+import { useDashboard } from '@/application/hooks/useDashboard'
+import { useAgendas } from '@/application/hooks/useAgendas'
+import { usePapel } from '@/application/hooks/usePapel'
 
 export function DashboardAEE() {
   const { alunos } = useAlunos()
   const { escolas } = useEscolas()
+  const { stats } = useDashboard()
+  const { agendas } = useAgendas()
+  const dadosUsuario = usePapel()
 
   const meusAlunos = alunos?.filter((a) => a.status === 'ativo').length ?? 0
   const totalEscolas = escolas?.length ?? 0
+  const totalRelatorios = stats?.total_relatorios_pendentes ?? 0
+  const totalAgendas = agendas?.length ?? 0
 
   return (
     <div className="max-w-[1160px] mx-auto px-6 py-9 flex flex-col gap-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">Olá, AEE 👋</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">Olá, AEE {dadosUsuario?.nome?.split(' ')[0] } </h2>
           <p className="text-sm text-gray-500 mt-1">Acompanhe seus atendimentos</p>
         </div>
         <Link
@@ -33,8 +41,8 @@ export function DashboardAEE() {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[
           { label: 'Meus Alunos', value: meusAlunos, Icon: Users, color: '#2563eb', bg: '#eff6ff', href: '/alunos' },
-          { label: 'Relatórios', value: '—', Icon: FileText, color: '#7c3aed', bg: '#f5f3ff', href: '/relatorios' },
-          { label: 'Minha Agenda', value: '—', Icon: CalendarDays, color: '#d97706', bg: '#fffbeb', href: '/horarios' },
+          { label: 'Relatórios', value: totalRelatorios, Icon: FileText, color: '#7c3aed', bg: '#f5f3ff', href: '/relatorios' },
+          { label: 'Minha Agenda', value: totalAgendas, Icon: CalendarDays, color: '#d97706', bg: '#fffbeb', href: '/horarios' },
           { label: 'Escolas', value: totalEscolas, Icon: School, color: '#059669', bg: '#ecfdf5', href: '/escolas' },
         ].map(({ label, value, Icon, color, bg, href }) => (
           <Link

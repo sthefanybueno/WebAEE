@@ -4,11 +4,22 @@ import { AppShell } from '@/presentation/components/layout/AppShell'
 import { ArrowLeft, Save, Info, Loader2, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useEditarAlunoForm } from '@/application/hooks/useEditarAlunoForm'
-import { useParams } from 'next/navigation'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useParams, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function EditarAlunoPage() {
   const params = useParams()
+  const router = useRouter()
   const id = params.id as string
+  const usuario = usePapel()
+
+  useEffect(() => {
+    if (usuario?.papel === 'prof_apoio' || usuario?.papel === 'prof_regente') {
+      router.replace(`/alunos/${id}`)
+    }
+  }, [usuario, router, id])
+
   const { register, errors, onSubmit, isSubmitting, erroGlobal, escolas, escolasLoading, alunoLoading, professoresApoio, professoresLoading } = useEditarAlunoForm(id)
 
   if (alunoLoading) {

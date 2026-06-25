@@ -6,13 +6,36 @@ import { Search, Plus, Loader2, AlertCircle, CheckCircle2, Clock, Users, Chevron
 import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
 import { useAlunos, useEscolas } from '@/application/hooks/useAlunos'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+import { apiClient } from '@/infrastructure/http/client'
 
 type Filtro = 'todos' | 'local' | 'synced'
 
 export default function AlunosPage() {
+  const router = useRouter()
+  const usuario = usePapel()
+  const canEdit = usuario?.papel !== 'prof_apoio' && usuario?.papel !== 'prof_regente'
+  
+
+
   const [busca, setBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState<'ativo' | 'arquivado' | 'todos'>('ativo')
   const [filtroEscola, setFiltroEscola] = useState('todas')
+  const [professoresMap, setProfessoresMap] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    apiClient.get<any>('/api/usuarios/')
+      .then(res => {
+        const map: Record<string, string> = {}
+        ;(res?.items || []).forEach((u: any) => {
+          map[u.id] = u.nome
+        })
+        setProfessoresMap(map)
+      })
+      .catch(err => console.error('Erro ao buscar usuários:', err))
+  }, [])
   
   const { alunos, loading } = useAlunos(filtroStatus, busca, 'todos', filtroEscola)
   const escolas = useEscolas()
@@ -35,13 +58,15 @@ export default function AlunosPage() {
             </p>
           </div>
 
-          <Link 
-            href="/alunos/novo" 
-            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
-          >
-            <Plus size={16} />
-            Novo Aluno
-          </Link>
+          {canEdit && (
+            <Link 
+              href="/alunos/novo" 
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+            >
+              <Plus size={16} />
+              Novo Aluno
+            </Link>
+          )}
         </div>
 
         {/* ── Barra de busca e filtros ─────────────────────── */}
@@ -108,12 +133,14 @@ export default function AlunosPage() {
             <p className="text-sm text-slate-500 mt-2 mb-8 max-w-sm leading-relaxed">
               {busca ? 'Tente outros termos de busca ou ajuste os filtros.' : 'Cadastre o primeiro aluno para começar o acompanhamento.'}
             </p>
-            <Link 
-              href="/alunos/novo" 
-              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
-            >
-              <Plus size={16} /> Cadastrar Aluno
-            </Link>
+            {canEdit && (
+              <Link 
+                href="/alunos/novo" 
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+              >
+                <Plus size={16} /> Cadastrar Aluno
+              </Link>
+            )}
           </div>
 
         ) : (
@@ -124,9 +151,8 @@ export default function AlunosPage() {
                   <tr className="bg-slate-50/50 border-b border-slate-200">
                     <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Aluno</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Escola</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Nascimento</th>
+                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Apoio</th>
                     <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Sincronização</th>
                     <th className="px-6 py-4"></th>
                   </tr>
                 </thead>
@@ -151,11 +177,9 @@ export default function AlunosPage() {
                         {a.escola_atual || '—'}
                       </td>
 
-                      {/* Nascimento */}
+                      {/* Apoio  */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                        {a.data_nascimento
-                          ? new Date(a.data_nascimento).toLocaleDateString('pt-BR')
-                          : '—'}
+                        {a.apoio_id ? (professoresMap[a.apoio_id] || 'Carregando...') : '—'}
                       </td>
 
                       {/* Status */}
@@ -170,26 +194,6 @@ export default function AlunosPage() {
                           )}
                           {a.status === 'ativo' ? 'Ativo' : 'Arquivado'}
                         </span>
-                      </td>
-
-                      {/* Sync */}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {a.sync_status === 'local' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-                            <Clock size={12} className="shrink-0" />
-                            Pendente
-                          </span>
-                        ) : a.sync_status === 'failed' ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
-                            <AlertCircle size={12} className="shrink-0" />
-                            Falhou
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
-                            <CheckCircle2 size={12} className="shrink-0" />
-                            Sincronizado
-                          </span>
-                        )}
                       </td>
 
                       {/* Ação */}

@@ -6,6 +6,8 @@ export interface Relatorio {
   aluno_id: string;
   tipo: 'diario' | 'mensal' | 'trimestral' | 'pdi';
   conteudo_json: Record<string, unknown>;
+  conteudo?: string;
+  data_referencia?: string;
   sync_status: SyncStatus;
   updated_at: string;
   autor_nome?: string;

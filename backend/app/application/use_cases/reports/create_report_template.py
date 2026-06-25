@@ -11,6 +11,7 @@ class CreateReportTemplateInput:
     nome: str
     descricao: str
     secoes: dict
+    papeis_com_acesso: list[str]
     papel_autor: PapelUsuario
 
 class CreateReportTemplateUseCase:
@@ -34,6 +35,7 @@ class CreateReportTemplateUseCase:
                 nome=input_dto.nome,
                 descricao=input_dto.descricao,
                 secoes=input_dto.secoes,
+                papeis_com_acesso=input_dto.papeis_com_acesso,
                 versao=1,
                 ativo=True
             )

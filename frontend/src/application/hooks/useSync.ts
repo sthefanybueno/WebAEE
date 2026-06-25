@@ -8,6 +8,9 @@ import type { AlunoLocal } from '@/infrastructure/db/db'
 
 type SyncState = 'idle' | 'syncing' | 'error' | 'offline'
 
+let isSyncing = false
+let isSyncingDown = false
+
 /**
  * useSync — gerencia a sincronização bidirecional entre o Dexie e o backend.
  *
@@ -39,16 +42,61 @@ export function useSync() {
     const items = await db.sync_queue.orderBy('prioridade').toArray()
 
     if (items.length === 0) {
-      setState('idle')
-      return
+      // Heal orphaned local records: If queue is empty, any record still 'local' or 'failed' must be added back to the queue
+      const orphanedAlunos = await db.alunos.filter(a => a.sync_status === 'local' || a.sync_status === 'failed').toArray()
+      for (const a of orphanedAlunos) {
+        if (!a.server_id) {
+          await db.sync_queue.add({
+            entidade: 'aluno',
+            operacao: 'create',
+            payload: { ...a, local_id: a.id },
+            prioridade: 2,
+            criado_em: new Date().toISOString(),
+          })
+        } else {
+          await db.sync_queue.add({
+            entidade: 'aluno',
+            operacao: 'update',
+            payload: { ...a, local_id: a.id, server_id: a.server_id },
+            prioridade: 2,
+            criado_em: new Date().toISOString(),
+          })
+        }
+      }
+      
+      // Se reinserimos algo na fila, continua a sincronização, senão idle
+      const itemsAfterHeal = await db.sync_queue.orderBy('prioridade').toArray()
+      if (itemsAfterHeal.length === 0) {
+        setState('idle')
+        return
+      }
+      // Se chegamos aqui, a fila agora tem itens para processar! Atualiza items
+      items.push(...itemsAfterHeal)
     }
 
+    if (isSyncing) return
+    isSyncing = true
     setState('syncing')
 
-    for (const item of items) {
+    try {
+      for (const item of items) {
       try {
         const endpoint = `/api/${item.entidade}s`
-        const payload = { ...item.payload } as Record<string, unknown>
+        let payload = { ...item.payload } as any
+
+        // Mapear aluno_id local para server_id (UUID)
+        if (payload.aluno_id && String(payload.aluno_id).length < 32) {
+          const localAlunoId = Number(payload.aluno_id)
+          if (!isNaN(localAlunoId)) {
+            const aluno = await db.alunos.get(localAlunoId)
+            if (aluno && aluno.server_id) {
+              payload.aluno_id = aluno.server_id
+            } else {
+              console.warn(`[Sync] Aluno ${localAlunoId} ainda não foi sincronizado. Aguardando server_id.`)
+              throw new Error(`Aluno ${localAlunoId} ainda não tem server_id`)
+            }
+          }
+        }
 
         // Patch automático para corrigir dados em cache na fila
         if (item.entidade === 'aluno') {
@@ -62,16 +110,6 @@ export function useSync() {
 
         // Para fotos: atualiza aluno_id se o aluno foi sincronizado recentemente
         if (item.entidade === 'foto') {
-          if (payload.aluno_id && String(payload.aluno_id).length < 32) {
-             const localAlunoId = Number(payload.aluno_id)
-             if (!isNaN(localAlunoId)) {
-               const aluno = await db.alunos.get(localAlunoId)
-               if (aluno && aluno.server_id) {
-                 payload.aluno_id = aluno.server_id
-               }
-             }
-          }
-          
           if (item.operacao === 'create') {
             const localFotoId = (payload as any).local_foto_id
             const foto = await db.fotos.get(localFotoId)
@@ -136,20 +174,25 @@ export function useSync() {
       } catch (err) {
         if (err instanceof ApiError) {
           if (err.statusCode === 401) {
-            // SessÃ£o expirada: apiClient jÃ¡ redirecionou para /login
-            console.error('[Sync] SessÃ£o expirada. SincronizaÃ§Ã£o interrompida.')
+            // Sessão expirada: apiClient já redirecionou para /login
+            console.error('[Sync] Sessão expirada. Sincronização interrompida.')
             setState('error')
             return // Para o loop inteiramente
           }
           if (err.statusCode === 404) {
-            // O item nÃ£o existe no servidor (ex: foi deletado por outro meio).
+            // O item não existe no servidor (ex: foi deletado por outro meio).
             // Para evitar loop infinito, removemos da fila.
             console.warn(`[Sync] Servidor retornou 404 para o item ${item.id} (${item.entidade}). Removendo da fila de sync para evitar loop infinito.`)
             await db.sync_queue.delete(item.id!)
+            
+            // Auto-heal: se era uma atualização de aluno e deu 404, marcamos como failed ou synced para sair do 'local'
+            if (item.entidade === 'aluno' && (item.payload as any).local_id) {
+              await db.alunos.update((item.payload as any).local_id, { sync_status: 'failed' })
+            }
             continue
           }
 
-          // Erro de servidor (4xx/5xx): mantÃ©m na fila para prÃ³xima tentativa
+          // Erro de servidor (4xx/5xx): mantém na fila para próxima tentativa
           const detailStr = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail)
           console.warn(
             `[Sync] Falha no item ${item.id} (HTTP ${err.statusCode}): ${detailStr}. SerÃ¡ retentado.`,
@@ -163,6 +206,9 @@ export function useSync() {
         }
       }
     }
+    } finally {
+      isSyncing = false
+    }
 
     const remaining = await db.sync_queue.count()
     setState(remaining === 0 ? 'idle' : 'error')
@@ -170,7 +216,8 @@ export function useSync() {
 
   // Função para baixar os dados do servidor para o Dexie
   const runSyncDown = useCallback(async () => {
-    if (!navigator.onLine) return
+    if (!navigator.onLine || isSyncingDown) return
+    isSyncingDown = true
 
     try {
       // 1. Buscar Alunos da API
@@ -191,9 +238,16 @@ export function useSync() {
       for (const aluno of alunosToPut) {
         const existente = await db.alunos.where('server_id').equals(aluno.server_id).first()
         if (existente) {
-          // Mantém o ID local e atualiza os dados A MENOS QUE haja edições locais pendentes
+          // Mantém o ID local e atualiza os dados A MENOS QUE haja edições locais pendentes na fila
           if (existente.sync_status !== 'local') {
             await db.alunos.update(existente.id!, aluno)
+          } else {
+            // Se está 'local', mas não está na fila (órfão), forçamos a sincronização com o servidor
+            const inQueue = await db.sync_queue.where('entidade').equals('aluno').toArray()
+            const isPending = inQueue.some(i => (i.payload as any).local_id === existente.id)
+            if (!isPending) {
+              await db.alunos.update(existente.id!, aluno)
+            }
           }
         } else {
           // Insere novo
@@ -204,6 +258,8 @@ export function useSync() {
       console.log(`[SyncDown] ${alunosToPut.length} alunos sincronizados com o servidor.`)
     } catch (err) {
       console.error('[SyncDown] Erro ao buscar alunos do servidor:', err)
+    } finally {
+      isSyncingDown = false
     }
   }, [])
 

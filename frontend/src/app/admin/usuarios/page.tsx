@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { AppShell } from '@/presentation/components/layout/AppShell'
-import { ArrowLeft, UserPlus, X, Send, MoreVertical, Shield, Pencil, PowerOff } from 'lucide-react'
+import { ArrowLeft, UserPlus, X, Send, MoreVertical, Shield, Pencil, PowerOff, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getInitials } from '@/presentation/utils/utils'
 import { apiClient } from '@/infrastructure/http/client'
+import { usePapel } from '@/application/hooks/usePapel'
+import { useRouter } from 'next/navigation'
 
 // Tipagem baseada no backend
 type PapelUsuario = 'admin' | 'coordenacao' | 'prof_aee' | 'prof_apoio' | 'prof_regente'
@@ -20,6 +22,15 @@ interface Usuario {
 }
 
 export default function AdminUsuariosPage() {
+  const router = useRouter()
+  const loggedUsuario = usePapel()
+  
+  useEffect(() => {
+    if (loggedUsuario?.papel === 'prof_apoio' || loggedUsuario?.papel === 'prof_regente') {
+      router.replace('/dashboard')
+    }
+  }, [loggedUsuario, router])
+
   const [modalAberta, setModalAberta] = useState(false)
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [escolas, setEscolas] = useState<{id: string, nome: string}[]>([])
@@ -40,6 +51,10 @@ export default function AdminUsuariosPage() {
   const [modalVisualizacaoAberta, setModalVisualizacaoAberta] = useState(false)
   const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null)
   
+  // Detalhes do Usuário State
+  const [alunosDoProfessor, setAlunosDoProfessor] = useState<{id: string, nome: string}[]>([])
+  const [carregandoAlunos, setCarregandoAlunos] = useState(false)
+  
   // Toast State
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null)
 
@@ -55,6 +70,20 @@ export default function AdminUsuariosPage() {
     carregarUsuarios()
     carregarEscolas()
   }, [])
+
+  useEffect(() => {
+    if (modalVisualizacaoAberta && usuarioSelecionado && usuarioSelecionado.papel.startsWith('prof')) {
+      setCarregandoAlunos(true)
+      apiClient.get<any[]>(`/api/alunos?professor_id=${usuarioSelecionado.id}`)
+        .then(res => {
+          setAlunosDoProfessor(res.map(a => ({ id: a.id, nome: a.nome })))
+        })
+        .catch(() => setAlunosDoProfessor([]))
+        .finally(() => setCarregandoAlunos(false))
+    } else {
+      setAlunosDoProfessor([])
+    }
+  }, [modalVisualizacaoAberta, usuarioSelecionado])
 
   async function carregarUsuarios() {
     try {
@@ -87,9 +116,9 @@ export default function AdminUsuariosPage() {
     }
   }
 
-  // Efeito para carregar alunos quando a escola mudar e o papel for prof_regente
+  // Efeito para carregar alunos quando a escola mudar e o papel for prof_regente ou prof_apoio
   useEffect(() => {
-    if (papel === 'prof_regente' && escolaId) {
+    if ((papel === 'prof_regente' || papel === 'prof_apoio') && escolaId) {
       carregarAlunosDaEscola(escolaId)
     } else {
       setAlunosDisponiveis([])
@@ -126,7 +155,7 @@ export default function AdminUsuariosPage() {
     setAlunoIds([])
     setModalAberta(true)
     
-    if (u.papel === 'prof_regente') {
+    if (u.papel === 'prof_regente' || u.papel === 'prof_apoio') {
       carregarAlunosDoUsuario(u.id)
     }
   }
@@ -155,7 +184,7 @@ export default function AdminUsuariosPage() {
           nome,
           papel,
           escola_id: escolaId || null,
-          aluno_ids: papel === 'prof_regente' ? alunoIds : []
+          aluno_ids: (papel === 'prof_regente' || papel === 'prof_apoio') ? alunoIds : []
         })
         
         const userAtualizadoObj = {
@@ -179,7 +208,7 @@ export default function AdminUsuariosPage() {
           password: senha,
           papel,
           escola_id: escolaId || null,
-          aluno_ids: papel === 'prof_regente' ? alunoIds : []
+          aluno_ids: (papel === 'prof_regente' || papel === 'prof_apoio') ? alunoIds : []
         })
         
         setUsuarios([...usuarios, { ...novoUser, status: 'ativo' }])
@@ -278,7 +307,6 @@ export default function AdminUsuariosPage() {
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider rounded-tl-2xl">Usuário</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Papel</th>
                 <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Escola</th>
-                <th className="px-6 py-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-right rounded-tr-2xl">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -315,16 +343,19 @@ export default function AdminUsuariosPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg">
-                        {formatarEscola(u.escola_id)}
-                      </span>
+                      {u.escola_id && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg">
+                          {formatarEscola(u.escola_id)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button 
                         onClick={() => abrirModalVisualizacao(u)}
-                        className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-900 cursor-pointer transition-colors"
+                        title="Ver perfil"
                       >
-                        Ver Detalhes
+                        <ChevronRight size={18} />
                       </button>
                     </td>
                   </tr>
@@ -428,7 +459,7 @@ export default function AdminUsuariosPage() {
                 </div>
               )}
 
-              {papel === 'prof_regente' && (
+              {(papel === 'prof_regente' || papel === 'prof_apoio') && (
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">Alunos Atribuídos</label>
                   <div className="space-y-2 max-h-40 overflow-y-auto p-2 border border-slate-200 rounded-lg bg-slate-50">
@@ -514,10 +545,30 @@ export default function AdminUsuariosPage() {
                 <span className="text-sm text-slate-500">Papel</span>
                 <span className="text-sm font-semibold text-slate-900">{formatarPapel(usuarioSelecionado.papel)}</span>
               </div>
-              <div className="flex justify-between items-center py-3 border-b border-slate-100">
-                <span className="text-sm text-slate-500">Escola</span>
-                <span className="text-sm font-semibold text-slate-900">{formatarEscola(usuarioSelecionado.escola_id)}</span>
-              </div>
+              {usuarioSelecionado.escola_id && (
+                <div className="flex justify-between items-center py-3 border-b border-slate-100">
+                  <span className="text-sm text-slate-500">Escola</span>
+                  <span className="text-sm font-semibold text-slate-900">{formatarEscola(usuarioSelecionado.escola_id)}</span>
+                </div>
+              )}
+              {usuarioSelecionado.papel.startsWith('prof') && (
+                <div className="py-3 border-b border-slate-100">
+                  <span className="block text-sm text-slate-500 mb-2">Alunos Vinculados</span>
+                  {carregandoAlunos ? (
+                    <span className="text-xs text-slate-400">Carregando alunos...</span>
+                  ) : alunosDoProfessor.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {alunosDoProfessor.map(a => (
+                        <span key={a.id} className="inline-flex items-center px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-md">
+                          {a.nome}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400">Nenhum aluno vinculado.</span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">

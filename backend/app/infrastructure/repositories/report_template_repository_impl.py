@@ -34,6 +34,6 @@ class SQLModelReportTemplateRepository(ReportTemplateRepository):
     async def save(self, template: ReportTemplate) -> ReportTemplate:
         orm = ReportTemplateORM(**template.model_dump())
         self.session.add(orm)
-        await self.session.commit()
+        await self.session.flush()
         await self.session.refresh(orm)
         return ReportTemplate(**orm.model_dump())

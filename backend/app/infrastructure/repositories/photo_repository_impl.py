@@ -29,3 +29,8 @@ class SQLModelPhotoRepository(PhotoRepository):
         orm = await self.session.merge(orm)
         await self.session.flush()
         return Photo(**orm.model_dump())
+
+    async def delete(self, id: uuid.UUID) -> None:
+        orm = await self.session.get(PhotoORM, id)
+        if orm:
+            await self.session.delete(orm)

@@ -63,6 +63,7 @@ async def create_user(
         nome=request.nome,
         papel=request.papel,
         escola_id=request.escola_id,
+        aluno_ids=request.aluno_ids,
     )
     try:
         user = await use_case.execute(input_dto)
@@ -121,6 +122,49 @@ async def get_me(
         _handle_domain_exception(e)
 
 
+from app.application.use_cases.users.update_profile import UpdateProfileUseCase, UpdateProfileInput
+from app.interfaces.schemas.user import UpdateProfileRequest, UpdateProfileResponse
+from app.infrastructure.security.tokens import create_access_token
+
+def get_update_profile_use_case(session: AsyncSession = Depends(get_session)) -> UpdateProfileUseCase:
+    return UpdateProfileUseCase(
+        uow=SQLAlchemyUnitOfWork(session),
+        user_repo=SQLModelUserRepository(session)
+    )
+
+@router.patch("/me", response_model=UpdateProfileResponse)
+async def update_my_profile(
+    request: UpdateProfileRequest,
+    current_user: CurrentUser = Depends(get_current_user),
+    use_case: UpdateProfileUseCase = Depends(get_update_profile_use_case),
+):
+    """
+    Atualiza os dados do perfil do usuário logado.
+    """
+    try:
+        input_dto = UpdateProfileInput(
+            user_id=current_user.id,
+            tenant_id=current_user.tenant_id,
+            nome=request.nome,
+            email=request.email,
+            escola_id=request.escola_id
+        )
+        updated_user = await use_case.execute(input_dto)
+        
+        # Gerar novo token com o nome atualizado
+        access_token = create_access_token(
+            user_id=updated_user.id,
+            tenant_id=updated_user.tenant_id,
+            papel=updated_user.papel.value,
+            nome=updated_user.nome
+        )
+        
+        return {
+            "user": updated_user,
+            "access_token": access_token
+        }
+    except DomainException as e:
+        _handle_domain_exception(e)
 
 from app.application.use_cases.users.update_user import UpdateUserUseCase, UpdateUserInput
 from app.application.use_cases.users.toggle_user_status import ToggleUserStatusUseCase, ToggleUserStatusInput
@@ -156,7 +200,8 @@ async def update_user(
             tenant_id=current_user.tenant_id,
             nome=request.nome,
             papel=request.papel,
-            escola_id=request.escola_id
+            escola_id=request.escola_id,
+            aluno_ids=request.aluno_ids
         )
         return await use_case.execute(input_dto)
     except DomainException as e:

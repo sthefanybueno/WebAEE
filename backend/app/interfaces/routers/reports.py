@@ -7,7 +7,7 @@ from app.application.use_cases.reports.create_report import (
     CreateReportInput,
     CreateReportUseCase,
 )
-from app.application.use_cases.reports.list_templates import ListTemplatesUseCase
+from app.application.use_cases.reports.list_templates import ListTemplatesUseCase, ListTemplatesInput
 from app.application.use_cases.reports.create_report_template import (
     CreateReportTemplateInput,
     CreateReportTemplateUseCase,
@@ -136,7 +136,7 @@ async def list_templates(
     Templates são configurações globais (não isoladas por tenant).
     O router delega ao ListTemplatesUseCase — nenhum ORM aqui.
     """
-    return await use_case.execute()
+    return await use_case.execute(ListTemplatesInput(papel_usuario=current_user.papel))
 
 @router.get("/templates/{template_id}", response_model=ReportTemplateResponse)
 async def get_template(
@@ -168,6 +168,7 @@ async def create_template(
         nome=request.nome,
         descricao=request.descricao,
         secoes=request.secoes,
+        papeis_com_acesso=request.papeis_com_acesso,
         papel_autor=current_user.papel,
     )
     try:

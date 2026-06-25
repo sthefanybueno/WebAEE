@@ -48,14 +48,12 @@ export function useRelatorioForm() {
       // Cria a entrada no indexedDB (simulação do relatorioLocalService)
       // Como não criamos um relatorioLocalService ainda, usamos o DB diretamente
       // para honrar a promessa de offline-first.
-      const numAlunoId = parseInt(data.aluno_id)
-      
       const payload = {
         server_id: undefined,
-        aluno_id: numAlunoId,
+        aluno_id: data.aluno_id,
         tipo: data.tipo,
         conteudo: data.conteudo,
-        conteudo_json: '', // Default empty
+        conteudo_json: {}, // Default empty object
         data_referencia: data.data,
         sync_status: 'local' as const,
         updated_at: new Date().toISOString()

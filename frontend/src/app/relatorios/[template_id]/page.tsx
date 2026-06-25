@@ -7,6 +7,8 @@ import { ArrowLeft, Plus, FileText, Calendar, User } from 'lucide-react'
 import { apiClient } from '@/infrastructure/http/client'
 import { ReportTemplate } from '@/application/hooks/useReportTemplates'
 import { useParams } from 'next/navigation'
+import { usePapel } from '@/application/hooks/usePapel'
+import { ReportModal } from './ReportModal'
 
 interface Report {
   id: string
@@ -24,16 +26,28 @@ export default function ListaRelatoriosPorTemplatePage() {
   const [template, setTemplate] = useState<ReportTemplate | null>(null)
   const [reports, setReports] = useState<Report[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+  const [alunosMap, setAlunosMap] = useState<Record<string, string>>({})
+  
+  const dadosUsuario = usePapel()
+  const canCreateReport = true // todos os papéis podem criar relatórios, mas não templates
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [tempData, repData] = await Promise.all([
+        const [tempData, repData, alunosData] = await Promise.all([
           apiClient.get<ReportTemplate>(`/api/relatorios/templates/${template_id}`),
-          apiClient.get<Report[]>(`/api/relatorios/template/${template_id}/relatorios`)
+          apiClient.get<Report[]>(`/api/relatorios/template/${template_id}/relatorios`),
+          apiClient.get<any[]>('/api/alunos')
         ])
         setTemplate(tempData)
         setReports(repData)
+        
+        const map: Record<string, string> = {}
+        ;(alunosData || []).forEach(a => {
+          map[a.id] = a.nome
+        })
+        setAlunosMap(map)
       } catch (e) {
         console.error(e)
       } finally {
@@ -66,13 +80,15 @@ export default function ListaRelatoriosPorTemplatePage() {
             </div>
           </div>
           
-          <Link 
-            href={`/relatorios/${template_id}/novo`} 
-            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
-          >
-            <Plus size={18} />
-            Criar Documento
-          </Link>
+          {canCreateReport && (
+            <Link 
+              href={`/relatorios/${template_id}/novo`} 
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-[0.98]"
+            >
+              <Plus size={18} />
+              Criar Documento
+            </Link>
+          )}
         </div>
 
         {/* Lista de relatórios */}
@@ -83,22 +99,29 @@ export default function ListaRelatoriosPorTemplatePage() {
         ) : reports.length === 0 ? (
           <div className="p-8 text-center bg-slate-50 rounded-xl border border-slate-200">
             <p className="text-slate-500 mb-4">Nenhum relatório deste tipo encontrado.</p>
-            <Link href={`/relatorios/${template_id}/novo`} className="text-primary font-semibold hover:underline">
-              Criar o primeiro
-            </Link>
+            {canCreateReport && (
+              <Link href={`/relatorios/${template_id}/novo`} className="text-primary font-semibold hover:underline">
+                Criar o primeiro
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {reports.map(report => (
-              <div key={report.id} className="bg-white border border-slate-200 rounded-xl p-5 hover:border-primary/50 transition-colors">
+            {reports.map(report => {
+              const alunoNome = alunosMap[report.aluno_id] || 'Aluno não encontrado'
+              return (
+              <div 
+                key={report.id} 
+                onClick={() => setSelectedReport(report)}
+                className="bg-white border border-slate-200 rounded-xl p-5 hover:border-primary/50 transition-colors cursor-pointer"
+              >
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <FileText size={20} />
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 mb-1">
-                      {/* Em uma app real, buscaríamos o nome do aluno via join ou chamada extra */}
-                      Aluno ID: {report.aluno_id.substring(0, 8)}...
+                      {alunoNome}
                     </h3>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
                       <span className="flex items-center gap-1.5">
@@ -109,10 +132,18 @@ export default function ListaRelatoriosPorTemplatePage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </div>
+
+      {/* Renderização do Modal */}
+      <ReportModal 
+        report={selectedReport}
+        template={template}
+        alunoNome={selectedReport ? (alunosMap[selectedReport.aluno_id] || 'Aluno não encontrado') : ''}
+        onClose={() => setSelectedReport(null)}
+      />
     </AppShell>
   )
 }

@@ -20,6 +20,8 @@ export interface Aluno {
   escola_atual_id?: string;      // UUID do backend (opcional para compatibilidade com dados offline antigos)
   consentimento_lgpd?: boolean;  // Obrigatório no backend; pode ser undefined em dados offline legados
   diagnostico?: string;
+  apoio_id?: string | null;
+
   status: 'ativo' | 'arquivado';
   sync_status: SyncStatus;
   conflict_flag?: boolean;   // campo separado do sync_status — True quando merge offline detectou colisão

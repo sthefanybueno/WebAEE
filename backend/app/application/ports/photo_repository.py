@@ -13,3 +13,6 @@ class PhotoRepository(Protocol):
 
     async def save(self, photo: Photo) -> Photo:
         ...
+
+    async def delete(self, id: uuid.UUID) -> None:
+        ...
