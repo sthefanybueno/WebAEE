@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel
+from app.infrastructure.orm_models.base import *
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 # URL do banco. Fallback para sqlite in memory para testes rápidos se não for fornecido.
