@@ -1,12 +1,27 @@
 import asyncio
+import sys
+import os
+
+# Adiciona o diretorio backend ao path para que o script possa importar 'app'
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "backend"))
+
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+from sqlmodel import SQLModel
+
+# Importa todos os ORMs para povoar o SQLModel.metadata
+from app.infrastructure.orm_models.base import *
 
 DATABASE_URL = "postgresql+asyncpg://neondb_owner:npg_7syPWGQoxSN4@ep-gentle-bonus-acu3lh7e-pooler.sa-east-1.aws.neon.tech/neondb?ssl=require"
 
 async def seed_db():
-    print("Conectando ao Neon para criar o administrador padrão...")
+    print("Conectando ao Neon para criar as tabelas e o administrador padrão...")
     engine = create_async_engine(DATABASE_URL)
+    
+    # Cria todas as tabelas no Neon
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+        print("Todas as tabelas criadas no Neon com sucesso!")
     
     # SQLs baseados no seed_reset.sql
     sqls = [
@@ -17,7 +32,7 @@ async def seed_db():
     async with engine.begin() as conn:
         for sql in sqls:
             await conn.execute(text(sql))
-        print("Usuário administrador padrão criado com sucesso!")
+        print("Usuário administrador padrão inserido com sucesso!")
         
     await engine.dispose()
 
