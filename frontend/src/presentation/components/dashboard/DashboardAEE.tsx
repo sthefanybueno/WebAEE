@@ -84,11 +84,30 @@ export function DashboardAEE() {
         </div>
       </div>
 
-      {/* Atividades Recentes (Placeholder) */}
+      {/* Atividades Recentes */}
       <div>
         <p className="text-sm font-bold text-gray-900 mb-3 tracking-tight">Atividades Recentes</p>
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 text-center">
-          <p className="text-sm text-gray-500">Nenhuma atividade recente encontrada.</p>
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+          {stats?.recent_activities && stats.recent_activities.length > 0 ? (
+            stats.recent_activities.map((activity) => (
+              <div key={activity.id} className="flex items-center justify-between border-b border-gray-100 last:border-b-0 pb-3 last:pb-0">
+                <div className="flex flex-col">
+                  <p className="text-sm font-semibold text-gray-800">{activity.description}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">
+                    {new Date(activity.created_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-2">Nenhuma atividade recente encontrada.</p>
+          )}
         </div>
       </div>
     </div>

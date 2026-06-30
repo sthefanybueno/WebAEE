@@ -3,10 +3,18 @@
 import { useEffect, useState } from 'react'
 import { apiClient } from '@/infrastructure/http/client'
 
+export interface ActivityItem {
+  id: string
+  type: string
+  description: string
+  created_at: string
+}
+
 export interface DashboardResponse {
   total_alunos_ativos: number
   total_relatorios_pendentes: number
   total_fotos_hoje: number
+  recent_activities: ActivityItem[]
 }
 
 export function useDashboard() {
