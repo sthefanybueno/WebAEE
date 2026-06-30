@@ -102,7 +102,6 @@ export default function EscolasPage() {
                             <p className="font-bold text-sm text-slate-900 group-hover:text-primary transition-colors">
                               {escola.nome}
                             </p>
-                            <p className="text-xs text-slate-500 mt-0.5">ID: {escola.id.split('-')[0]}...</p>
                           </div>
                         </Link>
                       </td>

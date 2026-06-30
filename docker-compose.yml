@@ -37,6 +37,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
 
   # ── API FastAPI ───────────────────────────────
   api:
@@ -61,6 +66,11 @@ services:
         condition: service_healthy
     networks:
       - backend_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
 
   # ── pgAdmin (Interface do Banco) ──────────────
@@ -97,6 +107,11 @@ services:
       - api
     networks:
       - backend_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
 
   # ── Volumes ───────────────────────────────────────────────────────────────
 volumes:
