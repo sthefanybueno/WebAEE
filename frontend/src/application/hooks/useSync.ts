@@ -222,41 +222,72 @@ export function useSync() {
     try {
       // 1. Buscar Alunos da API
       const alunosServer = await apiClient.get<any[]>('/api/alunos')
-      
-      // 2. Para cada aluno, salvar/atualizar no Dexie.
-      // O campo sync_status será marcado como 'synced' pois veio do servidor.
-      const alunosToPut = alunosServer.map(a => {
-        const { id, ...rest } = a
-        return {
+
+      // 2. Coletar todos os server_ids recebidos para detectar deletados
+      const serverIds = new Set(alunosServer.map((a) => a.id))
+
+      // 3. Para cada aluno do servidor, salvar/atualizar no Dexie
+      for (const a of alunosServer) {
+        const { id: serverId, ...rest } = a
+        const dadosServidor = {
           ...rest,
-          server_id: id,
-          sync_status: 'synced',
+          server_id: serverId,
+          sync_status: 'synced' as const,
           conflict_flag: false,
         }
-      })
 
-      for (const aluno of alunosToPut) {
-        const existente = await db.alunos.where('server_id').equals(aluno.server_id).first()
+        const existente = await db.alunos
+          .where('server_id')
+          .equals(serverId)
+          .first()
+
         if (existente) {
-          // Mantém o ID local e atualiza os dados A MENOS QUE haja edições locais pendentes na fila
-          if (existente.sync_status !== 'local') {
-            await db.alunos.update(existente.id!, aluno)
-          } else {
-            // Se está 'local', mas não está na fila (órfão), forçamos a sincronização com o servidor
-            const inQueue = await db.sync_queue.where('entidade').equals('aluno').toArray()
-            const isPending = inQueue.some(i => (i.payload as any).local_id === existente.id)
+          // ── Proteção contra sobrescrever edição offline pendente ──────────
+          // Se o registro local tem sync_status 'local', ainda não foi enviado
+          // ao servidor — não sobrescrevemos com dados antigos do servidor.
+          if (existente.sync_status === 'local') {
+            const inQueue = await db.sync_queue
+              .where('entidade')
+              .equals('aluno')
+              .toArray()
+            const isPending = inQueue.some(
+              (i) => (i.payload as any).local_id === existente.id,
+            )
+            // Só sobrescreve o órfão (local sem fila) — evita dados malucos
             if (!isPending) {
-              await db.alunos.update(existente.id!, aluno)
+              await db.alunos.update(existente.id!, dadosServidor)
             }
+            // Se está pendente na fila, deixa o dado local intacto
+          } else {
+            // Registro synced: atualiza normalmente com dados frescos do servidor
+            await db.alunos.update(existente.id!, dadosServidor)
           }
         } else {
-          // Insere novo
-          await db.alunos.add(aluno)
+          // ── Bug fix: put() em vez de add() para evitar duplicatas ─────────
+          // Se houver corrida (ex: dois runSyncDown simultâneos), put() é idempotente.
+          // add() lançaria ConstraintError e criaria dados duplicados com IDs diferentes.
+          await db.alunos.put(dadosServidor)
         }
       }
-      
-      console.log(`[SyncDown] ${alunosToPut.length} alunos sincronizados com o servidor.`)
+
+      // 4. Remover do cache local alunos que foram deletados no servidor
+      // (só remove synced — nunca apaga registros locais pendentes)
+      const alunosSynced = await db.alunos
+        .where('sync_status')
+        .equals('synced')
+        .toArray()
+      const deletados = alunosSynced.filter(
+        (a) => a.server_id && !serverIds.has(a.server_id),
+      )
+      for (const d of deletados) {
+        await db.alunos.delete(d.id!)
+      }
+
+      console.log(
+        `[SyncDown] ${alunosServer.length} alunos atualizados. ${deletados.length} removidos do cache local.`,
+      )
     } catch (err) {
+      // Não limpa o cache em caso de erro de rede — mantém último estado válido
       console.error('[SyncDown] Erro ao buscar alunos do servidor:', err)
     } finally {
       isSyncingDown = false
